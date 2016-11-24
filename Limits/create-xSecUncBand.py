@@ -14,6 +14,27 @@ L = 0.12*W_ref
 R = 0.04*W_ref    
     
 signals = ["ZprimeWW","WZ","BulkWW","BulkZZ"]
+signals += ["qW","qZ"]
+signals=signals[5:6]
+
+def uncertaintyFromFile(f):
+  pFile=open(f)
+  unc=rt.TGraph()
+  startCrossSection=False
+  for l in pFile.readlines():
+    if startCrossSection and "00" in l:
+      unc.Set(unc.GetN()+1)
+      unc.SetPoint(unc.GetN(),float(l.split()[0]),float(l.split()[3])/100.)
+    if "pass selection" in l: startCrossSection=True
+    if "acceptance" in l: break #take the "events which pass selection" (and not "acceptance")
+  return unc
+
+qStarqWunc=uncertaintyFromFile("../updf_qStarqW.txt")
+qStarqZunc=uncertaintyFromFile("../updf_qStarqZ.txt")
+BulkGWWunc=uncertaintyFromFile("../updf_BulkGWW.txt")
+BulkGZZunc=uncertaintyFromFile("../updf_BulkGZZ.txt")
+ZprimeWWunc=uncertaintyFromFile("../updf_ZprimeWW.txt")
+WprimeWZunc=uncertaintyFromFile("../updf_WprimeWZ.txt")
 
 def get_xsec_unc(mass):
    uncs = {}
@@ -23,6 +44,12 @@ def get_xsec_unc(mass):
     if p.InheritsFrom("TMultiGraph"):
      for g in p.GetListOfGraphs(): uncs[g.GetName()] = g.Eval(mass) 
    fin.Close() 
+   uncs['qq_PDF_Wprime']=WprimeWZunc.Eval(mass)
+   uncs['qq_PDF_Zprime']=ZprimeWWunc.Eval(mass)
+   uncs['gg_PDF_WW']=BulkGWWunc.Eval(mass)
+   uncs['gg_PDF_ZZ']=BulkGZZunc.Eval(mass)
+   uncs['qW_PDF']=qStarqWunc.Eval(mass)
+   uncs['qZ_PDF']=qStarqZunc.Eval(mass)
    return uncs
    
    
@@ -51,26 +78,41 @@ for signal in signals:
      if signal in line:
       split=line.split(":")
       
-      # print "Mass = %i   Crossection = %f" %(int(split[0][-4:]),float(split[1]))
-      
+      print "Mass = %i   Crossection = %f" %(int(split[0][-4:]),float(split[1]))
       xsecUnc      =  get_xsec_unc(int(split[0][-4:]))
-      pdf_Wprime   = 1+xsecUnc['qq_PDF_Wprime']
-      pdf_Zprime   = 1+xsecUnc['qq_PDF_Zprime']
-      scale_Wprime = 1+xsecUnc['qq_scale_Wprime']
-      scale_Zprime = 1+xsecUnc['qq_scale_Zprime']
-      pdf_Bulk     = 1+xsecUnc['gg_PDF']
-      scale_Bulk   = 1+xsecUnc['gg_scale']
+      pdf_Wprime   = 1.+xsecUnc['qq_PDF_Wprime']
+      pdf_Zprime   = 1.+xsecUnc['qq_PDF_Zprime']
+      scale_Wprime = 1.+xsecUnc['qq_scale_Wprime']
+      scale_Zprime = 1.+xsecUnc['qq_scale_Zprime']
+      pdf_BulkWW   = 1.+xsecUnc['gg_PDF_WW']
+      pdf_BulkZZ   = 1.+xsecUnc['gg_PDF_ZZ']
+      scale_Bulk   = 1.+xsecUnc['gg_scale']
+      pdf_qW   = 1.+xsecUnc['qW_PDF']
+      pdf_qZ   = 1.+xsecUnc['qZ_PDF']
+      scale_qW=1.
+      scale_qZ=1.
       
-      pdf   = pdf_Wprime
-      scale = scale_Wprime
-   
-      if signal.find("Bulk") != -1:
-        pdf   =  pdf_Bulk  
+      if signal.find("BulkWW") != -1:
+        pdf   =  pdf_BulkWW  
+        scale =  scale_Bulk
+      elif signal.find("BulkZZ") != -1:
+        pdf   =  pdf_BulkZZ  
         scale =  scale_Bulk
       elif signal.find("Zprime") != -1:
           pdf   = pdf_Zprime
           scale = scale_Zprime
-      # print "Mass = %f   Crossection = %f  ScaleUP =%f   ScaleDOWN = %f" %( float(split[0][-4:])/1000.,float(split[1]), (float(split[1])*scale    *pdf), float(split[1])*(1-(scale-1))*(1-(pdf-1)) )
+      elif signal.find("WZ") != -1:
+          pdf   = pdf_Wprime
+          scale = scale_Wprime
+      elif signal.find("qW") != -1:
+          pdf   = pdf_qW
+          scale = scale_qW
+      elif signal.find("qZ") != -1:
+          pdf   = pdf_qZ
+          scale = scale_qZ
+      else:
+          signaluncertaintynotfound
+      print "Mass = %f   Crossection = %f  ScaleUP =%f   ScaleDOWN = %f" %( float(split[0][-4:])/1000.,float(split[1]), (float(split[1])*scale    *pdf), float(split[1])*(1-(scale-1))*(1-(pdf-1)) )
       gtheory    .SetPoint(j, float(split[0][-4:])/1000., float(split[1]))
       gtheoryUP  .SetPoint(j, float(split[0][-4:])/1000., float(split[1])*scale    *pdf)
       gtheoryDOWN.SetPoint(j, float(split[0][-4:])/1000., float(split[1])*(1-(scale-1))*(1-(pdf-1)))
@@ -150,3 +192,4 @@ for signal in signals:
   del gtheoryUP  
   del gtheoryDOWN
   del grshade    
+  

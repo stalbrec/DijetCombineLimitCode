@@ -55,6 +55,7 @@ def Plot(files, label, obs):
 
     fChain = []
     for onefile in files:
+        print onefile
         # if onefile.find("2500")!=-1 or onefile.find("2500")!=-1: continue
         fileIN = rt.TFile.Open(onefile)
         fChain.append(fileIN.Get("limit;1")) 
@@ -199,7 +200,7 @@ def Plot(files, label, obs):
     if "ZprimeWW" in label.split("_")[0]:
         resonance="Z'"
         frame.GetXaxis().SetTitle("M_{Z'} (TeV)")
-    frame.GetYaxis().SetTitle("#sigma_{95%} #times BR("+resonance+" #rightarrow "+label.split("_")[0].replace("RS1","").replace("Bulk","").replace("Zprime","")+") [pb]")
+    frame.GetYaxis().SetTitle("#sigma_{95%} #times BR("+resonance+" #rightarrow "+label.split("_")[0].replace("RS1","").replace("Bulk","").replace("Zprime","")+") (pb)")
 
     
 
@@ -252,9 +253,9 @@ def Plot(files, label, obs):
     gtheorySHADE.SetLineWidth(3)
     
     
-    filenameTH = "/mnt/t3nfs01/data01/shome/thaarres/EXOVVAnalysisRunII/LimitCode/CMSSW_7_1_5/src/DijetCombineLimitCode/Limits/%s_xSecUnc.root"%label.split("_")[0]
+    filenameTH = "/mnt/t3nfs01/data01/shome/hinzmann/CMSSW_7_1_20_patch2/src/theaDebug/DijetCombineLimitCode/Limits/%s_xSecUnc.root"%label.split("_")[0]
+    print "Opening file " ,filenameTH
     thFile       = rt.TFile.Open(filenameTH,'READ')   
-    print "Opening file " ,thFile.GetName()
     gtheory      = thFile.Get("gtheory")
     gtheoryUP    = thFile.Get("gtheoryUP")
     gtheoryDOWN  = thFile.Get("gtheoryDOWN")
@@ -394,7 +395,7 @@ def Plot(files, label, obs):
     leg.Draw()
     leg2.Draw("same")
     
-    fname = "withoutPDFandScale/brazilianFlag_%s_13TeV.pdf" %label
+    fname = "brazilianFlag_%s_13TeV.pdf" %label
     c1.SaveAs(fname)
     c1.SaveAs(fname.replace(".pdf" ,".C"  ))
     
@@ -417,7 +418,7 @@ if __name__ == '__main__':
   postfix = ""
 
   channels=["ZprimeWW","WZ","BulkWW","BulkZZ"]
-  # channels=["BulkZZ"]
+  channels+=["qW","qZ"]
   for chan in channels:
     masses =[m*100 for m in range(11,42+1)]
     
@@ -448,7 +449,6 @@ if __name__ == '__main__':
     for mass in masses: 
        # HPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_VVHPnew_asymptoticCLs.root"]
 #        LPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_VVLPnew_asymptoticCLs.root"]
-       combinedplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_VVnew_asymptoticCLs.root"]
        # combinedplots_old+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_VV_asymptoticCLs.root"]
   #      WWHPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_WWHP_asymptoticCLs.root"]
   #      WZHPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_WZHP_asymptoticCLs.root"]
@@ -463,8 +463,10 @@ if __name__ == '__main__':
   #      qZHPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_qZHP_asymptoticCLs.root"]
   #      qWLPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_qWLP_asymptoticCLs.root"]
   #      qZLPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_qZLP_asymptoticCLs.root"]
-  #      combinedplots_qV+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_qVnew_asymptoticCLs.root"]
-       
+       if chan.find("q") != -1:
+         combinedplots_qV+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_qVnew_asymptoticCLs_new.root"]
+       else:
+         combinedplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_VVnew_asymptoticCLs_new.root"]
  
     # Plot(WWHPplots,chan+"_WWHP", obs=True)
 #     Plot(WWLPplots,chan+"_WWLP", obs=True)
@@ -474,7 +476,6 @@ if __name__ == '__main__':
 #     Plot(ZZLPplots,chan+"_ZZLP", obs=True)
     # Plot(LPplots,chan+"_VVLP_new_combined_purity", obs=True)
     # Plot(HPplots,chan+"_VVHP_new_combined_purity", obs=True)
-    Plot(combinedplots,chan+"_new_combined", obs=True)
 
     
     
@@ -485,5 +486,8 @@ if __name__ == '__main__':
     # Plot(qZLPplots,chan+"_qZLP", obs=True)
     # # # Plot(qVLPplots,chan+"_qVLP_new_combined_purity", obs=True)
     # # Plot(qVHPplots,chan+"_qVHP_new_combined_purity", obs=True)
-    # Plot(combinedplots_qV,chan+"_new_combined", obs=True)
+    if chan.find("q") != -1:
+      Plot(combinedplots_qV,chan+"_new_combined", obs=True)
+    else:
+      Plot(combinedplots,chan+"_new_combined", obs=True)
     # # Plot(combinedplots_old,chan+"_old_combined", obs=False)
