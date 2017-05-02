@@ -16,13 +16,13 @@ TColor *col = new TColor();
 
 
 void AddSigData(RooWorkspace* w, Float_t mass, int signalsample, std::vector<string> cat_names);
-void AddBkgData(RooWorkspace* w, std::vector<string> cat_names);
+void AddBkgData(RooWorkspace* w, std::vector<string> cat_names, std::string altfunc);
 void SigModelFit(RooWorkspace* w, Float_t mass, TString signalname, std::vector<string> cat_names);
 void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, std::vector<string> cat_names);
 vector<RooFitResult*> BkgModelFitBernstein(std::string altfunc, RooWorkspace* w, Bool_t dobands, std::vector<string> cat_names);
 void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, std::vector<string> cat_names);
 void SetConstantParams(const RooArgSet* params);
-void MakeDataCard_1Channel(RooWorkspace* w, const char* fileBaseName, const char* fileBkgName, int iChan, TString signalname, int signalsample, std::vector<string> cat_names, double mass);
+void MakeDataCard_1Channel(std::string altfunc,RooWorkspace* w, const char* fileBaseName, const char* fileBkgName, int iChan, TString signalname, int signalsample, std::vector<string> cat_names, double mass);
 void MakePlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitresults, TString signalname, std::vector<string> cat_names);
 
 RooArgSet* defineVariables()
@@ -130,14 +130,12 @@ void runfits(const Float_t mass=2000, int signalsample = 1, int channel = 1,std:
   cat_names.push_back("CMS_jj_WZLP");
   cat_names.push_back("CMS_jj_ZZHP");
   cat_names.push_back("CMS_jj_ZZLP");
-
   cat_names.push_back("CMS_jj_qVHP");
   cat_names.push_back("CMS_jj_qVLP");
   cat_names.push_back("CMS_jj_qWHP");
   cat_names.push_back("CMS_jj_qWLP");
   cat_names.push_back("CMS_jj_qZHP");
   cat_names.push_back("CMS_jj_qZLP");
-
   cat_names.push_back("CMS_jj_VVNP");
   cat_names.push_back("CMS_jj_WWNP");
   cat_names.push_back("CMS_jj_WZNP");
@@ -151,9 +149,20 @@ void runfits(const Float_t mass=2000, int signalsample = 1, int channel = 1,std:
   if (altfunc.find("Exp")!=std::string::npos or altfunc.find("alt")!=std::string::npos)
   {
    card_name = TString("vv_"+altfunc+"vv_models_Bkg_13TeV.rs"); 
+   if (altfunc.find("Exp")!=std::string::npos)
+   {
+      card_name = TString("vv_alt"+altfunc+"vv_models_Bkg_13TeV.rs"); 
+   }
    fileBaseName = TString("CMS_jj_"+altfunc+signalname+TString::Format("_%.0f_13TeV", mass));
   }
-  std::cout << fileBaseName << std::endl;
+  if( altfunc.find("MC")!=std::string::npos or altfunc.find("binning")!=std::string::npos)
+  {
+      
+    fileBaseName = TString("CMS_jj_"+altfunc+signalname+TString::Format("_%.0f_13TeV", mass));  
+  }
+  
+  std::cout << "filebaseName : " << fileBaseName << std::endl;
+  std::cout << card_name <<std::endl;
   HLFactory hlf("HLFactory", card_name, false);
   RooWorkspace* w = hlf.GetWs();
   vector<RooFitResult*> fitresults;
@@ -161,7 +170,7 @@ void runfits(const Float_t mass=2000, int signalsample = 1, int channel = 1,std:
   w->var("mgg13TeV")->setMin(MMIN);
   w->var("mgg13TeV")->setMax(MMAX);
 
-  // Add data to the workspace
+  // Add data to the workspace                                                 F
 
   cout << "SIGNAL SAMPLE = " << signalsample << ".) "<< signalname<< endl;
  
@@ -185,7 +194,7 @@ void runfits(const Float_t mass=2000, int signalsample = 1, int channel = 1,std:
   MakeSigWS(w, fileBaseName, signalname,cat_names);
   // if(mass<1300){
   cout << "CREATE BACKGROUND" << endl;
-  AddBkgData(w,cat_names);
+  AddBkgData(w,cat_names,altfunc);
     
   cout << "FIT BACKGROUND" << endl;
   fitresults = BkgModelFitBernstein(altfunc, w, dobands,cat_names);
@@ -198,35 +207,35 @@ void runfits(const Float_t mass=2000, int signalsample = 1, int channel = 1,std:
 
   if((signalsample==0)||(signalsample==1)||(signalsample==2)||(signalsample==3)||(signalsample==4)||(signalsample==5)){
     if(CHANNEL==1){
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 0, signalname, signalsample, cat_names, mass);
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 1, signalname, signalsample, cat_names, mass);
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 2, signalname, signalsample, cat_names, mass);
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 3, signalname, signalsample, cat_names, mass);
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 4, signalname, signalsample, cat_names, mass);
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 5, signalname, signalsample, cat_names, mass);
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 6, signalname, signalsample, cat_names, mass);
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 7, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 0, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 1, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 2, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 3, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 4, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 5, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 6, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 7, signalname, signalsample, cat_names, mass);
     }
     else if(CHANNEL==3){
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 14, signalname, signalsample, cat_names, mass);
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 15, signalname, signalsample, cat_names, mass);
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 16, signalname, signalsample, cat_names, mass);
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 17, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 14, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 15, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 16, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 17, signalname, signalsample, cat_names, mass);
     }
   }
   if((signalsample==6)||(signalsample==7)){
     if(CHANNEL==2){
       // MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 8, signalname, signalsample, cat_names, mass);
       // MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 9, signalname, signalsample, cat_names, mass);
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 10, signalname, signalsample, cat_names, mass);
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 11, signalname, signalsample, cat_names, mass);
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 12, signalname, signalsample, cat_names, mass);
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 13, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 10, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 11, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 12, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 13, signalname, signalsample, cat_names, mass);
     }
     else if(CHANNEL==3){
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 18, signalname, signalsample, cat_names, mass);
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 19, signalname, signalsample, cat_names, mass);
-      MakeDataCard_1Channel(w, fileBaseName, fileBkgName, 20, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 18, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 19, signalname, signalsample, cat_names, mass);
+      MakeDataCard_1Channel(altfunc, w, fileBaseName, fileBkgName, 20, signalname, signalsample, cat_names, mass);
     }
   }
   
@@ -409,7 +418,7 @@ void AddSigData(RooWorkspace* w, Float_t mass, int signalsample, std::vector<str
 }
 
 
-void AddBkgData(RooWorkspace* w, std::vector<string> cat_names) {
+void AddBkgData(RooWorkspace* w, std::vector<string> cat_names, std::string altfunc) {
   // Int_t ncat = NCAT;
   Int_t ncat_min = NCAT;
   Int_t ncat = NCAT;
@@ -441,7 +450,15 @@ void AddBkgData(RooWorkspace* w, std::vector<string> cat_names) {
   // retrieve the data tree;
   // no common preselection cut applied yet; 
 
-  TFile dataFile(inDir+"dijetVV_13TeV_miniTree.root");   
+   char* name =  "dijetVV_13TeV_miniTree.root" ;
+   if(altfunc.find("MC")!=std::string::npos)
+    {
+        name = "dijetVV_13TeV_miniTree_MC.root"; 
+    }
+   std::cout << " take file for mini-Trees : "<< name << std::endl;
+   TFile dataFile(inDir+name);
+  
+  
   TTree* dataTree     = (TTree*) dataFile.Get("TCVARS");
 
   // Variables
@@ -690,16 +707,22 @@ vector<RooFitResult*> BkgModelFitBernstein(std::string altfunc,RooWorkspace* w, 
     std::cout << " take alt fit function " << std::endl;
     if (altfunc.find("alt")!=std::string::npos)
     {
-    //============== use levelled exponential as alternative function ========================================
-//     RooFormulaVar *x = new RooFormulaVar(TString::Format("x_%s",cat_names.at(c).c_str()),"","@0",RooArgList(*mgg));
-//     p3mod = new RooFormulaVar(TString::Format("p3mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(c).c_str())));
-//     bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "exp(-(@0-@1)/(@2+@3*(@0-@1)))", RooArgList(*x, *p1mod, *p2mod, *p3mod));
-//     std::cout<< "works"<< c << std::endl;
     //============== use alt. four parameter funtion as alternative function ====================================
-    x = new RooFormulaVar(TString::Format("x_%s",cat_names.at(c).c_str()),"","@0",RooArgList(*mgg, *sqrtS));
+    x = new RooFormulaVar(TString::Format("x_%s",cat_names.at(c).c_str()),"","@0/@1",RooArgList(*mgg, *sqrtS));
     p4mod = new RooFormulaVar(TString::Format("p4mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(c).c_str())));
-    bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "( @1*pow(1-@0/13000. + @4*pow(@0/13000.,2),@2) ) / ( pow(@0/13000.,@3) )", RooArgList(*x, *p1mod, *p2mod, *p3mod,*p4mod));
+    bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "( @1*pow(1-@0 + @4*pow(@0,2),@2) ) / ( pow(@0/13000.,@3) )", RooArgList(*x, *p1mod, *p2mod, *p3mod,*p4mod));
     }
+    if (altfunc.find("Exp")!=std::string::npos)
+    {
+      //============== use levelled exponential as alternative function ========================================
+       RooFormulaVar *x = new RooFormulaVar(TString::Format("x_%s",cat_names.at(c).c_str()),"","@0",RooArgList(*mgg));
+       p3mod = new RooFormulaVar(TString::Format("p3mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(c).c_str())));
+       bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "exp(-(@0-@1)/(@2+@3*(@0-@1)))", RooArgList(*x, *p1mod, *p2mod, *p3mod));
+  //     std::cout<< "works"<< c << std::endl;   
+    }
+    
+    
+    
     RooAbsReal* bkg_fitTmp2  = new RooRealVar(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str()),"",data[c]->sumEntries(),1.0,1000000000);
     w->import(*bkg_fitTmp);
     w->import(*bkg_fitTmp2);
@@ -1224,11 +1247,34 @@ void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, s
     data[c]      = (RooDataSet*) w->data(TString::Format("Data_%s",cat_names.at(c).c_str()));
     std::cout << data[c] << std::endl;
     
+    RooDataHist* dataBinned;
+    std::string name = fileBaseName;
+    if(name.find("NObinning")!=std::string::npos)
+    {
+      wAll->import(*data[c], Rename(TString::Format("data_obs_%s",cat_names.at(c).c_str())));
+      std::cout << " use no binning " << std::endl;
+    }
+    if(name.find("binningHCAL")!=std::string::npos)
+    {
+      double massBins[44] ={1058.,  1118, 1181, 1246, 1313, 1383, 1455, 1530, 1607, 1687, 1770, 1856, 1945, 2037, 2132, 2231, 2332, 2438, 2546, 2659, 2775, 2895, 3019, 3147, 3279, 3416, 3558, 3704, 3854, 4010, 4171, 4337, 4509, 4686, 4869, 5058, 5253, 5455, 5663, 5877, 6099, 6328, 6564, 6808};
+      //((RooRealVar*) data[c]->get()->find("mgg13TeV"))->setBins(MMAX-MMIN) ;
+      RooBinning mjjbins(43 ,massBins, "mjjbins");
+      ((RooRealVar*) data[c]->get()->find("mgg13TeV"))->setBinning(mjjbins);
+      dataBinned = data[c]->binnedClone();
+      wAll->import(*dataBinned, Rename(TString::Format("data_obs_%s",cat_names.at(c).c_str())));
+      std::cout << "use binning of resolution " << std::endl;
+    }
+    if(name.find("binning")==std::string::npos)
+    {    
     ((RooRealVar*) data[c]->get()->find("mgg13TeV"))->setBins(MMAX-MMIN) ;
-    RooDataHist* dataBinned = data[c]->binnedClone();
-    bkg_fitPdf[c] = (RooExtendPdf*)  w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()));
+     dataBinned = data[c]->binnedClone();
+     wAll->import(*dataBinned, Rename(TString::Format("data_obs_%s",cat_names.at(c).c_str())));
+     std::cout << "use default binning (~1GeV bins) " << std::endl;
+    }
     //   wAll->import(*data[c], Rename(TString::Format("data_obs_%s",cat_names.at(c).c_str())));
-    wAll->import(*dataBinned, Rename(TString::Format("data_obs_%s",cat_names.at(c).c_str())));
+    
+    
+    bkg_fitPdf[c] = (RooExtendPdf*)  w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()));
     wAll->import(*w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str())));
     wAll->import(*w->function(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())));
 
@@ -1249,16 +1295,6 @@ void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, s
     // }
     if ( altfunc.find("alt")!=std::string::npos)
     {
-       // =============== take levelled exponential as fit function ===================================== 
-//        mean = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->getVal();
-//        min  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->getMin(); 
-//        max  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->getMax(); 
-//        wAll->factory(TString::Format("CMS_bkg_fit_slope2_%s_13TeV[%g,%g,%g]", cat_names.at(c).c_str(), mean, min, max));
-//         
-//        mean = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(c).c_str())))->getVal();
-//        min  = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(c).c_str())))->getMin(); 
-//        max  = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(c).c_str())))->getMax(); 
-//        wAll->factory(TString::Format("CMS_bkg_fit_slope3_%s_13TeV[%g,%g,%g]", cat_names.at(c).c_str(), mean, min, max));
        //================ take alt four parameter as fit function  =======================================
        mean = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->getVal();
        min  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->getMin(); 
@@ -1278,6 +1314,21 @@ void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, s
         
         
        
+    }
+    if (altfunc.find("Exp")!=std::string::npos)
+    {
+        // =============== take levelled exponential as fit function ===================================== 
+       mean = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->getVal();
+       min  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->getMin(); 
+       max  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->getMax(); 
+       wAll->factory(TString::Format("CMS_bkg_fit_slope2_%s_13TeV[%g,%g,%g]", cat_names.at(c).c_str(), mean, min, max));
+        
+       mean = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(c).c_str())))->getVal();
+       min  = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(c).c_str())))->getMin(); 
+       max  = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(c).c_str())))->getMax(); 
+       wAll->factory(TString::Format("CMS_bkg_fit_slope3_%s_13TeV[%g,%g,%g]", cat_names.at(c).c_str(), mean, min, max)); 
+        
+        
     }
 
 //     if(c!=3 && c!=4 && c!=6){
@@ -1441,7 +1492,7 @@ void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, s
 
 
 
-void MakeDataCard_1Channel(RooWorkspace* w, const char* fileBaseName, const char* fileBkgName, int iChan, TString signalname, int signalsample, std::vector<string> cat_names, double mass) {
+void MakeDataCard_1Channel(std::string altfunc, RooWorkspace* w, const char* fileBaseName, const char* fileBkgName, int iChan, TString signalname, int signalsample, std::vector<string> cat_names, double mass) {
   
   TString cardDir = "/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/"+filePOSTfix;
   // TString cardDir = filePOSTfix;
@@ -1541,16 +1592,16 @@ void MakeDataCard_1Channel(RooWorkspace* w, const char* fileBaseName, const char
   outFile << Form("shapes bkg_fit_jj %s ", cat_names[iChan].c_str()) << wsDir+TString(fileBkgName)+".root" << Form(" w_all:CMS_bkg_fit_%s_13TeV", cat_names[iChan].c_str()) << endl;
   
   if(signalsample<2){
-    outFile << Form("shapes RS1WW_jj %s ", cat_names[iChan].c_str()) << wsDir+TString::Format("CMS_jj_RS1WW_%.0f_13TeV.root", mass) << Form(" w_all:RS1WW_jj_sig_%s", cat_names[iChan].c_str()) << endl;
-    outFile << Form("shapes RS1ZZ_jj %s ", cat_names[iChan].c_str()) << wsDir+TString::Format("CMS_jj_RS1ZZ_%.0f_13TeV.root", mass) << Form(" w_all:RS1ZZ_jj_sig_%s", cat_names[iChan].c_str()) << endl;
+    outFile << Form("shapes RS1WW_jj %s ", cat_names[iChan].c_str()) << wsDir+TString::Format(("CMS_jj_"+altfunc+"RS1WW_%.0f_13TeV.root").c_str(), mass) << Form(" w_all:RS1WW_jj_sig_%s", cat_names[iChan].c_str()) << endl;
+    outFile << Form("shapes RS1ZZ_jj %s ", cat_names[iChan].c_str()) << wsDir+TString::Format(("CMS_jj_"+altfunc+"RS1ZZ_%.0f_13TeV.root").c_str(), mass) << Form(" w_all:RS1ZZ_jj_sig_%s", cat_names[iChan].c_str()) << endl;
   } 
   else if(signalsample<4){
-    outFile << Form("shapes WZ_jj %s ", cat_names[iChan].c_str()) << wsDir+TString::Format("CMS_jj_WZ_%.0f_13TeV.root", mass) << Form(" w_all:WZ_jj_sig_%s", cat_names[iChan].c_str()) << endl;
-    outFile << Form("shapes ZprimeWW_jj %s ", cat_names[iChan].c_str()) << wsDir+TString::Format("CMS_jj_ZprimeWW_%.0f_13TeV.root", mass) << Form(" w_all:ZprimeWW_jj_sig_%s", cat_names[iChan].c_str()) << endl;
+    outFile << Form("shapes WZ_jj %s ", cat_names[iChan].c_str()) << wsDir+TString::Format(("CMS_jj_"+altfunc+"WZ_%.0f_13TeV.root").c_str(), mass ) << Form(" w_all:WZ_jj_sig_%s", cat_names[iChan].c_str()) << endl;
+    outFile << Form("shapes ZprimeWW_jj %s ", cat_names[iChan].c_str()) << wsDir+TString::Format(("CMS_jj_"+altfunc+"ZprimeWW_%.0f_13TeV.root").c_str(), mass ) << Form(" w_all:ZprimeWW_jj_sig_%s", cat_names[iChan].c_str()) << endl;
   } 
   else if(signalsample<6){
-    outFile << Form("shapes BulkWW_jj %s ", cat_names[iChan].c_str()) << wsDir+TString::Format("CMS_jj_BulkWW_%.0f_13TeV.root", mass) << Form(" w_all:BulkWW_jj_sig_%s", cat_names[iChan].c_str()) << endl;
-    outFile << Form("shapes BulkZZ_jj %s ", cat_names[iChan].c_str()) << wsDir+TString::Format("CMS_jj_BulkZZ_%.0f_13TeV.root", mass) << Form(" w_all:BulkZZ_jj_sig_%s", cat_names[iChan].c_str()) << endl;
+    outFile << Form("shapes BulkWW_jj %s ", cat_names[iChan].c_str()) << wsDir+TString::Format(("CMS_jj_"+altfunc+"BulkWW_%.0f_13TeV.root").c_str(), mass ) << Form(" w_all:BulkWW_jj_sig_%s", cat_names[iChan].c_str()) << endl;
+    outFile << Form("shapes BulkZZ_jj %s ", cat_names[iChan].c_str()) << wsDir+TString::Format(("CMS_jj_"+altfunc+"BulkZZ_%.0f_13TeV.root").c_str(), mass ) << Form(" w_all:BulkZZ_jj_sig_%s", cat_names[iChan].c_str()) << endl;
   }
   else{
     outFile << Form("shapes qW_jj %s ", cat_names[iChan].c_str()) << wsDir+TString::Format("CMS_jj_qW_%.0f_13TeV.root", mass) << Form(" w_all:qW_jj_sig_%s", cat_names[iChan].c_str()) << endl;

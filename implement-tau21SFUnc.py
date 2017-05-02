@@ -2,8 +2,8 @@ import sys,os
 import ROOT
 from ROOT import *
 import math
-systhp = 0.1 
-systlp = 0.219
+systhp = 0.11 
+systlp = 0.23
 
 def get_SF_VV():
  fsys = []
@@ -28,10 +28,11 @@ def get_SF_qV():
 indir = 'datacards/'
 outdir = 'datacards/'
 
-signals  = ["altqW"]#,"altBulkZZ"]
-signals  = ["WZ","ZprimeWW"]#
-signals  = ["BulkZZ","BulkWW","WZ","ZprimeWW"]
-signals  = ["qW","qZ"]
+signals  = ["MCBulkZZ"]#,"altBulkZZ"]
+signals  = ["altBulkWW","altBulkZZ"]#,"altBulkZZ"]#
+#signals=["altBulkWW","BulkWW"]
+#signals  = ["BulkZZ","BulkWW","WZ","ZprimeWW","qW","qZ"]
+#signals  = ["qW","qZ"]
 purities = ["LP","HP"]
 
 for signal in signals:  

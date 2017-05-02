@@ -23,11 +23,12 @@ python scripts/sb-fit-bkgonly.py  //VV analysis
 ```
 
 ## Produce workspaces:
-To interpolate signal MC, take as input .root files of signal MC.  with 1 GeV binned histograms of dijet invariant mass (0-7000 GeV). Names of histograms are names of analysis category, eg. "DijetMassHighPuriWW". 
+To interpolate signal MC, take as input .root files of signal MC.  with 1 GeV binned histograms of dijet invariant mass (0-7000 GeV). Names of histograms are names of analysis category, eg. "DijetMassHighPuriWW". Attention: here you should use rootfiles with lumiweights applied and not scaled to the dataluminosity. This scaling is done in the workspace generation so it would be double if we did it here also!
 These scripts are designed to run on the PSI T3 batch system (qsub protocol)! Needs adaption to run on alternate systems.
 Modify interpolateAll.py to signal sample and masspoints you wish to run on
 ```
 python interpolateAll.py -> if you want to do them manually do: python interpolateVV13TeV.py input/ZprimeWW_13TeV_ 2100 GeV
+-> in this file the names of the used histograms have to be adjusted to qV <-> VV etc. !
 ```
 Create data and signal MC minitrees
 ```
@@ -37,12 +38,16 @@ root -l MiniTreeSignalProducerVV13TeV.C //VV analysis
 ```
 Produce workspaces and datacards. Remember to change which signals and masspoints you wanna run over! Need to be available as minitrees!
 ```
+when changing parameters of fit functions change them here: BkgModelFitBernstein
+and also here:  MakeBkgWS
+and also change the paramters written as nuisance in the datacard here:  MakeDataCard_1Channel
 python ProduceWorkspaces13TeV.py
 ```
-Implement JES/JER/JMS/JMR  and xross section uncertanties
+Implement JES/JER/JMS/JMR  and cross section uncertanties
 ```
 python implement-JESJMRsystematics.py
 python implement-XsecUncertainty.py
+python implement-tau21PtUnc.py
 ```
 ## Run limits:
 To run limits you need to have datacards and workspaces produced as instructed above. 

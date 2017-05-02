@@ -2,9 +2,9 @@ import os,sys
 import time
 
 masses =[m*100 for m in range(10,45+1)]
-samples = ["ZprimeWW_13TeV_"]#
-samples = ["ZprimeWW_13TeV_","WprimeWZ_13TeV_","BulkZZ_13TeV_","BulkWW_13TeV_"]
-#samples = ["QstarQW_13TeV_","QstarQZ_13TeV_"]
+#samples = ["ZprimeWW_13TeV_"]#
+#samples = ["ZprimeWW_13TeV_","WprimeWZ_13TeV_","BulkZZ_13TeV_","BulkWW_13TeV_"]
+samples = ["QstarQW_13TeV_","QstarQZ_13TeV_"]
 for sample in samples:
   if sample.find("Qstar") != -1:
     masses =[m*100 for m in range(10,60+1)]

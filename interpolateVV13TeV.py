@@ -47,25 +47,25 @@ histnames= [
             # "DijetMassNoPuriVV", # VV medium purity
             # "DijetMassLowPuriVV", # not used
 
-            "DijetMassHighPuriWW", # WW high purity
-            "DijetMassLowPuriWW", # WW low purity
-            "DijetMassNoPuriWW", # WW no purity
-            "DijetMassHighPuriWZ", # WZ high purity
-            "DijetMassLowPuriWZ", # WZ low purity
-            "DijetMassNoPuriWZ", # WZ no purity
-            "DijetMassHighPuriZZ", # ZZ high purity
-            "DijetMassLowPuriZZ", # ZZ low purity
-            "DijetMassNoPuriZZ", # ZZ no purity
+            #"DijetMassHighPuriWW", # WW high purity
+            #"DijetMassLowPuriWW", # WW low purity
+            #"DijetMassNoPuriWW", # WW no purity
+            #"DijetMassHighPuriWZ", # WZ high purity
+            #"DijetMassLowPuriWZ", # WZ low purity
+            #"DijetMassNoPuriWZ", # WZ no purity
+            #"DijetMassHighPuriZZ", # ZZ high purity
+            #"DijetMassLowPuriZZ", # ZZ low purity
+            #"DijetMassNoPuriZZ", # ZZ no purity
             
-            #"DijetMassHighPuriqV", # qV high purity
-            #"DijetMassNoPuriqV", # qV medium purity
-            #"DijetMassLowPuriqV", # qV kow purity
-            #"DijetMassHighPuriqW", # qV high purity
-            #"DijetMassLowPuriqW", # qW low purity
-            #"DijetMassNoPuriqW", # qW no purity
-            #"DijetMassHighPuriqZ", # qZ high purity
-            #"DijetMassLowPuriqZ", # qZ low purity
-            #"DijetMassNoPuriqZ", # qZ no purity
+            "DijetMassHighPuriqV", # qV high purity
+            "DijetMassNoPuriqV", # qV medium purity
+            "DijetMassLowPuriqV", # qV kow purity
+            "DijetMassHighPuriqW", # qV high purity
+            "DijetMassLowPuriqW", # qW low purity
+            "DijetMassNoPuriqW", # qW no purity
+            "DijetMassHighPuriqZ", # qZ high purity
+            "DijetMassLowPuriqZ", # qZ low purity
+            "DijetMassNoPuriqZ", # qZ no purity
             ]
 
 if "Wprime" in inputRoot:
@@ -157,8 +157,8 @@ for histname in histnames:
    # interpolate the shape linearly
    su = 0
    su1 = 0.0
-   for i in range(5001) :
-     x = 0.0 + i/5000.0*2.0 # interpolation range: [0*mass,2*mass]
+   for i in range(7001) :
+     x = 0.0 + i/7000.0*2.0 # interpolation range: [0*mass,2*mass]
      masslow = x*mjjlow
      masshigh = x*mjjhigh
      #print masshigh
@@ -182,7 +182,7 @@ for histname in histnames:
      inputf = TFile( inputRoot + str(x) + suffix + '.root' )
      f = inputf.Get( histname )
      xvalues.push_back(x)
-     yvalues.push_back(f.Integral(f.FindBin(x*0.8),f.FindBin(x*1.2))/ngenevents[masses.index(x)]*10000.) #100 000 is 2015 default, test 10 000
+     yvalues.push_back(f.Integral(f.FindBin(x*0.8),f.FindBin(x*1.2))/ngenevents[masses.index(x)]*100000.) #100 000 is 2015 default, test 10 000
    interpolator=r.Math.Interpolator(xvalues,yvalues)
    integral=interpolator.Eval(outmjj)
    foutmjj.Scale( integral/foutmjj.Integral(foutmjj.FindBin(outmjj*0.8),foutmjj.FindBin(outmjj*1.2)) )
@@ -200,7 +200,7 @@ for histname in histnames:
      xvalues.push_back(m)
      for i in range(npoints+1):
        x=0.0 + i/float(npoints)*2.0
-       yvalues[i].push_back(f.Integral(f.FindBin(m*x)-rebin+1,f.FindBin(m*x)+rebin-1)/float(2*rebin-1)/ngenevents[masses.index(m)]*10000.) #100 000 is 2015 default, test 10 000
+       yvalues[i].push_back(f.Integral(f.FindBin(m*x)-rebin+1,f.FindBin(m*x)+rebin-1)/float(2*rebin-1)/ngenevents[masses.index(m)]*100000.) #100 000 is 2015 default, test 10 000
    for i in range(npoints+1):
      x=0.0 + i/float(npoints)*2.0
      inter=r.Math.Interpolator(xvalues,yvalues[i])

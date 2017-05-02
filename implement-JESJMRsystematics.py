@@ -9,19 +9,19 @@ prefixDCout = "datacards/CMS_jj_"
 prefix = "EXOVVSystematics/dijet"
 
 purities = ["LP","HP"]
-channels = ["WW","WZ","ZZ"]
+channels = ["WW","WZ","ZZ","VV"]
 
 signals=["BulkWW","BulkZZ","WZ","ZprimeWW"]
-#signals=["altBulkZZ"]
+signals=["altBulkWW"]
 masses_interpolated =[m*100 for m in range(12,45+1)]
 massesInSystematics = [1200,1400,1600,1800,2000,2500,3500,4000]
 
 
 
-#signals=["BulkZZ"]#,"WZ","ZprimeWW"]
+signals=["altBulkZZ"]#,"WZ","ZprimeWW"]
 
-#masses_interpolated =[m*100 for m in range(12,45+1)]
-#massesInSystematics = [1200,1400,1600,1800,2000,2500,3000,3500,4000]
+masses_interpolated =[m*100 for m in range(12,45+1)]
+massesInSystematics = [1200,1400,1600,1800,2000,2500,3000,3500,4000]
 
 #signals=["ZprimeWW"]
 
@@ -35,12 +35,12 @@ massesInSystematics = [1200,1400,1600,1800,2000,2500,3500,4000]
 #massesInSystematics = [1200,1400,1600,1800,2000,2500,3000,3500,4000]
 
 
-signals=["qW"]
-channels = ["qW","qZ"]
-masses_interpolated =[m*100 for m in range(12,60+1)]
-massesInSystematics = [1200,1400,1600,1800,2000,2500,3000,3500,4000,4500,5000,6000,6500]
+#signals=["altqW"]
+#channels = ["qW","qZ"]
+#masses_interpolated =[m*100 for m in range(12,60+1)]
+#massesInSystematics = [1200,1400,1600,1800,2000,2500,3000,3500,4000,4500,5000,6000,6500]
 
-#signals=["qZ"]
+#signals=["qW"]
 #channels = ["qW","qZ"]
 #masses_interpolated =[m*100 for m in range(12,60+1)]
 #massesInSystematics = [1200,1400,1600,1800,2000,2500,3000,4500,6000]

@@ -3,44 +3,54 @@ import ROOT
 from ROOT import *
 import math
  
+# new for Moriond 2017: pT HP and LP uncertainty both fitted (no scaling with v-tag uncertainties anymore)
+# treat uncertainties as correlated (since the migration between mass windows is correlated) (for ICHEP anti-correlation)
+# new working point of 0.35
 def get_sys_pt_vv(mass):
  fsys = []
- systhp = 5.90094*math.log(mass/2./200.)/100.
+ systhp = 8.5*math.log(mass/2./200.)/100.
  fsys.append( (1+systhp)*(1+systhp) )
  fsys.append( (1-systhp)*(1-systhp) )
- tothp = math.sqrt(0.03*0.03+0.04*0.04+0.06*0.06)/1.03 # efficiency scale factor HP = 1.03 +- 0.03 (stat -> fit unc.) +- 0.04 (sys->herwig vs pythia) +- 0.06 (sys -> different fit methods)
- totlp = math.sqrt(0.12*0.12+0.17*0.17+0.12*0.12)/0.88 # same for LP category
- systlp = systhp*totlp/tothp
- fsys.append( (1+systhp)*(1-systlp) )
- fsys.append( (1-systhp)*(1+systlp) )
+# tothp = math.sqrt(0.03*0.03+0.04*0.04+0.06*0.06)/1.03 # efficiency scale factor HP = 1.03 +- 0.03 (stat -> fit unc.) +- 0.04 (sys->herwig vs pythia) +- 0.06 (sys -> different fit methods)
+# totlp = math.sqrt(0.12*0.12+0.17*0.17+0.12*0.12)/0.88 # same for LP category
+ #systlp = systhp*totlp/tothp
+ systlp = 3.9*math.log(mass/2./200.)/100.
+ #fsys.append( (1+systhp)*(1-systlp) )
+ #fsys.append( (1-systhp)*(1+systlp) )
+ fsys.append( (1+systhp)*(1+systlp) )
+ fsys.append( (1-systhp)*(1-systlp) )
  return fsys
 
 def get_sys_pt_qv(mass):
  fsys = []
- systhp = 5.90094*math.log(mass/2./200.)/100.
+ systhp = 8.5*math.log(mass/2./200.)/100.
  print systhp
  fsys.append( (1+systhp) )
  fsys.append( (1-systhp) )
- tothp = math.sqrt(0.03*0.03+0.04*0.04+0.06*0.06)/1.03
- totlp = math.sqrt(0.12*0.12+0.17*0.17+0.12*0.12)/0.88
- systlp = systhp*totlp/tothp
- fsys.append( (1-systlp) )
+ systlp = 3.9*math.log(mass/2./200.)/100.
+ print systlp
  fsys.append( (1+systlp) )
+ fsys.append( (1-systlp) )
+ #tothp = math.sqrt(0.03*0.03+0.04*0.04+0.06*0.06)/1.03
+ #totlp = math.sqrt(0.12*0.12+0.17*0.17+0.12*0.12)/0.88
+ #systlp = systhp*totlp/tothp
+ #fsys.append( (1-systlp) )
+ #fsys.append( (1+systlp) )
  return fsys
    
 
 indir = 'datacards/'
 outdir = 'datacards/'
 
-signals  = ["altqW"]#,"altBulkZZ"]
-signals  = ["WZ","ZprimeWW"]#
-signals  = ["BulkZZ","BulkWW","WZ","ZprimeWW"]
-signals  = ["qW","qZ"]
+signals  = ["MCBulkZZ"]#,"altBulkZZ"]
+signals=["altBulkWW","altBulkZZ"]
+#signals  = ["BulkZZ","BulkWW","WZ","ZprimeWW"]
+#signals  = ["qW","qZ"]
 purities = ["LP","HP"]
 
 for signal in signals:  
-  masses =[m*100 for m in range(11,42+1)]
-  channels = ["WW","WZ","ZZ"]
+  masses =[m*100 for m in range(11,45+1)]
+  channels = ["WW","WZ","ZZ","VV"]
   if signal.find("q")!=-1:
     masses =[m*100 for m in range(12,62+1)]
     channels = ["qW","qZ"]

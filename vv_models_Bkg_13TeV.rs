@@ -1,4 +1,4 @@
-mgg13TeV[955,4500];
+mgg13TeV[1050,4500];
 
 bkg_fit_slope1_CMS_jj_VVHP[7., -100.0, 500.0];
 bkg_fit_slope2_CMS_jj_VVHP[7., -100., 100.0];

@@ -33,7 +33,7 @@
 
    for (int iMass = 0; iMass<massrange; iMass++){
 
-     string sInFile = "input/" + inFile + "_13TeV_" + Form("OUT%dGeV.root", 1000+iMass*100);
+     string sInFile = "input/" + inFile + "_13TeV_" + Form("10k_OUT%dGeV.root", 1000+iMass*100);
      cout << sInFile.c_str() << endl;
      TFile file0(sInFile.c_str(), "read");
 

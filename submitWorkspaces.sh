@@ -1,27 +1,28 @@
 #!/bin/bash
 
-MASSPOINT=$1
 SAMPLE=$2
 CHANNEL=$3
+MASS=$1
 ALTFUNC=$4
-SAMPLE_ONE=$5
-SAMPLE_TWO=$6
+MODEL1=$5
+MODEL2=$6
+
 JOBLOGFILES="myout.txt myerr.txt"
-OUTFILES=""
+# OUTFILES=""
 DBG=2
 SEUSERSUBDIR=""
 SEOUTFILES=""
 HN_NAME=`whoami`
 USER_SRM_HOME="srm://t3se01.psi.ch:8443/srm/managerv2?SFN=/pnfs/psi.ch/cms/trivcat/store/user"
 TOPWORKDIR=/scratch/`whoami`
+HOMEDIR="/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode"
 JOBDIR=workspaces-$JOB_ID
-$HOMEDIR="/mnt/t3nfs01/data01/shome/dschafer/src/DijetCombineLimitCode/"
-CMSSW_DIR="/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/"
-#CMSSW_DIR="/cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_20/"
+#CMSSW_DIR="/mnt/t3nfs01/data01/shome/thaarres/EXOVVAnalysisRunII/LimitCode/CMSSW_7_1_5"
+#CMSSW_DIR="/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7"
+CMSSW_DIR="/cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_20/"
 BASEDIR=`pwd`
 LOGDIRNAME=${BASEDIR}/${JOBDIR}
 OUTDIR=${BASEDIR}/${JOBDIR}
-
 #mkdir ${OUTDIR}
 ############ BATCH QUEUE DIRECTIVES ##############################
 # Lines beginning with #$ are used to set options for the SGE
@@ -30,7 +31,7 @@ OUTDIR=${BASEDIR}/${JOBDIR}
 
 # Job name (defines name seen in monitoring by qstat and the
 #     job script's stderr/stdout names)
-#$ -N workspace_job
+#$ -N interpolateAll_job
 
 ### Specify the queue on which to run
 #$ -q short.q
@@ -42,9 +43,8 @@ OUTDIR=${BASEDIR}/${JOBDIR}
 
 # here you could change location of the job report stdout/stderr files
 #  if you did not want them in the submission directory
-# 
-#$ -o /mnt/t3nfs01/data01/shome/thaarres/EXOVVAnalysisRunII/LimitCode/CMSSW_7_1_5/src/DijetCombineLimitCode/workspaceBatchProducer
-#$ -e /mnt/t3nfs01/data01/shome/thaarres/EXOVVAnalysisRunII/LimitCode/CMSSW_7_1_5/src/DijetCombineLimitCode/workspaceBatchProducer
+#$ -o $OUTDIR
+#$ -e $OUTDIR
 #################################################################
 
 ##### MONITORING/DEBUG INFORMATION ###############################
@@ -102,12 +102,11 @@ SERESULTDIR=$SERESULTDIR
 EOF
 
 ###########################################################################
-if (( ${SAMPLE}==6 )) ; then
-  RUN_SCRIPT=$BASEDIR/X2qVFitter.cc
-else
-  RUN_SCRIPT=$BASEDIR/X2VVFitter.cc
-fi  
+## YOUR FUNCTIONALITY CODE GOES HERE
 # set up CMS environment
+
+INFILE=${BASEDIR}/${INPUT}
+
 source $VO_CMS_SW_DIR/cmsset_default.sh
 
 cd $CMSSW_DIR/src
@@ -118,13 +117,16 @@ if test $? -ne 0; then
 fi
 
 cd $WORKDIR
-# cp -r $CMSSW_DIR/src/DijetCombineLimitCode/qv_models_Bkg_13TeV.rs .
-# cp -r $CMSSW_DIR/src/DijetCombineLimitCode/vv_models_Bkg_13TeV.rs .
-cp -r $USER_SRM_HOME/DijetCombineLimitCode/qv_models_Bkg_13TeV.rs .
-cp -r $USER_SRM_HOME/DijetCombineLimitCode/vv_models_Bkg_13TeV.rs .
-echo "root -b -q '$RUN_SCRIPT(${MASSPOINT},${SAMPLE},${CHANNEL},\"${ALTFUNC}\")'"  >> myout.txt 2>>myerr.txt
+cp -r $BASEDIR/qv_models_Bkg_13TeV.rs .
+cp -r $BASEDIR/vv_models_Bkg_13TeV.rs .
+cp -r $BASEDIR/qv_altmodels_Bkg_13TeV.rs .
+cp -r $BASEDIR/vv_altExpvv_models_Bkg_13TeV.rs .
+cp -r $BASEDIR/vv_altvv_models_Bkg_13TeV.rs .
+# root -b -q 'X2VVFitter.cc(1100,4,1,"MC")'
+
+echo "root -b -q '${HOMEDIR}/X2VVFitter.cc(${MASS},${SAMPLE},${CHANNEL},\"${ALTFUNC}\")'"  >> myout.txt 2>>myerr.txt
 cp myout.txt ${HOMEDIR}
-root -b -q "$RUN_SCRIPT(${MASSPOINT},${SAMPLE},${CHANNEL},\"${ALTFUNC}\")">> myout.txt 2>>myerr.txt
+root -b -q "${HOMEDIR}/X2VVFitter.cc(${MASS},${SAMPLE},${CHANNEL},\"${ALTFUNC}\")">> myout.txt 2>>myerr.txt
 
 #### RETRIEVAL OF OUTPUT FILES AND CLEANING UP ############################
 cd $WORKDIR
@@ -186,9 +188,5 @@ echo "Job finished at " `date`
 echo "Wallclock running time: $RUNTIME s"
 
 cd ${BASEDIR}
-mv workspace_job.o$JOB_ID $LOGDIRNAME/
-mv workspace_job.e$JOB_ID $LOGDIRNAME/
-
-mv ${OUTDIR}/CMS_jj*.txt ${HOMEDIR}/test/
-mv ${OUTDIR}/*.root ${HOMEDIR}/test/
+mv interpolateAll_job.o$JOB_ID interpolateAll_job.e$JOB_ID $LOGDIRNAME/.
 exit 0

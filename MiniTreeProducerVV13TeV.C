@@ -8,12 +8,23 @@
  normWeight = 1.;
 
 
- string sInFile = "/shome/thaarres/EXOVVAnalysisRunII/LimitCode/CMSSW_7_1_5/src/DijetCombineLimitCode/input/JetHT_qV.root";
+//  string sInFile = "/shome/thaarres/EXOVVAnalysisRunII/LimitCode/CMSSW_7_1_5/src/DijetCombineLimitCode/input/JetHT_qV.root";
+//  string sInFile = "/shome/dschafer/ExoDiBosonAnalysis/results/ReRecoData_qVdijet.root";
+ string sInFile = "/shome/dschafer/ExoDiBosonAnalysis/results/ReRecoData_VVdijet.root";
+ //string sInFile = "/shome/dschafer/ExoDiBosonAnalysis/results/QCD_pythia8_VV_summer16.root";
  cout << sInFile.c_str() << endl;
  TFile file0(sInFile.c_str(), "read");
  
 
- string sOutFile("MiniTrees/Data_qV_13TeV/dijetVV_13TeV_miniTree.root");
+ //string sOutFile("MiniTrees/Data_qV_13TeV/dijetqV_13TeV_miniTree.root");
+ string sOutFile("MiniTrees/Data_VV_13TeV/dijetVV_13TeV_miniTree_test.root");
+ int nCategorie = 8;
+ int maxCategorie = 14;
+ if (sInFile.find("VV")!=std::string::npos)
+ {
+    nCategorie = 0;
+    maxCategorie  = 8;
+ }
  TFile f1(sOutFile.c_str(), "recreate");
  f1.cd();
  
@@ -24,9 +35,9 @@
  TCVARS->Branch("normWeight",&normWeight,"normWeight/D");
  
  TCVARS->Branch("categories",&categories,"categories/I");
- 
- for (int iCat = 8; iCat < 14; iCat++){
-   TH1D* hMass = (TH1D*) file0.Get("DijetMassHighPuriVV;1");
+ TH1D* hMass;
+ for (int iCat = nCategorie; iCat < maxCategorie; iCat++){
+   if (iCat ==0 ) hMass = (TH1D*) file0.Get("DijetMassHighPuriVV;1");
    if (iCat == 1) hMass = (TH1D*) file0.Get("DijetMassLowPuriVV;1");
    
    if (iCat == 2) hMass = (TH1D*) file0.Get("DijetMassHighPuriWW;1");
@@ -55,13 +66,13 @@
    // if (iCat == 19) hMass = (TH1D*) file0.Get("DijetMassNoPuriqW;1");
    // if (iCat == 20) hMass = (TH1D*) file0.Get("DijetMassNoPuriqZ;1");    
   
-   std::cout<<"Histogram = " << hMass.GetName() << std::endl;
+   std::cout<<"Histogram = " << hMass->GetName() << "  category " << iCat<< std::endl;
    TAxis* Axis =   hMass->GetXaxis();
+   std::cout << hMass->GetEntries() << std::endl;
    for (int i = 1 ; i < hMass->GetNbinsX()+1; i++){
      double N = abs(hMass->GetBinContent(i));
  
-     if (i%10 == 0) cout << "i = " << i << "N = " << N << " binCenter = " << hMass->GetBinCenter(i) << endl;
-     
+     //if (i%10 == 0) cout << "i = " << i << "N = " << N << " binCenter = " << hMass->GetBinCenter(i) << endl;
      mgg = Axis->GetBinCenter(i);
      
      normWeight = N;
