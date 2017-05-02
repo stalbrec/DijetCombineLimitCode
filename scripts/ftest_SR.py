@@ -14,7 +14,7 @@ from heapq import nsmallest
 tdrstyle.setTDRStyle()
 #gStyle.SetOptFit(0) 
 gROOT.SetBatch(True)
-CMS_lumi.lumi_13TeV = "36.8 fb^{-1}"
+CMS_lumi.lumi_13TeV = "35.9 fb^{-1}"
 CMS_lumi.writeExtraText = 1
 CMS_lumi.extraText = "Preliminary"
 CMS_lumi.lumi_sqrtS = "13 TeV" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
@@ -940,19 +940,19 @@ if __name__ == '__main__':
              4509, 4686, 4869, 5058, 5253, 5455, 5663, 5877, 6099, 6328, 6564, 6808]
   
   channels = ["WW",'WZ','ZZ']
-  channels = ['WW']
+  #channels = ['WW']
   fitmax = 7000
   # file for data sideband: Data_VV_qV_SB_Run2016All.root
   # file for QCD pythia 8: QCD_pythia8_VV.root
   
   #infile = "../../ExoDiBosonAnalysis/results/Data_VVdijet_test40GeV_SB.root"
-  infile = "../../ExoDiBosonAnalysis/results/ReRecoData_VVdijet_SB.root"
+  infile = "/shome/dschafer/ExoDiBosonAnalysis/results/ReRecoData_VVdijet.root"
   
   for ch in channels:
     #performFit("input/JetHT_VV.root", "DijetMassHighPuri%s"%ch, len(massBins)-1, massBins, 955, fitmax, "%s category, HP"%ch, "ftest_2016/%sHP"%ch, doSigmaBand = False)
     #performFit("input/JetHT_VV.root", "DijetMassLowPuri%s"%ch , len(massBins)-1, massBins, 955, fitmax, "%s category, LP"%ch, "ftest_2016/%sLP"%ch, doSigmaBand = False)
-    performFit(infile, "DijetMassHighPuri%s"%ch , len(massBins)-1, massBins, 1118, fitmax, "%s category, HPSB"%ch, "%s/%sHP"%(outdir,ch), doSigmaBand = False)
-    #performFit(infile, "DijetMassLowPuri%s"%ch , len(massBins)-1, massBins, 1118, fitmax, "%s category, LP"%ch, "%s/%sLP"%(outdir,ch), doSigmaBand = False)
+    performFit(infile, "DijetMassHighPuri%s"%ch , len(massBins)-1, massBins, 1118, fitmax, "%s category, HP"%ch, "%s/%sHP"%(outdir,ch), doSigmaBand = False)
+    performFit(infile, "DijetMassLowPuri%s"%ch , len(massBins)-1, massBins, 1118, fitmax, "%s category, LP"%ch, "%s/%sLP"%(outdir,ch), doSigmaBand = False)
     
   # sys.stdout = orig_stdout
 

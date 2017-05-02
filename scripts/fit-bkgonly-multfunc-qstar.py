@@ -43,15 +43,15 @@ xsec=[0.01] #pb
 categories = ["qW, high-purity","qW, low-purity","qZ, high-purity","qZ, low-purity"]
 legends=["q*(4 TeV)#rightarrowqW","q*(4 TeV)#rightarrowqW","q*(4 TeV)#rightarrowqZ","q*(4 TeV)#rightarrowqZ"]         
 histos = ["DijetMassHighPuriqW","DijetMassLowPuriqW","DijetMassHighPuriqZ", "DijetMassLowPuriqZ"]
-#histos = ["DijetMassLowPuriqW"]
-lumi = 35867.
+#histos = ["DijetMassLowPuriqZ"]
+lumi = 36814.
 outdir = "/mnt/t3nfs01/data01/shome/dschafer/AnalysisOutput/figures/bkgfit/ReReco2016/"
 # parameters=[4]
 # categories = ["qZ, high-purity"]
 # legends=["q^{*}(2 TeV)#rightarrowqZ"]
 # histos = ["DijetMassHighPuriqZ"]
+alternative_func = "lExp"#"lExp"
 
-#
 ii = -1        
 for h in histos:
     ii += 1
@@ -70,13 +70,7 @@ for h in histos:
       fFitXmax = lower
     if higher > lower:
       fFitXmax = higher
-    maxbintest =0
-    for i in range(0,htmp.GetNbinsX()):
-        ctmp = htmp.GetBinContent(i)
-        if ctmp >0.99999:
-            maxbintest = htmp.GetBinCenter(i) 
-    print maxbintest
-    print lastbin
+      
     print "Last non-zero bin is at x=%f. Closest dijet mass bins are L = %i  H = %i" %(lastbin,lower,higher)
     print "Using x max = %i" %fFitXmax
     
@@ -109,7 +103,62 @@ for h in histos:
     p2 = rt.RooRealVar("p2", "p2",1.03641e+01, -200, 200)
     p3 = rt.RooRealVar("p3", "p3",2.35256e+00, -100., 100.)
     p4 = rt.RooRealVar("p4", "p4",4.17695e-01, -100., 100.)
+    
+    a0= 0
+    a1= 0
+    a2= 0
+    a3= 0
+    a3max=  120.
+    a3min= -120.
+    a0max= 200.
+    a0min= -100.
+    
+    if (h.find("qW") != -1) and h.find("High") != -1:     
+      a0  =  4.27857e+01# 3.45939e+02 
+      a1  = -1.37580e-02#-4.45967e+00 
+      a2  =  7.46099e+00# 1.31413e+00 
+      a3  =  1.78503e+00# 1.91782e+02 
+      a3max = 100.
+      a3min =-1000.
 
+      a0min = -100.
+      a0max = 1000.
+      
+    if (h.find("qZ") != -1) and h.find("High") != -1:     
+      a0  =  3.64825e-05 
+      a1  =  2.78348e+00 
+      a2  =  7.17321e+00 
+      a3  = -9.83737e-01 
+      a3max = 1000.
+      a3min =-1000.
+
+      a0min = -1000.
+      a0max = 1000.
+    if h.find("Low") != -1:
+      a0 =  3.45939e+02
+      a1 = -4.45967e+00
+      a2 =  1.31413e+00
+      a3 =  1.91782e+02
+      a3max=  1000.
+      a3min= -1000.
+      #a0max= 1000.
+      #a0min= -100.
+      
+  
+    
+    
+    
+    p0_alt = rt.RooRealVar("p0_alt", "p0_alt", a0 , a0min , a0max)
+    p1_alt = rt.RooRealVar("p1_alt", "p1_alt", a1, -100. , 100.)
+    p2_alt = rt.RooRealVar("p2_alt", "p2_alt", a2, 0., 50.)
+    p3_alt = rt.RooRealVar("p3_alt", "p3_alt", a3, a3min, a3max)
+    
+    m_lExp = rt.RooRealVar("mean_lExp","mean_lExp",1000.,0.,7000)
+    p1_lExp   = rt.RooRealVar("p1_lExp","p1_lExp",400.,0.,1000.)
+    p2_lExp   = rt.RooRealVar("p2_lExp","p2_lExp",1.,0.,100.)
+   
+        
+    
     mjj = rt.RooRealVar("mjjCMS","Dijet invariant mass (GeV)",len(bins)-1, bins[0], bins[-1])
 
     # bkg_fit = rt.RooGenericPdf("bkg_fitCMS", "pow(1-@0/13000., @1)/pow(@0/13000., @2+@3*log(@0)+@4*pow(log(@0),2))", rt.RooArgList(mjj, p1, p2, p3, p4))
@@ -118,7 +167,13 @@ for h in histos:
     #if ii == 0:  
       #bkg_fit = rt.RooGenericPdf("bkg_fitCMS", "pow(1-@0/13000., @1)/ ( pow(@0/13000., @2+@3*log(@0/13000.)+@4*pow(log(@0/13000.),2)) )", rt.RooArgList(mjj, p1, p2, p3, p4))
 
-
+    bkg_fit_alt = rt.RooGenericPdf("bkg_fit_levelledExp", "exp(-(@0-@1)/(@2+@3*(@0-@1)))" ,rt.RooArgList(mjj,m_lExp,p1_lExp,p2_lExp))
+    
+    if alternative_func.find("alt")!=-1:
+        bkg_fit_alt = rt.RooGenericPdf("bkg_fit_alt","( @1*pow(1-@0/13000 + @4*pow(@0/13000,2),@2) ) / ( pow(@0/13000,@3) )", rt.RooArgList(mjj,p0_alt,p1_alt,p2_alt,p3_alt))
+    
+    
+    
     alpha       = rt.RooRealVar("alpha","alpha",alphas[ii])
     sigfrac     = rt.RooRealVar("sigfrac","sigfrac",sigfracs[ii])
     scalesigma  = rt.RooRealVar("scalesigma","scalesigma",scalesigmas[ii])
@@ -185,6 +240,7 @@ for h in histos:
     
       # for r in range(0,10):
     fr = sumPDF.fitTo(dataset,rt.RooFit.Save())
+    fr2 = bkg_fit_alt.fitTo(dataset,rt.RooFit.Save())
       # fr = sumPDF.chi2FitTo(dataset,currentlist)
  
 
@@ -194,10 +250,18 @@ for h in histos:
     sumPDF.plotOn(frame, rt.RooFit.VisualizeError(fr,1),rt.RooFit.FillColor(rt.kRed-7),rt.RooFit.LineColor(rt.kRed-7),rt.RooFit.Name("fiterr"), rt.RooFit.Binning(mjjbins))
     sumPDF.plotOn(frame,rt.RooFit.LineColor(rt.kRed+1),rt.RooFit.Name("sumPDF"))
     
+    bkg_fit_alt.plotOn(frame, rt.RooFit.VisualizeError(fr2,1),rt.RooFit.FillColor(rt.kBlue-7),rt.RooFit.LineColor(rt.kBlue-7),rt.RooFit.Name("fiterr2"), rt.RooFit.Binning(mjjbins))
+    bkg_fit_alt.plotOn(frame,rt.RooFit.LineColor(rt.kBlue+1),rt.RooFit.Name(alternative_func))
+    
+    
+    
     frame3 = mjj.frame()
     hpull = frame.pullHist("data","sumPDF",True)
     frame3.addPlotable(hpull,"X0 P E1")
-   
+    hpull2 = frame.pullHist("data",alternative_func,True)
+    print hpull2
+    hpull2.SetMarkerColor(rt.kBlue)
+    frame3.addPlotable(hpull2,"X0 P E1")
     
     dataset.plotOn(frame,rt.RooFit.DataError(rt.RooAbsData.Poisson), rt.RooFit.Binning(mjjbins),rt.RooFit.Name("data"),rt.RooFit.XErrorSize(0))
     mjj.setRange("sigRegion",4000*0.8,4000*1.2) ;
@@ -232,9 +296,9 @@ for h in histos:
     frame.SetTitle("")
     frame.Draw()
 
-    legend = rt.TLegend(0.45097293,0.64183362,0.6681766,0.879833)
-    legend2 = rt.TLegend(0.45097293,0.64183362,0.6681766,0.879833)
-    legend.SetTextSize(0.046)
+    legend = rt.TLegend(0.52097293,0.64183362,0.6681766,0.879833)
+    legend2 = rt.TLegend(0.52097293,0.64183362,0.6681766,0.879833)
+    legend.SetTextSize(0.038)
     legend.SetLineColor(0)
     legend.SetShadowColor(0)
     legend.SetLineStyle(1)
@@ -251,17 +315,22 @@ for h in histos:
     legend2.SetFillStyle(0)
     legend2.SetMargin(0.35)
     legend.AddEntry(frame.findObject("data"),"CMS data","lpe")
+    if alternative_func.find("lExp")!=-1:
+        legend.AddEntry(frame.findObject("lExp"),"levelled exponential","l")
+    elif alternative_func.find("alt")!=-1:
+        legend.AddEntry(frame.findObject("alt"),"alt. 4 param. fit","l")
     legend.AddEntry(frame.findObject("sumPDF"),"%i par. background fit"%parameters[ii],"l")
     xsec= scaleToExcluded[ii]*0.01
     legend.AddEntry(frame.findObject("sig"),"%s (#sigma = %.2f pb)"%(legends[ii],xsec),"l")
     legend2.AddEntry("","","")
+    legend2.AddEntry(frame.findObject("fiterr2"),"","f")
     legend2.AddEntry(frame.findObject("fiterr"),"","f")
     legend2.AddEntry("","","")
 
     legend2.Draw("same")
     legend.Draw("same")
 
-    addInfo = rt.TPaveText(0.5010112,0.4166292,0.8502143,0.6123546,"NDC")
+    addInfo = rt.TPaveText(0.6110112,0.4166292,0.8502143,0.6123546,"NDC")
     addInfo.AddText(categories[ii])
     addInfo.AddText("|#eta| #leq 2.5, p_{T} > 200 GeV")
     addInfo.AddText("M_{jj} > 1050 GeV, |#Delta#eta_{jj}| #leq 1.3")
@@ -270,7 +339,7 @@ for h in histos:
     addInfo.SetFillStyle(0)
     addInfo.SetBorderSize(0)
     addInfo.SetTextFont(42)
-    addInfo.SetTextSize(0.050)
+    addInfo.SetTextSize(0.040)
     addInfo.SetTextAlign(12)
     addInfo.Draw()
     CMS_lumi.CMS_lumi(p11_1, iPeriod, iPos)
@@ -304,17 +373,13 @@ for h in histos:
     line = rt.TLine(minVal,0,frame3.GetXaxis().GetXmax(),0)
     line1  = rt.TLine(minVal,1,frame3.GetXaxis().GetXmax(),1)
     line2  = rt.TLine(minVal,-1,frame3.GetXaxis().GetXmax(),-1)
-    line1.SetLineStyle(2)
-    line1.SetLineWidth(2)
-    line2.SetLineStyle(2)
-    line2.SetLineWidth(2)
     line.Draw("same")
     line1.Draw("same")
     line2.Draw("same")
     c1.Update()
 
     print title
-    canvname = "MLBkgFit_%s.pdf"%histos[ii]
+    canvname = "MLBkgFit_%s_%s.pdf"%(histos[ii],alternative_func)
     c1.SaveAs(outdir+canvname)
     c1.SaveAs(outdir+canvname.replace("pdf","C"),"C")
 
