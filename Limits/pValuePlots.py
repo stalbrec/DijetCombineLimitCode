@@ -9,7 +9,7 @@ import CMS_lumi, tdrstyle
 
 tdrstyle.setTDRStyle()
 rt.gStyle.SetOptFit(0) 
-CMS_lumi.lumi_13TeV = "2.6 fb^{-1}"
+CMS_lumi.lumi_13TeV = "35.9 fb^{-1}"
 CMS_lumi.writeExtraText = 1
 CMS_lumi.extraText = "Preliminary"
 CMS_lumi.lumi_sqrtS = "13 TeV" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
@@ -54,6 +54,8 @@ def PlotPValue(filePVALNAME, label):
 
     pvalGraph = rt.TGraph(len(mass), array('d',mass), array('d',pval))
     pvalGraph.GetXaxis().SetLimits(1.1,4.1)
+    if filePVALNAME.find("q")!=-1:
+         pvalGraph.GetXaxis().SetLimits(1.1,6.0)
     
     c1 =rt.TCanvas("c1","",630,600)
     c1.SetLogy()
@@ -96,6 +98,21 @@ def PlotPValue(filePVALNAME, label):
     addInfo.SetTextFont(42)
     addInfo.SetTextSize(0.040)
     addInfo.SetTextAlign(12)
+    signal=""
+    if label.find("BulkWW")!=-1:
+           signal="G_{bulk} #rightarrow WW"
+    if label.find("BulkZZ")!=-1:
+           signal="G_{bulk} #rightarrow ZZ"
+    if label.find("Zprime")!=-1:
+           signal="Z' #rightarrow WW"
+    if label.find("WZ")!=-1:
+           signal="W' #rightarrow WZ"
+    if label.find("qW")!=-1:
+           signal="q* #rightarrow qW"
+    if label.find("qZ")!=-1:
+           signal="q* #rightarrow qZ"
+    
+    addInfo.AddText(signal)
     if(label.find("WW_high_purity")!=-1):addInfo.AddText("WW enriched")
     if(label.find("WZ_high_purity")!=-1):addInfo.AddText("WZ enriched")
     if(label.find("ZZ_high_purity")!=-1):addInfo.AddText("ZZ enriched")
@@ -115,7 +132,7 @@ def PlotPValue(filePVALNAME, label):
     c1.Update()
     
     c1.Update()
-    c1.SaveAs("silverjson/AllSystematics/pvalue/pvalue_%s_wPDF.pdf" %label)
+    c1.SaveAs("pValues/pvalue_%s_wPDF.pdf" %label)
     time.sleep(10)
 
 def PlotMu(muFILENAME, label):
@@ -185,20 +202,26 @@ def PlotMu(muFILENAME, label):
 
 if __name__ == '__main__':
 
-  channels=["RS1WW","RS1ZZ","WZ","qW","qZ","BulkWW","BulkZZ"]
-  channels=["WZ","BulkWW","BulkZZ"]
-  # channels=["WZ"]
+  channels=["ZprimeWW","WZ","qW","qZ","BulkWW","BulkZZ"]
+  #channels=["BulkZZ","WZ","ZprimeWW"]
+  #channels=["WZ","BulkWW","BulkZZ"]
+  #channels=["qW","qZ"]
 
   for chan in channels:
       
     print "chan =",chan
     if "q" in chan:
        cat="qV"
-    elif "Bulk" in chan:
-       cat="WW"
     else:
        cat="VV"
-       
+    
+    qWHPplots="CMS_jj_"+chan+"_13TeV_CMS_jj_qWHP_pvalue.txt"
+    qWLPplots="CMS_jj_"+chan+"_13TeV_CMS_jj_qWLP_pvalue.txt"
+    
+    qZHPplots="CMS_jj_"+chan+"_13TeV_CMS_jj_qZHP_pvalue.txt"
+    qZLPplots="CMS_jj_"+chan+"_13TeV_CMS_jj_qZLP_pvalue.txt"
+    
+    
     WWHPplots="CMS_jj_"+chan+"_13TeV_CMS_jj_WWHP_pvalue.txt"
     WWLPplots="CMS_jj_"+chan+"_13TeV_CMS_jj_WWLP_pvalue.txt"
     
@@ -209,26 +232,32 @@ if __name__ == '__main__':
     ZZLPplots="CMS_jj_"+chan+"_13TeV_CMS_jj_ZZLP_pvalue.txt"
     
     combinedplots_old="CMS_jj_"+chan+"_13TeV_CMS_jj_VV_pvalue.txt"
-    combinedplots_new="CMS_jj_"+chan+"_13TeV_CMS_jj_VVnew_pvalue.txt"
+    combinedplots_new="CMS_jj_"+chan+"_13TeV_CMS_jj_"+cat+"new_pvalue.txt"
     
     # HPnewplots="CMS_jj_"+chan+"_13TeV_CMS_jj_VVHPnew_pvalue.txt"
     # HPoldplots="CMS_jj_"+chan+"_13TeV_CMS_jj_VVHP_pvalue.txt"
     # LPnewplots="CMS_jj_"+chan+"_13TeV_CMS_jj_VVLPnew_pvalue.txt"
     # LPoldplots="CMS_jj_"+chan+"_13TeV_CMS_jj_VVLP_pvalue.txt"
 
-    PlotPValue(WWHPplots,chan+"inWW_high_purity")
-    PlotPValue(WWLPplots,chan+"inWW_low_purity")
+    #PlotPValue(WWHPplots,chan+"inWW_high_purity")
+    #PlotPValue(WWLPplots,chan+"inWW_low_purity")
 
-    PlotPValue(WZHPplots,chan+"inWZ_high_purity")
-    PlotPValue(WZLPplots,chan+"inWZ_low_purity")
+    #PlotPValue(WZHPplots,chan+"inWZ_high_purity")
+    #PlotPValue(WZLPplots,chan+"inWZ_low_purity")
 
-    PlotPValue(ZZHPplots,chan+"inZZ_high_purity")
-    PlotPValue(ZZLPplots,chan+"inZZ_low_purity")
+    #PlotPValue(ZZHPplots,chan+"inZZ_high_purity")
+    #PlotPValue(ZZLPplots,chan+"inZZ_low_purity")
+    
+    #PlotPValue(qZHPplots,chan+"inqZ_high_purity")
+    #PlotPValue(qZLPplots,chan+"inqZ_low_purity")
+    
+    #PlotPValue(qWHPplots,chan+"inqW_high_purity")
+    #PlotPValue(qWLPplots,chan+"inqW_low_purity")
 
-    PlotPValue(HPnewplots,chan+"inVVnew_high_purity")
-    PlotPValue(LPnewplots,chan+"inVVnew_low_purity")
+    #PlotPValue(HPnewplots,chan+"inVVnew_high_purity")
+    #PlotPValue(LPnewplots,chan+"inVVnew_low_purity")
     # PlotPValue(HPoldplots,chan+"inVVold_high_purity")
     # PlotPValue(LPoldplots,chan+"inVVold_low_purity")
 
-    PlotPValue(combinedplots_old,chan+"in_combined_old")
+    #PlotPValue(combinedplots_old,chan+"in_combined_old")
     PlotPValue(combinedplots_new,chan+"in_combined_new")
