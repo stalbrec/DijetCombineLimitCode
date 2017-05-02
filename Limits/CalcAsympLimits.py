@@ -26,8 +26,8 @@ rmax=200
 # rmax= 250
 
 channels=["RS1WW","RS1ZZ","WZ","qW","qZ","BulkWW","BulkZZ"]
-channels=["BulkWW","BulkZZ","WZ","ZprimeWW"]
-channels=["qW"]
+channels=["BulkWW","BulkZZ"]#,"WZ","ZprimeWW"]
+#channels=["qW"]
 fullToys=False
 postfix =""
 freezeCMD="--freezeNuisances CMS_bkg_fit_slope1_CMS_jj_ZZHP_13TeV"
@@ -39,7 +39,7 @@ for chan in channels:
     bins = ["CMS_jj_qVnew","CMS_jj_qWHP","CMS_jj_qZHP","CMS_jj_qWLP","CMS_jj_qZLP"]
     bins = ["CMS_jj_qVHPnew"]
   else:
-    masses =[m*100 for m in range(11,40+1)]
+    masses =[m*100 for m in range(12,45+1)]
     bins = ["CMS_jj_WWHP","CMS_jj_WZHP","CMS_jj_ZZHP","CMS_jj_WWLP","CMS_jj_WZLP","CMS_jj_ZZLP","CMS_jj_VVHPnew","CMS_jj_VVLPnew","CMS_jj_VVnew"]
     bins = ["CMS_jj_ZZLP"]
     
@@ -64,5 +64,5 @@ for chan in channels:
         command = "qsub -q short.q Limits/submitAsympLimits.sh %i %s %i %s %f %s %s %s"%( fullToys,chan,mass,bin,point, str(rmin), str(rmax), postfix )
         print command
         print "combine datacards/%sCMS_jj_%s_%i_13TeV_%s.txt -M Asymptotic -v2 -m %i -n %s%s --rMin %s --rMax %s >> myout.txt 2>>myerr.txt"%(postfix,chan,mass,bin,mass,chan,bin, str(rmin), str(rmax))
-        os.system(command)
+        #os.system(command)
         # time.sleep(2)

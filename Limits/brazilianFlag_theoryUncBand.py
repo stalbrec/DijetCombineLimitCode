@@ -9,9 +9,10 @@ import array
 import sys
 import time
 import random
+import numpy as np
 
 tdrstyle.setTDRStyle()
-CMS_lumi.lumi_13TeV = "12.9 fb^{-1}"
+CMS_lumi.lumi_13TeV = "35.9 fb^{-1}"
 CMS_lumi.writeExtraText = 1
 CMS_lumi.extraText = "Preliminary"
 CMS_lumi.lumi_sqrtS = "13 TeV" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
@@ -19,14 +20,200 @@ iPos = 11
 if( iPos==0 ): CMS_lumi.relPosX = 0.12
 iPeriod=4
 
-def Plot(files, label, obs):
+def getRoot(mass,gtheoryUP,y):
+    #print " y "+str(y)+" up "+str(gtheoryUP.Eval(mass))
+    UP =2*y
+    DOWN = 2*y
+    isu = mass+0.5*mass
+    isd = mass-0.5*mass
+    ism = mass
+    NMAX = 100000;
+    N =0
+    resultUP = 0
+    while ( N <= NMAX): # limit iterations to prevent infinite loop
+        ism = (isu + isd)/2 # new midpoint
+        fc = rt.TMath.Abs(gtheoryUP.Eval(ism)-y)
+        #print fc
+        #print ism
+        #print 
+        if fc < 0.00000001 or rt.TMath.Abs((isd - isu)/2) <= 0.00000001: # solution found
+            resultUP = ism
+            break    
+        N = N + 1 # increment step counter
+        fism = gtheoryUP.Eval(ism)-y
+        fisu = gtheoryUP.Eval(isu)-y
+        #print str(fism)+"    "+str(fisu)
+        if np.sign(fism) == np.sign(fisu):
+            isu = ism 
+        else:
+            isd = ism # new interval
+    return resultUP
+
+def getIntersectionOfObservedLimitTheoryLine(mass,g,f):
+    isu = mass*(1.5)
+    isd = mass*(0.5)
+    ism = mass
+    NMAX = 100000;
+    N =0
+    resultUP = 0
+    while ( N <= NMAX): # limit iterations to prevent infinite loop
+        ism = (isu + isd)/2 # new midpoint
+        fc = rt.TMath.Abs(f.Eval(ism)-g.Eval(ism))
+        #print fc
+        #print ism
+        #print 
+        if fc < 0.00000001 or rt.TMath.Abs((isd - isu)/2) <= 0.00000001: # solution found
+            resultUP = ism
+            break    
+        N = N + 1 # increment step counter
+        fism = f.Eval(ism)-g.Eval(ism)
+        fisu = f.Eval(isu)-g.Eval(isu)
+        #print str(fism)+"    "+str(fisu)
+        if np.sign(fism) == np.sign(fisu):
+            isu = ism 
+        else:
+            isd = ism # new interval
+    return resultUP
+
+
+    
+
+
+def printTheoryUncAtPoint(mass,gtheory,gtheoryUP,gtheoryDOWN):
+    resultUP = getRoot(mass,gtheoryUP,gtheory.Eval(mass))
+    resultDOWN = getRoot(mass,gtheoryDOWN,gtheory.Eval(mass))
+    print "theory uncertainty at mass "+str(round(mass,2))
+    print "up : "+str(round(resultUP,2))+" down : "+str(round(resultDOWN,2))
+    print str(round(mass,2))+" + "+str(round(resultUP-mass,2))+" - "+ str(round(mass - resultDOWN,2))+" TeV"
+
+
+def plotGraph(modelname,channel,radmasses,color,obs=False):
+    efficiencies={}
+    rad = []
+    limits = []
+    filenames =[]
+    for m in radmasses:
+        filename = "newSF/CMS_jj_"+str(int(m*1000))+"_"+modelname+"_13TeV_CMS_jj_"+channel+"_asymptoticCLs_new.root"
+        #filename = "withoutPDFandScale/CMS_jj_"+str(int(m*1000))+"_"+modelname+"_13TeV_CMS_jj_"+channel+"_asymptoticCLs_new.root"
+        filenames.append(filename)
+        if  modelname.find("WZ")!=-1:
+            efficiencies[m]= 0.01/((0.6991*0.6760))
+        if modelname.find("BulkZZ")!=-1:
+            efficiencies[m]=0.01/((0.6991*0.6991))
+        if modelname.find("BulkZZ")==-1 and modelname.find("WZ")==-1:
+            efficiencies[m]=0.01
+        else:
+            efficiencies[m]=0.01
+
+    for onefile in filenames:
+        print "using file " + onefile
+        file = rt.TFile(onefile)
+        tree = file.Get("limit")
+        limits = []
+        for quantile in tree:
+            limits.append(tree.limit)
+            print ">>>   %.2f" % limits[-1]
+
+        rad.append(limits[:6])
+    
+
+    print limits
+    print rad
+    mg = rt.TMultiGraph()
+    mg.SetTitle("X -> ZZ")
+    x = []
+    yobs = []
+    y2up = []
+    y1up = []
+    y1down = []
+    y2down = []
+    ymean = []
+
+    for i in range(0,len(efficiencies)):
+        y2up.append(rad[i][0]*efficiencies[radmasses[i]])
+        y1up.append(rad[i][1]*efficiencies[radmasses[i]])
+        ymean.append(rad[i][2]*efficiencies[radmasses[i]])
+        y1down.append(rad[i][3]*efficiencies[radmasses[i]])
+        y2down.append(rad[i][4]*efficiencies[radmasses[i]])
+        yobs.append(rad[i][5]*efficiencies[radmasses[i]])
+     
+    grobs = rt.TGraphErrors(1)
+    grobs.SetMarkerStyle(8)
+    grobs.SetMarkerSize(0.8)
+    grobs.SetLineColor(kRed)
+    grobs.SetMarkerColor(kRed)
+    grobs.SetLineWidth(2)
+    gr2up = rt.TGraphErrors(1)
+    gr2up.SetLineColor(color+1)
+    gr1up = rt.TGraphErrors(1)
+    gr1up.SetLineColor(color+2)
+    grmean = rt.TGraphErrors(1)
+    grmean.SetLineColor(color+4)
+    grmean.SetLineWidth(2)
+    grmean.SetLineStyle(3)
+    gr1down = rt.TGraphErrors(1)
+    gr1down.SetLineColor(color+2)
+    gr2down = rt.TGraphErrors(1)
+    gr2down.SetLineColor(color+1)
+    
+    grmean.SetLineWidth(2)
+    gr1down.SetLineWidth(2)
+    gr1up.SetLineWidth(2)
+    gr2down.SetLineWidth(2)
+    gr2up.SetLineWidth(2)
+    print len(rad)
+    print len(radmasses)
+    print len(y2up)
+    for j in range(0,len(radmasses)):
+        grobs.SetPoint(j, radmasses[j], yobs[j])
+        gr2up.SetPoint(j, radmasses[j], y2up[j])
+        gr1up.SetPoint(j, radmasses[j], y1up[j])
+        grmean.SetPoint(j, radmasses[j], ymean[j])
+        gr1down.SetPoint(j, radmasses[j], y1down[j])    
+        gr2down.SetPoint(j, radmasses[j], y2down[j])
+       
+    
+    #mg.Add(gr2up)#.Draw("same")
+    #mg.Add(gr1up)#.Draw("same")
+    #mg.Add(grmean,"L")#.Draw("same,AC*")
+    #mg.Add(gr1down)#.Draw("same,AC*")
+    #mg.Add(gr2down)#.Draw("same,AC*")
+    #if obs: mg.Add(grobs,"L")#.Draw("AC*")
+    if obs:
+        return [grobs,grmean,gr1up,gr2up,gr1down,gr2down]
+    else:
+       return [grmean,gr1up,gr2up,gr1down,gr2down] 
+
+def PlotTheoryLine(label):
+    filenameTH = "/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/Limits/%s_xSecUnc.root"%label.split("_")[0]
+    thFile       = rt.TFile.Open(filenameTH,'READ')   
+    print "Opening file " ,thFile.GetName()
+    gtheory      = thFile.Get("gtheory")
+    gtheoryUP    = thFile.Get("gtheoryUP")
+    gtheoryDOWN  = thFile.Get("gtheoryDOWN")
+    gtheorySHADE = thFile.Get("grshade")
+    gtheory     .SetName("%s_gtheory"    %label.split("_")[0] )
+    gtheoryUP   .SetName("%s_gtheoryUP"  %label.split("_")[0] )
+    gtheoryDOWN .SetName("%s_gtheoryDOWN"%label.split("_")[0] )
+    gtheorySHADE.SetName("%s_grshade"    %label.split("_")[0] )
+    gtheorySHADE.SetLineColor(0)
+    gtheoryUP.SetLineWidth(1)
+    gtheoryDOWN.SetLineWidth(1)
+    return [gtheory, gtheorySHADE,gtheoryUP,gtheoryDOWN]
+    
+
+def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
     
     radmasses = []
     for f in files:
       if not postfix:
         radmasses.append(float(f.replace("CMS_jj_","").split("_")[0])/1000.)
       else:
-        radmasses.append(float(f.replace("CMS_jj_","").split("_")[1])/1000.)  
+        stmp = f.replace("CMS_jj_","").split("_")[0]
+        print stmp
+        stmp2 = stmp.split("/")[1]
+        print stmp2
+        radmasses.append(float(stmp2)/1000.) 
     #print radmasses
 
     efficiencies={}
@@ -53,28 +240,42 @@ def Plot(files, label, obs):
         efficiencies[mass]=0.01
          
 
-    fChain = []
-    for onefile in files:
-        # if onefile.find("2500")!=-1 or onefile.find("2500")!=-1: continue
-        fileIN = rt.TFile.Open(onefile)
-        fChain.append(fileIN.Get("limit;1")) 
+    #fChain = []
+    #for onefile in files:
+        ## if onefile.find("2500")!=-1 or onefile.find("2500")!=-1: continue
+        #fileIN = rt.TFile.Open(onefile)
+        #fChain.append(fileIN.Get("limit;1")) 
 
-        rt.gROOT.ProcessLine("struct limit_t {Double_t limit;};")
-        from ROOT import limit_t
-        limit_branch = limit_t()
+        #rt.gROOT.ProcessLine("struct limit_t {Double_t limit;};")
+        #from ROOT import limit_t
+        #limit_branch = limit_t()
 
-        for j in range(0,len(fChain)):
-            chain = fChain[j]
-            chain.SetBranchAddress("limit", rt.AddressOf(limit_branch,'limit'))
+        #for j in range(0,len(fChain)):
+            #chain = fChain[j]
+            #chain.SetBranchAddress("limit", rt.AddressOf(limit_branch,'limit'))
 
+    #rad = []
+    #for j in range(0,len(fChain)):
+        #chain = fChain[j]
+        #thisrad = []
+        #for  i in range(0,6):
+          #chain.GetTree().GetEntry(i)
+          #thisrad.append(limit_branch.limit)
+        #rad.append(thisrad)
+        
+        
     rad = []
-    for j in range(0,len(fChain)):
-        chain = fChain[j]
-        thisrad = []
-        for  i in range(0,6):
-          chain.GetTree().GetEntry(i)
-          thisrad.append(limit_branch.limit)
-        rad.append(thisrad)
+    for onefile in files:
+        print "using file " + onefile
+        file = rt.TFile(onefile)
+        tree = file.Get("limit")
+        limits = []
+        for quantile in tree:
+            limits.append(tree.limit)
+            print ">>>   %.2f" % limits[-1]
+
+        rad.append(limits[:6])
+
 
 
     mg = rt.TMultiGraph()
@@ -87,15 +288,15 @@ def Plot(files, label, obs):
     y2down = []
     ymean = []
 
-    for i in range(0,len(fChain)):
+    for i in range(0,len(efficiencies)):
 
         
-        y2up.append(rad[i][0]*efficiencies[radmasses[j]])
-        y1up.append(rad[i][1]*efficiencies[radmasses[j]])
-        ymean.append(rad[i][2]*efficiencies[radmasses[j]])
-        y1down.append(rad[i][3]*efficiencies[radmasses[j]])
-        y2down.append(rad[i][4]*efficiencies[radmasses[j]])
-        yobs.append(rad[i][5]*efficiencies[radmasses[j]])
+        y2up.append(rad[i][0]*efficiencies[radmasses[i]])
+        y1up.append(rad[i][1]*efficiencies[radmasses[i]])
+        ymean.append(rad[i][2]*efficiencies[radmasses[i]])
+        y1down.append(rad[i][3]*efficiencies[radmasses[i]])
+        y2down.append(rad[i][4]*efficiencies[radmasses[i]])
+        yobs.append(rad[i][5]*efficiencies[radmasses[i]])
      
     grobs = rt.TGraphErrors(1)
     grobs.SetMarkerStyle(8)
@@ -115,7 +316,7 @@ def Plot(files, label, obs):
     gr2down = rt.TGraphErrors(1)
     gr2down.SetMarkerColor(0)
   
-    for j in range(0,len(fChain)):
+    for j in range(0,len(radmasses)):
         grobs.SetPoint(j, radmasses[j], yobs[j])
         gr2up.SetPoint(j, radmasses[j], y2up[j])
         gr1up.SetPoint(j, radmasses[j], y1up[j])
@@ -193,13 +394,16 @@ def Plot(files, label, obs):
     if "Bulk" in label.split("_")[0]:
         frame.GetXaxis().SetTitle("M_{G_{Bulk}} (TeV)")
         resonance="G_{Bulk}"
+    if label.find("BulkWW")!=-1:
+        resonance = "G_{Bulk}/Z'"
+        frame.GetXaxis().SetTitle("M_{G_{Bulk}/Z'} (TeV)")
     if "WZ" in label.split("_")[0]:
         resonance="W'"
         frame.GetXaxis().SetTitle("M_{W'} (TeV)")
     if "ZprimeWW" in label.split("_")[0]:
         resonance="Z'"
         frame.GetXaxis().SetTitle("M_{Z'} (TeV)")
-    frame.GetYaxis().SetTitle("#sigma_{95%} #times BR("+resonance+" #rightarrow "+label.split("_")[0].replace("RS1","").replace("Bulk","").replace("Zprime","")+") [pb]")
+    frame.GetYaxis().SetTitle("#sigma_{95%} #times BR("+resonance+" #rightarrow "+label.split("_")[0].replace("RS1","").replace("Bulk","").replace("Zprime","")+") (pb)")
 
     
 
@@ -212,7 +416,7 @@ def Plot(files, label, obs):
         
 
     # histo to shade
-    n=len(fChain)
+    n=len(radmasses)
 
     grgreen = rt.TGraph(2*n)
     for i in range(0,n):
@@ -237,6 +441,7 @@ def Plot(files, label, obs):
 
     grmean.Draw("L")
     if obs: grobs.Draw("LPsame")
+    
 
     gtheory = rt.TGraphErrors(1)
     gtheory.SetLineColor(rt.kRed)
@@ -252,7 +457,7 @@ def Plot(files, label, obs):
     gtheorySHADE.SetLineWidth(3)
     
     
-    filenameTH = "/mnt/t3nfs01/data01/shome/thaarres/EXOVVAnalysisRunII/LimitCode/CMSSW_7_1_5/src/DijetCombineLimitCode/Limits/%s_xSecUnc.root"%label.split("_")[0]
+    filenameTH = "/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/Limits/%s_xSecUnc.root"%label.split("_")[0]
     thFile       = rt.TFile.Open(filenameTH,'READ')   
     print "Opening file " ,thFile.GetName()
     gtheory      = thFile.Get("gtheory")
@@ -268,7 +473,22 @@ def Plot(files, label, obs):
     gtheoryDOWN.SetLineColor(rt.kRed)
     gtheoryUP.SetLineWidth(1)
     gtheoryDOWN.SetLineWidth(1)
-
+    
+    print "max cross section (observed limit ) : " +str(round(rt.TMath.MaxElement(n,grobs.GetY()),5))+ " pb"
+    print "min cross section (observed limit ) : " +str(round(rt.TMath.MinElement(n,grobs.GetY()),5))+ " pb"
+    if label.find("Zprime")!=-1:
+        root = getIntersectionOfObservedLimitTheoryLine(2.6,gtheory,grobs)
+        printTheoryUncAtPoint(root,gtheory,gtheoryUP,gtheoryDOWN)
+    if label.find("WZ")!=-1:
+        root = getIntersectionOfObservedLimitTheoryLine(2.6,gtheory,grobs)
+        printTheoryUncAtPoint(root,gtheory,gtheoryUP,gtheoryDOWN)
+    if label.find("qZ")!=-1:
+        root = getIntersectionOfObservedLimitTheoryLine(4.5,gtheory,grobs)
+        printTheoryUncAtPoint(root,gtheory,gtheoryUP,gtheoryDOWN)
+    if label.find("qW")!=-1:
+        root = getIntersectionOfObservedLimitTheoryLine(4.6,gtheory,grobs)
+        printTheoryUncAtPoint(root,gtheory,gtheoryUP,gtheoryDOWN)
+    
     mg.Add(gtheory,"L")
     mg.Add(gtheoryUP,"L")
     mg.Add(gtheoryDOWN,"L")
@@ -277,6 +497,46 @@ def Plot(files, label, obs):
     # gtheoryUP.Draw("L")
 #     gtheoryDOWN.Draw("L")
     gtheorySHADE.Draw("F")
+   
+    
+    if CompareLimits:
+        modelname = plotExpLimitRatio
+        channel   = "VVnew"
+        if combinedplots[0].find("WWHP")!=-1:
+            channel = "WWHP"
+        if combinedplots[0].find("WZHP")!=-1:
+            channel = "WZHP"
+        if combinedplots[0].find("ZZHP")!=-1:
+            channel = "ZZHP"
+        if combinedplots[0].find("WWLP")!=-1:
+            channel = "WWLP"
+        if combinedplots[0].find("WZLP")!=-1:
+            channel = "WZLP"
+        if combinedplots[0].find("ZZLP")!=-1:
+                channel = "ZZLP"
+        if combinedplots[0].find("qW")!=-1:
+            modelname = "altqW"
+            channel   = "qVnew"
+            if combinedplots[0].find("qWHP")!=-1:
+                channel   = "qWHP"
+            if combinedplots[0].find("qWLP")!=-1:
+                channel   = "qWLP"
+            if combinedplots[0].find("qZHP")!=-1:
+                channel   = "qZHP"
+            if combinedplots[0].find("qZLP")!=-1:
+                channel   = "qZLP"
+            
+       
+        
+        
+       
+        color = 5
+        cgraphs = plotGraph(modelname,channel,radmasses,color,obs)
+        for g in cgraphs:
+            print g
+            #g.SetLineColor(kRed)
+            g.Draw("Lsame")
+    
     
     if "qZ" in label.split("_")[0]:
       ltheory="#sigma_{TH}#timesBR(q*#rightarrowqZ)"
@@ -325,11 +585,25 @@ def Plot(files, label, obs):
     leg2.AddEntry(grmean, " ", "L")
     leg2.AddEntry(gtheorySHADE, " ", "F")
 
-
+    if label.find("BulkWW")!=-1:
+        gt2 = PlotTheoryLine("ZprimeWW")
+        gt2[0].SetLineColor(rt.kBlue)
+        gt2[1].SetLineColor(0)
+        gt2[1].SetFillColor(rt.kBlue-2)
+        gt2[0].Draw("L")
+        gt2[1].Draw("F")
+        ltheory2 = "#sigma_{TH}#timesBR(Z'#rightarrowWW) HVT_{B}"
+        leg.AddEntry(gt2[0],ltheory2,"L")
+        leg2.AddEntry(gt2[1]," ","F")
 
     
     # addInfo = rt.TPaveText(0.548995,0.1830769,0.9346734,0.2897203,"NDC")
     addInfo = rt.TPaveText(0.6946309,0.5437063,0.795302,0.6363636,"NDC")
+    addNarrow = rt.TPaveText(0.9,0.02,0.64,0.3,"NDC")
+    if label.find("qW")!=-1 or label.find("qZ")!=-1 or label.find("Zprime")!=-1 or label.find("WZ_")!=-1:
+        addNarrow = rt.TPaveText(0.15,0.02,0.64,0.3,"NDC")
+    if label.find("BulkWW")!=-1:
+        addNarrow = rt.TPaveText(0.4,0.02,0.64,0.3,"NDC")
     if (label.find("new")!=-1) and label.find("qW")!=-1 or label.find("qZ")!=-1:addInfo = rt.TPaveText(0.7846309,0.5437063,0.825302,0.6363636,"NDC")
     addInfo.SetFillColor(0)
     addInfo.SetLineColor(0)
@@ -339,6 +613,15 @@ def Plot(files, label, obs):
     addInfo.SetTextSize(0.040)
     addInfo.SetTextAlign(12)
     
+    addNarrow.SetFillColor(0)
+    addNarrow.SetLineColor(0)
+    #addNarrow.SetTextColor(kRed)
+    addNarrow.SetFillStyle(0)
+    addNarrow.SetBorderSize(0)
+    addNarrow.SetTextFont(42)
+    addNarrow.SetTextSize(0.035)
+    addNarrow.SetTextAlign(12)
+    addNarrow.AddText("narrow width approximation")
   
     # addInfo.AddText("Pruned mass sideband")
     if(label.find("HP")!=-1):
@@ -377,6 +660,7 @@ def Plot(files, label, obs):
         addInfo.AddText("HP+LP")
       
     addInfo.Draw()
+    addNarrow.Draw()
     c1.Update() 
     frame = c1.GetFrame()
     frame.Draw()
@@ -394,9 +678,56 @@ def Plot(files, label, obs):
     leg.Draw()
     leg2.Draw("same")
     
-    fname = "withoutPDFandScale/brazilianFlag_%s_13TeV.pdf" %label
+    #========================= print observed limits for some mass points ==========================
+    
+    print " observed limit for M=1500 GeV "+str(grobs.Eval(1.5))
+    print " observed limit for M=2000 GeV "+str(grobs.Eval(2.0))
+    print " observed limit for M=3000 GeV "+str(grobs.Eval(3.0))
+    print " observed limit for M=3500 GeV "+str(grobs.Eval(3.5))
+    
+    
+    #===============================================================================================
+    
+    fname = postfix+"brazilianFlag_%s_13TeV.pdf" %label
     c1.SaveAs(fname)
     c1.SaveAs(fname.replace(".pdf" ,".C"  ))
+    
+    if plotExpLimitRatio != '':     
+        yexp1 = grmean.GetY()
+        if obs == True:
+           yexp2 = cgraphs[1].GetY()
+        else:
+           yexp2 = cgraphs[0].GetY()
+        
+        if obs:
+            yexp2 = cgraphs[1].GetY()
+        x = grmean.GetX()
+        print x
+        print yexp1
+        print yexp2
+        print yexp1[0]
+        y = []
+        n = grmean.GetN()
+        gratio = TGraph()
+        for i in range(0,n):
+            #y.append((yexp2[i]/yexp1[i]))
+            y.append( (1-yexp2[i]/yexp1[i]))
+            print y[i]
+            gratio.SetPoint(i,x[i],y[i])
+        print y
+        gratio.SetMaximum(0.5)
+        gratio.SetMinimum(-0.5)
+        gratio.GetXaxis().SetTitle("m_{jj} (TeV)")
+        gratio.GetYaxis().SetTitle("(1- exp. limit alt. func./ exp. limit)")
+        gratio.SetMarkerStyle(24)
+        gratio.SetMarkerColor(kBlue)
+        cratio = TCanvas("cratio","cratio",400,400)
+        gratio.Draw("AP")
+        addInfo2 = addText(label)
+        addInfo2.Draw()
+        time.sleep(5)
+        cratio.SaveAs("testratio_"+label+".pdf")
+        
     
     # del c1
   #   del leg
@@ -413,16 +744,72 @@ def Plot(files, label, obs):
     
     time.sleep(5)
     
-if __name__ == '__main__':
-  postfix = ""
-
-  channels=["ZprimeWW","WZ","BulkWW","BulkZZ"]
-  # channels=["BulkZZ"]
-  for chan in channels:
-    masses =[m*100 for m in range(11,42+1)]
+def addText(label):
+    bla = rt.TPaveText(0.9,0.8,0.6,0.7,"NDC")
+    bla.SetFillColor(0)
+    bla.SetLineColor(0)
+    bla.SetFillStyle(0)
+    bla.SetBorderSize(0)
+    bla.SetTextFont(42)
+    bla.SetTextSize(0.040)
+    bla.SetTextAlign(12)
+    if label.find("BulkWW")!=-1:
+        bla.AddText("Bulk Graviton to WW")
+    if label.find("BulkZZ")!=-1:
+        bla.AddText("Bulk Graviton to ZZ") 
+    if label.find("WZ_")!=-1:
+        bla.AddText("W' to WZ")
+    if label.find("Zprime")!=-1:
+        bla.AddText("Z' to WW")
+    if label.find("qW")!=-1:
+        bla.AddText("q* to qW")
+    if label.find("qZ")!=-1:
+        bla.AddText("q* to qZ") 
+    if label.find("WWLP")!=-1:
+        bla.AddText("WW LP")
+    if label.find("ZZ LP")!=-1:
+        bla.AddText("ZZ LP") 
+    if label.find("WZLP")!=-1:
+        bla.AddText("WZ LP")
+    if label.find("WWHP")!=-1:
+        bla.AddText("WW HP")
+    if label.find("ZZ HP")!=-1:
+        bla.AddText("ZZ HP") 
+    if label.find("WZHP")!=-1:
+        bla.AddText("WZ HP")
+    if label.find("VVnew")!=-1:
+        bla.AddText("WW + WZ + ZZ")
+        bla.AddText("HP + LP")
+    if label.find("qWLP")!=-1:
+        bla.AddText("qW LP")
+    if label.find("qZ LP")!=-1:
+        bla.AddText("qZ LP") 
+    if label.find("qWHP")!=-1:
+        bla.AddText("qW HP")
+    if label.find("qZ HP")!=-1:
+        bla.AddText("qZ HP") 
+    if label.find("qVnew")!=-1:
+        bla.AddText("qW + qZ")
+        bla.AddText("HP + LP")
+    return bla
     
-    if chan.find("BulkZZ") != -1: masses =[m*100 for m in range(11,40+1)]
-    if chan.find("q") != -1: masses =[m*100 for m in range(12,62+1)]
+        
+    
+    
+if __name__ == '__main__':
+  postfix = "newSF/"
+
+  channels=["WZ","BulkWW","BulkZZ"]#,"qW","qZ"]
+  channels=["BulkWW"]
+  region = "VVnew"
+  CompareLimits = False #True
+  plotExpLimitRatio = ""
+  
+  for chan in channels:
+    masses =[m*100 for m in range(12,41+1)]
+    
+    #if chan.find("BulkZZ") != -1: masses =[m*100 for m in range(11,40+1)]
+    if chan.find("q") != -1: masses =[m*100 for m in range(12,60+1)]
     # if chan.find("qZHPplots") != -1:
     # masses =[1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000,2100 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000, 3100, 3200, 3300, 3400, 3500, 3600, 3700, 3800, 3900, 4000, 4100, 4200, 4300, 4400, 4500, 4600, 4700, 4800, 4900, 5000, 5100, 5200, 5300, 5400, 5500, 5600, 5700, 5800, 5900, 6000, 6100, 6200]
 
@@ -445,27 +832,19 @@ if __name__ == '__main__':
     qZLPplots=[]
     combinedplots_qV=[]
     
-    for mass in masses: 
+    for mass in masses:
+       if mass == 5500:
+            continue;
        # HPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_VVHPnew_asymptoticCLs.root"]
 #        LPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_VVLPnew_asymptoticCLs.root"]
-       combinedplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_VVnew_asymptoticCLs.root"]
-       # combinedplots_old+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_VV_asymptoticCLs.root"]
-  #      WWHPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_WWHP_asymptoticCLs.root"]
-  #      WZHPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_WZHP_asymptoticCLs.root"]
-  #      ZZHPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_ZZHP_asymptoticCLs.root"]
-  #      WWLPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_WWLP_asymptoticCLs.root"]
-  #      WZLPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_WZLP_asymptoticCLs.root"]
-  #      ZZLPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_ZZLP_asymptoticCLs.root"]
-  #
-  #      qVHPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_qVHPnew_asymptoticCLs.root"]
-  #      qVLPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_qVLPnew_asymptoticCLs.root"]
-  #      qWHPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_qWHP_asymptoticCLs.root"]
-  #      qZHPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_qZHP_asymptoticCLs.root"]
-  #      qWLPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_qWLP_asymptoticCLs.root"]
-  #      qZLPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_qZLP_asymptoticCLs.root"]
-  #      combinedplots_qV+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_qVnew_asymptoticCLs.root"]
-       
- 
+       if chan.find("q")!=-1:
+            #combinedplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_qVnew_asymptoticCLs_new.root"]
+            combinedplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_"+region+"_asymptoticCLs_new.root"]
+       else:
+           combinedplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_"+region+"_asymptoticCLs_new.root"]
+           #combinedplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_VVnew_asymptoticCLs_new.root"]
+      
+      
     # Plot(WWHPplots,chan+"_WWHP", obs=True)
 #     Plot(WWLPplots,chan+"_WWLP", obs=True)
 #     Plot(WZHPplots,chan+"_WZHP", obs=True)
@@ -474,7 +853,9 @@ if __name__ == '__main__':
 #     Plot(ZZLPplots,chan+"_ZZLP", obs=True)
     # Plot(LPplots,chan+"_VVLP_new_combined_purity", obs=True)
     # Plot(HPplots,chan+"_VVHP_new_combined_purity", obs=True)
-    Plot(combinedplots,chan+"_new_combined", obs=True)
+   
+    Plot(combinedplots,chan+"_"+region+"_new_combined", obs=True,CompareLimits=False,plotExpLimitRatio="")  
+    #Plot(combinedplots,chan+"_VVnew_alt4partest_new_combined", obs=True,CompareLimits=True,plotExpLimitRatio="altBulkWW")
 
     
     

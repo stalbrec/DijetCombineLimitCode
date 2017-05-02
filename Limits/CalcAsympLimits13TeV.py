@@ -20,8 +20,8 @@ gStyle.SetLabelSize(0.05, "XYZ")
 gStyle.SetNdivisions(510, "XYZ")
 gStyle.SetLegendBorderSize(0)
 
-channels=["RS1WW","RS1ZZ","WZ","qW","qZ","BulkWW","BulkZZ"]
-channels=["BulkWW","BulkZZ","WZ","ZprimeWW"]
+channels=["qW","qZ"]#,"BulkWW","BulkZZ"]
+channels=["altqW"]#,"BulkZZ","WZ","ZprimeWW"]
 fullToys=False
 
 freezeCMD="--freezeNuisances CMS_bkg_fit_slope1_CMS_jj_ZZHP_13TeV"
@@ -30,15 +30,18 @@ for chan in channels:
     print "chan =",chan
 
     if "q" in chan:
-       masses =[m*100 for m in range(10,60+1)]
-       bins=["CMS_jj_qVHP","CMS_jj_qVLP","CMS_jj_qV"]
+       masses =[m*100 for m in range(46,60+1)]
+       #bins=["CMS_jj_qVHP","CMS_jj_qVLP","CMS_jj_qV"]
+       bins=["CMS_jj_qWHP","CMS_jj_qWLP","CMS_jj_qW","CMS_jj_qZHP","CMS_jj_qZLP","CMS_jj_qZ","CMS_jj_qVHPnew","CMS_jj_qVLPnew"]
+       bins=["CMS_jj_qWHP"]
     else:
-       masses =[m*100 for m in range(12,40+1)]
+       masses =[m*100 for m in range(12,45+1)]
        # masses=[4000]
        # bins=["CMS_jj_VVnew"]
-       bins = ["CMS_jj_WWHP","CMS_jj_WZHP","CMS_jj_ZZHP","CMS_jj_WWLP","CMS_jj_WZLP","CMS_jj_ZZLP","CMS_jj_VVHPnew","CMS_jj_VVLPnew","CMS_jj_VVnew",]
-       bins = ["CMS_jj_WWHP","CMS_jj_WZHP","CMS_jj_ZZHP","CMS_jj_WWLP","CMS_jj_WZLP","CMS_jj_ZZLP","CMS_jj_VVHPnew","CMS_jj_VVLPnew","CMS_jj_VVnew",]
-       bins = ["CMS_jj_WWHP","CMS_jj_ZZHP"]
+       bins = ["CMS_jj_WWHP","CMS_jj_WZHP","CMS_jj_ZZHP","CMS_jj_WWLP","CMS_jj_WZLP","CMS_jj_ZZLP","CMS_jj_VVHPnew","CMS_jj_VVLPnew"]
+       #bins = ["CMS_jj_WWHP","CMS_jj_WZHP","CMS_jj_ZZHP","CMS_jj_WWLP","CMS_jj_WZLP","CMS_jj_ZZLP","CMS_jj_VVHPnew","CMS_jj_VVLPnew","CMS_jj_VVnew",]
+       #bins = ["CMS_jj_VVHPnew","CMS_jj_VVLPnew","CMS_jj_VVnew"]
+       bins = ["CMS_jj_VVnew"]
 
     if fullToys:
       points=[]
@@ -52,7 +55,7 @@ for chan in channels:
     else:
       points=[0.1]
     points=[0.1] 
-    masses =[1000,1200,1400,1800,2000,2500,3000,3500,4000]
+    #masses =[4300,4400,4500]
     for bin in bins:
 
         for mass in masses:
@@ -76,7 +79,7 @@ for chan in channels:
               outputfile.write("combine datacards/CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+".txt -M HybridNew --frequentist --grid grid_mX"+str(mass)+"_" + chan + "_13TeV_"+bin+".root -m "+str(mass) + " -n "+chan+str(bin)+" --expectedFromGrid 0.975 &>CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+"_975_fullCLs.out\n")
             else:
                 outputfile.write("combine datacards/CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+".txt -M Asymptotic -v2 -m "+str(mass) + " -n "+chan+str(bin)+" --rMax 100 --rMin 0.000001 &>CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+"_asymptoticCLs.out\n")
-                outputfile.write("mv higgsCombine"+chan+str(bin)+".Asymptotic.mH"+str(int(mass))+".root Limits/CMS_jj_"+str(mass)+"_"+chan+"_13TeV_"+bin+"_asymptoticCLs_new.root")
+                outputfile.write("mv higgsCombine"+chan+str(bin)+".Asymptotic.mH"+str(int(mass))+".root Limits/withoutPDFandScale/CMS_jj_"+str(mass)+"_"+chan+"_13TeV_"+bin+"_asymptoticCLs_new.root")
             outputfile.close()
   
             command="rm "+logname
