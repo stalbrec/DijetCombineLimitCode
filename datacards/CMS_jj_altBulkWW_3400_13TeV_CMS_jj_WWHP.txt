@@ -5,8 +5,8 @@ kmax *
 ---------------
 shapes data_obs   CMS_jj_WWHP ../workspaces/CMS_jj_bkg_VValt_13TeV.root w_all:data_obs_CMS_jj_WWHP
 shapes bkg_fit_jj CMS_jj_WWHP ../workspaces/CMS_jj_bkg_VValt_13TeV.root w_all:CMS_bkg_fit_CMS_jj_WWHP_13TeV
-shapes BulkWW_jj CMS_jj_WWHP ../workspaces/CMS_jj_BulkWW_3400_13TeV.root w_all:BulkWW_jj_sig_CMS_jj_WWHP
-shapes BulkZZ_jj CMS_jj_WWHP ../workspaces/CMS_jj_BulkZZ_3400_13TeV.root w_all:BulkZZ_jj_sig_CMS_jj_WWHP
+shapes BulkWW_jj CMS_jj_WWHP ../workspaces/CMS_jj_altBulkWW_3400_13TeV.root w_all:BulkWW_jj_sig_CMS_jj_WWHP
+shapes BulkZZ_jj CMS_jj_WWHP ../workspaces/CMS_jj_altBulkZZ_3400_13TeV.root w_all:BulkZZ_jj_sig_CMS_jj_WWHP
 ---------------
 bin          CMS_jj_WWHP
 observation   1090

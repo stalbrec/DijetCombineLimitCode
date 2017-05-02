@@ -29,3 +29,12 @@ CMS_bkg_fit_slope1_CMS_jj_qWLP_13TeV         flatParam  # Mean and absolute unce
 CMS_bkg_fit_slope2_CMS_jj_qWLP_13TeV         flatParam  # Mean and absolute uncertainty on background slope
 CMS_bkg_fit_slope3_CMS_jj_qWLP_13TeV         flatParam  # Mean and absolute uncertainty on background slope
 --------------------------------
+
+CMS_mass_scale_j_13TeV       lnN      0.98232/1.01286      0.98232/1.01286      -                          
+CMS_mass_res_j_13TeV         lnN      0.97067/1.03897      0.97067/1.03897      -                          
+CMS_scale_j_13TeV            lnN      0.98152/1.00362      0.98152/1.00362      -  # jet energy scale      
+CMS_res_j_13TeV              lnN      0.9992/1.00201      0.9992/1.00201      -  # jet energy resolution 
+
+CMS_eff_vtag_tau21_pt_13TeV  lnN       1.046/0.954           1.046/0.954        -
+
+CMS_eff_vtag_tau21_sf_13TeV        lnN     0.770/1.230           0.770/1.230        -

@@ -14,9 +14,9 @@ observation   314257
 bin                      CMS_jj_qZHP      CMS_jj_qZHP      CMS_jj_qZHP      
 process                 qW_jj     qZ_jj     bkg_fit_jj     
 process                 -1          0           1          
-rate                    0          11.7177        1
+rate                    0          30.2176        1
 --------------------------------
-# signal scaled by 0.035867 to a cross section of 10/fb and also scale factor of 0.99 are applied.
+# signal scaled by 0.0035867 to a cross section of 10/fb and also scale factor of 0.99 are applied.
 lumi_13TeV                          lnN  1.026  1.026    - 
 CMS_acc_13TeV                       lnN  1.02  1.02      - # PDF unc. on acceptance
 CMS_pu_13TeV                        lnN  1.02  1.02      - # pileup

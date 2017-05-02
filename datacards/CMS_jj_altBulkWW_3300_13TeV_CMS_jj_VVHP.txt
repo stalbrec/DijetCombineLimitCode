@@ -5,8 +5,8 @@ kmax *
 ---------------
 shapes data_obs   CMS_jj_VVHP ../workspaces/CMS_jj_bkg_VValt_13TeV.root w_all:data_obs_CMS_jj_VVHP
 shapes bkg_fit_jj CMS_jj_VVHP ../workspaces/CMS_jj_bkg_VValt_13TeV.root w_all:CMS_bkg_fit_CMS_jj_VVHP_13TeV
-shapes BulkWW_jj CMS_jj_VVHP ../workspaces/CMS_jj_BulkWW_3300_13TeV.root w_all:BulkWW_jj_sig_CMS_jj_VVHP
-shapes BulkZZ_jj CMS_jj_VVHP ../workspaces/CMS_jj_BulkZZ_3300_13TeV.root w_all:BulkZZ_jj_sig_CMS_jj_VVHP
+shapes BulkWW_jj CMS_jj_VVHP ../workspaces/CMS_jj_altBulkWW_3300_13TeV.root w_all:BulkWW_jj_sig_CMS_jj_VVHP
+shapes BulkZZ_jj CMS_jj_VVHP ../workspaces/CMS_jj_altBulkZZ_3300_13TeV.root w_all:BulkZZ_jj_sig_CMS_jj_VVHP
 ---------------
 bin          CMS_jj_VVHP
 observation   5653
@@ -31,3 +31,10 @@ CMS_bkg_fit_slope2_CMS_jj_VVHP_13TeV         flatParam  # Mean and absolute unce
 CMS_bkg_fit_slope3_CMS_jj_VVHP_13TeV         flatParam  # Mean and absolute uncertainty on background slope
 --------------------------------
 --------------------------------
+
+CMS_eff_vtag_tau21_pt_13TeV  lnN       1.391/0.673           1.391/0.673        -
+
+CMS_mass_scale_j_13TeV       lnN      1.00653/0.99498      1.00653/0.99498      -                          
+CMS_mass_res_j_13TeV         lnN      0.97892/1.0251      0.97892/1.0251      -                          
+CMS_scale_j_13TeV            lnN      1.00201/1.00151      1.00201/1.00151      -  # jet energy scale      
+CMS_res_j_13TeV              lnN      0.999/1.0005      0.999/1.0005      -  # jet energy resolution 
