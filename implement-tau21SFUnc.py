@@ -2,6 +2,22 @@ import sys,os
 import ROOT
 from ROOT import *
 import math
+from optparse import OptionParser
+import sys
+
+
+argv = sys.argv
+parser = OptionParser()   
+parser.add_option("-b", "--batch", dest="batch", default=False,action="store_true",
+                              help="set batch mode")
+parser.add_option("-s", "--signal", dest="signal", default="BulkWW",action= "store",
+                              help="set signal. only in batch mode")
+parser.add_option("-m", "--mass", dest="mass", default=1200,action ="store",
+                              help="set mass. only in batch mode")
+parser.add_option("-p", "--path", dest="path", action='store',default="/usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/",
+                              help="set input path")
+(opts, args) = parser.parse_args(argv) 
+
 systhp = 0.11 
 systlp = 0.23
 
@@ -25,8 +41,8 @@ def get_SF_qV():
  return fsys
 
 
-indir = 'datacards/'
-outdir = 'datacards/'
+indir = opts.path+'datacards/'
+outdir = opts.path+'datacards/'
 
 signals  = ["MCBulkZZ"]#,"altBulkZZ"]
 signals  = ["altBulkWW","altBulkZZ"]#,"altBulkZZ"]#
@@ -34,6 +50,8 @@ signals  = ["altBulkWW","altBulkZZ"]#,"altBulkZZ"]#
 #signals  = ["BulkZZ","BulkWW","WZ","ZprimeWW","qW","qZ"]
 #signals  = ["qW","qZ"]
 purities = ["LP","HP"]
+if opts.batch:
+    signals = [opts.signal]
 
 for signal in signals:  
   masses =[m*100 for m in range(11,42+1)]
@@ -41,6 +59,8 @@ for signal in signals:
   if signal.find("q")!=-1:
     masses =[m*100 for m in range(12,62+1)]
     channels = ["qW","qZ"]
+  if opts.batch:
+      masses=[int(opts.mass)]
   for purity in purities:
     for ch in channels:
        for m in masses:

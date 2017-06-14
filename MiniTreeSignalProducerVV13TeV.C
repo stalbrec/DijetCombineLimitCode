@@ -1,13 +1,13 @@
-{
+void MiniTreeSignalProducerVV13TeV(int samplemin, int samplemax){
 
-
+ string dir = "/usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/";
   double mgg, mjj,evWeight, mtot, normWeight;
  int categories;
 
  evWeight = 1.0;
  normWeight = 1;
 
- for (int iSample = 5; iSample < 9; iSample++){
+ for (int iSample = samplemin; iSample < samplemax; iSample++){
    
    string inFile("WprimeToWZ");
    if (iSample == 1) inFile = string("RS1WW");
@@ -33,11 +33,11 @@
 
    for (int iMass = 0; iMass<massrange; iMass++){
 
-     string sInFile = "input/" + inFile + "_13TeV_" + Form("10k_OUT%dGeV.root", 1000+iMass*100);
+     string sInFile = dir+"input/" + inFile + "_13TeV_" + Form("10k_OUT%dGeV.root", 1000+iMass*100);
      cout << sInFile.c_str() << endl;
      TFile file0(sInFile.c_str(), "read");
 
-     string sOutFile = "MiniTrees/Signal_VV_13TeV/" + outFile + Form("OUT%d_miniTree.root", 1000+iMass*100);
+     string sOutFile = dir+"MiniTrees/Signal_VV_13TeV/" + outFile + Form("OUT%d_miniTree.root", 1000+iMass*100);
      TFile f1(sOutFile.c_str(), "recreate");
      f1.cd();
 

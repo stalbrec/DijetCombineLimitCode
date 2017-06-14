@@ -1,4 +1,4 @@
-{
+void MiniTreeSignalProducerqV13TeV(int samplemin, int samplemax){
 
 
   double mgg, mjj,evWeight, mtot, normWeight;
@@ -7,7 +7,7 @@
  evWeight = 1.0;
  normWeight = 1;
 
- for (int iSample = 3; iSample < 5; iSample++){
+ for (int iSample = samplemin; iSample < samplemax; iSample++){
    
    string inFile("WprimeToWZ");
    if (iSample == 1) inFile = string("RS1WW");

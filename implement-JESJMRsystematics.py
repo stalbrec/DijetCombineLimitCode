@@ -1,60 +1,57 @@
 from ROOT import *
 import fileinput
+from optparse import OptionParser
+import sys
 
-path = "/mnt/t3nfs01/data01/shome/dschafer/ExoDiBosonAnalysis/forSystematics/"
+argv = sys.argv
+parser = OptionParser()   
+parser.add_option("-b", "--batch", dest="batch", default=False,action="store_true",
+                              help="set batch mode")
+parser.add_option("-s", "--signal", dest="signal", default="BulkWW",action="store",
+                              help="set signal. only in batch mode")
+parser.add_option("-m", "--mass", dest="mass", default=1200,action="store",
+                              help="set mass. only in batch mode")
+parser.add_option("-p", "--path", dest="path",action="store_", default="/usr/users/dschaefer/SFrame_setup/ExoDiBosonAnalysis/forSystematics/",
+                              help="set input path")
+parser.add_option("-o", "--outpath", dest="outpath", action="store",default="/usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/",
+                              help="set output path")
+(opts, args) = parser.parse_args(argv)  
+path = opts.path
+outpath=opts.outpath
 
-prefixDCin = "datacards/CMS_jj_"
-prefixDCout = "datacards/CMS_jj_"
+prefixDCin = outpath+"datacards/CMS_jj_"
+prefixDCout = outpath+"datacards/CMS_jj_"
 
 prefix = "EXOVVSystematics/dijet"
 
 purities = ["LP","HP"]
 channels = ["WW","WZ","ZZ","VV"]
-
+label =""
 signals=["BulkWW","BulkZZ","WZ","ZprimeWW"]
-signals=["altBulkWW"]
 masses_interpolated =[m*100 for m in range(12,45+1)]
-massesInSystematics = [1200,1400,1600,1800,2000,2500,3500,4000]
+massesInSystematics = [1200,1400,1600,1800,2000,2500,3000,3500,4000,4500]
 
-
-
-signals=["altBulkZZ"]#,"WZ","ZprimeWW"]
-
-masses_interpolated =[m*100 for m in range(12,45+1)]
-massesInSystematics = [1200,1400,1600,1800,2000,2500,3000,3500,4000]
-
-#signals=["ZprimeWW"]
-
-#masses_interpolated =[m*100 for m in range(12,45+1)]
-#massesInSystematics = [1200,1400,1600,1800,2000,2500,3000,3500,4000]
-
-
-#signals=["WZ"]
-
-#masses_interpolated =[m*100 for m in range(12,45+1)]
-#massesInSystematics = [1200,1400,1600,1800,2000,2500,3000,3500,4000]
-
-
-#signals=["altqW"]
-#channels = ["qW","qZ"]
-#masses_interpolated =[m*100 for m in range(12,60+1)]
-#massesInSystematics = [1200,1400,1600,1800,2000,2500,3000,3500,4000,4500,5000,6000,6500]
-
-#signals=["qW"]
-#channels = ["qW","qZ"]
-#masses_interpolated =[m*100 for m in range(12,60+1)]
-#massesInSystematics = [1200,1400,1600,1800,2000,2500,3000,4500,6000]
-
-# purities = ["HP"]
-# signals=["qZ"]
-# channels = ["qZ"]
-# masses_interpolated =[1200]
-# massesInSystematics = [1200]
-
+if opts.batch:
+    masses_interpolated = [int(opts.mass)]
+    signals = [opts.signal]
+    label = opts.signal
+    print "test "+label
+    print "test 2 " +opts.signal+ " "+ str(opts.mass)
 
 for purity in purities:
   ii = -1
   for signal in signals:
+      if "BulkZZ" in signal:
+         massesInSystematics = [1200,1400,1600,1800,2000,2500,3000,3500,4000] 
+      if "BulkWW" in signal:
+          massesInSystematics = [1200,1400,1600,1800,2000,2500,3500,4000,4500]
+      if "qW" in signal:
+          massesInSystematics = [1200,1400,1600,1800,2000,2500,3000,3500,4000,4500,5000,6000,6500]
+      if "qZ" in signal:
+          massesInSystematics = [1200,1400,1600,1800,2000,2500,3000,4500,6000]
+      if "q" in signal:
+          channels = ["qW","qZ","qV"]
+          masses_interpolated =[m*100 for m in range(12,60+1)]
       ii += 1
       for ch in channels:
         chnl = ch + "_"

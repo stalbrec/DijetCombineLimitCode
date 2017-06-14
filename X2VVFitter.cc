@@ -12,6 +12,7 @@ double signalScaler=35867.*0.01/(100000.); // assume signal cross section of 0.0
 double scaleFactorHP=0.99;//1.04; // tau21 and jet mass scale factors data/MC
 double scaleFactorLP=1.03;//0.96; // tau21 and jet mass scale factors data/MC
 
+string directory = "/usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/" ;
 TColor *col = new TColor();
 
 
@@ -275,7 +276,7 @@ void AddSigData(RooWorkspace* w, Float_t mass, int signalsample, std::vector<str
     ncat = 7;
   }
 
-  TString inDir   = "/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/MiniTrees/Signal_VV_13TeV/";
+  TString inDir   = directory+"MiniTrees/Signal_VV_13TeV/"; //"/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/MiniTrees/Signal_VV_13TeV/";
 
   Float_t MASS(mass);
   // Float_t sqrts(21);
@@ -435,8 +436,8 @@ void AddBkgData(RooWorkspace* w, std::vector<string> cat_names, std::string altf
     ncat = 7;
   }
 
-  TString inDir   = "/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/MiniTrees/Data_VV_13TeV/";
-  if(CHANNEL==2) inDir   = "/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/MiniTrees/Data_qV_13TeV/";
+  TString inDir   = directory+"/MiniTrees/Data_VV_13TeV/";
+  if(CHANNEL==2) inDir   = directory+"/MiniTrees/Data_qV_13TeV/";
 
   // common preselection cut
   TString mainCut("1");
@@ -1008,8 +1009,8 @@ void MakePlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitresults, 
     int iMass = abs(mass);
 
     //ctmp->SaveAs("plots/sigmodel_"+signalname+TString::Format("%d_%s.png", iMass, cat_names.at(c).c_str()));
-    ctmp->SaveAs("/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/plots/sigmodel_"+signalname+TString::Format("%d_%s.pdf", iMass, cat_names.at(c).c_str()));
-    ctmp->SaveAs("/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/plots/sigmodel_"+signalname+TString::Format("%d_%s.root", iMass, cat_names.at(c).c_str()));
+    ctmp->SaveAs(directory+"/plots/sigmodel_"+signalname+TString::Format("%d_%s.pdf", iMass, cat_names.at(c).c_str()));
+    ctmp->SaveAs(directory+"/plots/sigmodel_"+signalname+TString::Format("%d_%s.root", iMass, cat_names.at(c).c_str()));
 
 
   }
@@ -1040,7 +1041,7 @@ void MakePlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitresults, 
   }
 
 
-  c4->SaveAs(TString::Format("/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/plots/backgrounds_log.pdf"));
+  c4->SaveAs((directory+"/plots/backgrounds_log.pdf").c_str());
 
 
   TCanvas* c5 = new TCanvas("c5","jj Background Categories",0,0,2000,2000);
@@ -1059,7 +1060,7 @@ void MakePlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitresults, 
     plotbkg_fit[c]->Draw();  
   }
 
-  c5->SaveAs(TString::Format("/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/plots/backgrounds.pdf"));
+  c5->SaveAs((directory+"/plots/backgrounds.pdf").c_str());
   //c5->SaveAs(TString::Format("plots/backgrounds.C",c));
 
 }
@@ -1067,7 +1068,7 @@ void MakePlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitresults, 
 
 void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, std::vector<string> cat_names) {
   
-  TString wsDir   = "/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/workspaces/"+filePOSTfix;
+  TString wsDir   = directory+"/workspaces/"+filePOSTfix;
   // TString wsDir   = filePOSTfix;
   // Int_t ncat = NCAT;
   Int_t ncat_min = NCAT;
@@ -1198,7 +1199,7 @@ void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, st
 
 void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, std::vector<string> cat_names) {
   
-  TString wsDir   = "/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/workspaces/"+filePOSTfix;
+  TString wsDir   = directory+"/workspaces/"+filePOSTfix;
   // TString wsDir   = filePOSTfix;
   // Int_t ncat = NCAT;
   Int_t ncat_min = NCAT;
@@ -1494,7 +1495,7 @@ void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, s
 
 void MakeDataCard_1Channel(std::string altfunc, RooWorkspace* w, const char* fileBaseName, const char* fileBkgName, int iChan, TString signalname, int signalsample, std::vector<string> cat_names, double mass) {
   
-  TString cardDir = "/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/"+filePOSTfix;
+  TString cardDir = directory+"/datacards/"+filePOSTfix;
   // TString cardDir = filePOSTfix;
   // Int_t ncat = NCAT;
   Int_t ncat_min = NCAT;

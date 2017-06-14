@@ -1,4 +1,4 @@
-{
+void MiniTreeProducerVV13TeV(string infile){
 
 
   double mgg, mjj,evWeight, mtot, normWeight;
@@ -8,22 +8,27 @@
  normWeight = 1.;
 
 
-//  string sInFile = "/shome/thaarres/EXOVVAnalysisRunII/LimitCode/CMSSW_7_1_5/src/DijetCombineLimitCode/input/JetHT_qV.root";
-//  string sInFile = "/shome/dschafer/ExoDiBosonAnalysis/results/ReRecoData_qVdijet.root";
- string sInFile = "/shome/dschafer/ExoDiBosonAnalysis/results/ReRecoData_VVdijet.root";
+
+ string sInFile = infile;//"/shome/dschafer/ExoDiBosonAnalysis/results/ReRecoData_VVdijet.root";
  //string sInFile = "/shome/dschafer/ExoDiBosonAnalysis/results/QCD_pythia8_VV_summer16.root";
  cout << sInFile.c_str() << endl;
  TFile file0(sInFile.c_str(), "read");
  
 
  //string sOutFile("MiniTrees/Data_qV_13TeV/dijetqV_13TeV_miniTree.root");
- string sOutFile("MiniTrees/Data_VV_13TeV/dijetVV_13TeV_miniTree_test.root");
+ string suffix ="";
+ if (infile.Contains("QCD") or infile.Contains("MC"))
+ {
+  suffix = "_MC";   
+ }
+ string sOutFile  = "MiniTrees/Data_qV_13TeV/dijetqV_13TeV_miniTree"+suffix+".root";
  int nCategorie = 8;
  int maxCategorie = 14;
  if (sInFile.find("VV")!=std::string::npos)
  {
     nCategorie = 0;
     maxCategorie  = 8;
+    sOutFile ="MiniTrees/Data_VV_13TeV/dijetVV_13TeV_miniTree"+suffix+".root";
  }
  TFile f1(sOutFile.c_str(), "recreate");
  f1.cd();
