@@ -1139,7 +1139,7 @@ void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, st
 
   wAll->factory("CMS_sig_p2_jer_13TeV[0.0,-10.0,10.0]");
   
-  wAll->factory("CMS_jj_sig_p2_jer_13TeV_HP[0.078,0.078,0.078]");
+  wAll->factory("CMS_jj_sig_p2_jer_13TeV_HP[0.08,0.08,0.08]");
   wAll->factory("sum::CMS_sig_p2_jer_sum_13TeV_HP(1.0,prod::CMS_sig_p2_jer_prod_13TeV_HP(CMS_sig_p2_jer_13TeV, CMS_jj_sig_p2_jer_13TeV_HP))");
  
  

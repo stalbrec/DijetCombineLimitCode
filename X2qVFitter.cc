@@ -1159,7 +1159,7 @@ void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, st
 //   wAll->factory("CMS_jj_sig_p2_pdf_13TeV_HP[0.13,0.13,0.13]");
 //   wAll->factory("sum::CMS_sig_p2_pdf_sum_13TeV_HP(1.0,prod::CMS_sig_p2_pdf_prod_13TeV_HP(CMS_sig_p2_pdf_13TeV, CMS_jj_sig_p2_pdf_13TeV_HP))");
  
-  wAll->factory("CMS_jj_sig_p2_jer_13TeV[0.05,0.05,0.05]");
+  wAll->factory("CMS_jj_sig_p2_jer_13TeV[0.09,0.09,0.09]");
   wAll->factory("sum::CMS_sig_p2_jer_sum_13TeV(1.0,prod::CMS_sig_p2_jer_prod_13TeV(CMS_sig_p2_jer_13TeV, CMS_jj_sig_p2_jer_13TeV))");  
   // systematics due to PDF's (impact on width)    
 //   wAll->factory("CMS_jj_sig_p2_pdf_13TeV[0.08,0.08,0.08]");
