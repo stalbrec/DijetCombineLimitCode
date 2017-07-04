@@ -1,20 +1,20 @@
-Combination of CMS_jj_WWHP=/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/CMS_jj_BulkWW_4500_13TeV_CMS_jj_WWHP.txt  CMS_jj_WZHP=/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/CMS_jj_BulkWW_4500_13TeV_CMS_jj_WZHP.txt  CMS_jj_ZZHP=/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/CMS_jj_BulkWW_4500_13TeV_CMS_jj_ZZHP.txt
+Combination of CMS_jj_WWHP=/usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/CMS_jj_BulkWW_4500_13TeV_CMS_jj_WWHP.txt  CMS_jj_WZHP=/usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/CMS_jj_BulkWW_4500_13TeV_CMS_jj_WZHP.txt  CMS_jj_ZZHP=/usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/CMS_jj_BulkWW_4500_13TeV_CMS_jj_ZZHP.txt
 imax 3 number of bins
 jmax 2 number of processes minus 1
 kmax 9 number of nuisance parameters
 ----------------------------------------------------------------------------------------------------------------------------------
-shapes BulkWW_jj    CMS_jj_WWHP  /mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_BulkWW_4500_13TeV.root w_all:BulkWW_jj_sig_CMS_jj_WWHP
-shapes BulkZZ_jj    CMS_jj_WWHP  /mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_BulkZZ_4500_13TeV.root w_all:BulkZZ_jj_sig_CMS_jj_WWHP
-shapes bkg_fit_jj   CMS_jj_WWHP  /mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_bkg_VV_13TeV.root w_all:CMS_bkg_fit_CMS_jj_WWHP_13TeV
-shapes data_obs     CMS_jj_WWHP  /mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_bkg_VV_13TeV.root w_all:data_obs_CMS_jj_WWHP
-shapes BulkWW_jj    CMS_jj_WZHP  /mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_BulkWW_4500_13TeV.root w_all:BulkWW_jj_sig_CMS_jj_WZHP
-shapes BulkZZ_jj    CMS_jj_WZHP  /mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_BulkZZ_4500_13TeV.root w_all:BulkZZ_jj_sig_CMS_jj_WZHP
-shapes bkg_fit_jj   CMS_jj_WZHP  /mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_bkg_VV_13TeV.root w_all:CMS_bkg_fit_CMS_jj_WZHP_13TeV
-shapes data_obs     CMS_jj_WZHP  /mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_bkg_VV_13TeV.root w_all:data_obs_CMS_jj_WZHP
-shapes BulkWW_jj    CMS_jj_ZZHP  /mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_BulkWW_4500_13TeV.root w_all:BulkWW_jj_sig_CMS_jj_ZZHP
-shapes BulkZZ_jj    CMS_jj_ZZHP  /mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_BulkZZ_4500_13TeV.root w_all:BulkZZ_jj_sig_CMS_jj_ZZHP
-shapes bkg_fit_jj   CMS_jj_ZZHP  /mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_bkg_VV_13TeV.root w_all:CMS_bkg_fit_CMS_jj_ZZHP_13TeV
-shapes data_obs     CMS_jj_ZZHP  /mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_bkg_VV_13TeV.root w_all:data_obs_CMS_jj_ZZHP
+shapes BulkWW_jj    CMS_jj_WWHP  /usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_BulkWW_4500_13TeV.root w_all:BulkWW_jj_sig_CMS_jj_WWHP
+shapes BulkZZ_jj    CMS_jj_WWHP  /usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_BulkZZ_4500_13TeV.root w_all:BulkZZ_jj_sig_CMS_jj_WWHP
+shapes bkg_fit_jj   CMS_jj_WWHP  /usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_bkg_VV_13TeV.root w_all:CMS_bkg_fit_CMS_jj_WWHP_13TeV
+shapes data_obs     CMS_jj_WWHP  /usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_bkg_VV_13TeV.root w_all:data_obs_CMS_jj_WWHP
+shapes BulkWW_jj    CMS_jj_WZHP  /usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_BulkWW_4500_13TeV.root w_all:BulkWW_jj_sig_CMS_jj_WZHP
+shapes BulkZZ_jj    CMS_jj_WZHP  /usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_BulkZZ_4500_13TeV.root w_all:BulkZZ_jj_sig_CMS_jj_WZHP
+shapes bkg_fit_jj   CMS_jj_WZHP  /usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_bkg_VV_13TeV.root w_all:CMS_bkg_fit_CMS_jj_WZHP_13TeV
+shapes data_obs     CMS_jj_WZHP  /usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_bkg_VV_13TeV.root w_all:data_obs_CMS_jj_WZHP
+shapes BulkWW_jj    CMS_jj_ZZHP  /usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_BulkWW_4500_13TeV.root w_all:BulkWW_jj_sig_CMS_jj_ZZHP
+shapes BulkZZ_jj    CMS_jj_ZZHP  /usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_BulkZZ_4500_13TeV.root w_all:BulkZZ_jj_sig_CMS_jj_ZZHP
+shapes bkg_fit_jj   CMS_jj_ZZHP  /usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_bkg_VV_13TeV.root w_all:CMS_bkg_fit_CMS_jj_ZZHP_13TeV
+shapes data_obs     CMS_jj_ZZHP  /usr/users/dschaefer/CMSSW_7_4_7/src/DijetCombineLimitCode/datacards/../workspaces/CMS_jj_bkg_VV_13TeV.root w_all:data_obs_CMS_jj_ZZHP
 ----------------------------------------------------------------------------------------------------------------------------------
 bin          CMS_jj_WWHP  CMS_jj_WZHP  CMS_jj_ZZHP
 observation  1090.0       2717.0       1846.0     

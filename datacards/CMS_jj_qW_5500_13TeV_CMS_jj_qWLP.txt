@@ -17,7 +17,7 @@ process                 -1          0           1
 rate                    37.39       0           1
 --------------------------------
 # signal scaled by 0.0035867 to a cross section of 10/fb and also scale factor of 1.03 are applied.
-lumi_13TeV                          lnN  1.026  1.026    - 
+lumi_13TeV                          lnN  1.025  1.025    - 
 CMS_acc_13TeV                       lnN  1.02  1.02      - # PDF unc. on acceptance
 CMS_pu_13TeV                        lnN  1.02  1.02      - # pileup
 --------------------------------
@@ -27,13 +27,10 @@ CMS_sig_p2_jer_13TeV                param   0.0   1.0   # dijet mass resolution 
 CMS_bkg_fit_CMS_jj_qWLP_13TeV_norm           flatParam  # Normalization uncertainty on background slope
 CMS_bkg_fit_slope1_CMS_jj_qWLP_13TeV         flatParam  # Mean and absolute uncertainty on background slope
 CMS_bkg_fit_slope2_CMS_jj_qWLP_13TeV         flatParam  # Mean and absolute uncertainty on background slope
-
-CMS_mass_scale_j_13TeV       lnN      0.9895/1.00445      0.9895/1.00445      -                          
-CMS_mass_res_j_13TeV         lnN      0.95833/1.04167      0.95833/1.04167      -                          
-CMS_scale_j_13TeV            lnN      0.95706/1.00127      0.95706/1.00127      -  # jet energy scale      
-CMS_res_j_13TeV              lnN      0.99968/1.00095      0.99968/1.00095      -  # jet energy resolution 
-
-
+CMS_eff_vtag_tau21_pt_13TeV  lnN       1.102/0.898           1.102/0.898        -
 CMS_eff_vtag_tau21_sf_13TeV        lnN     0.770/1.230           0.770/1.230        -
 
-CMS_eff_vtag_tau21_pt_13TeV  lnN       1.102/0.898           1.102/0.898        -
+CMS_mass_scale_j_13TeV       lnN      0.99248/1.01378      0.99248/1.01378      -                          
+CMS_mass_res_j_13TeV         lnN      0.96054/1.05543      0.96054/1.05543      -                          
+CMS_scale_j_13TeV            lnN      0.95302/1.00219      0.95302/1.00219      -  # jet energy scale      
+CMS_res_j_13TeV              lnN      0.99718/1.00094      0.99718/1.00094      -  # jet energy resolution 

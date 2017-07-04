@@ -1,0 +1,29 @@
+# Fully Hadronic VV analysis
+imax 1
+jmax 2
+kmax *
+---------------
+shapes data_obs   CMS_jj_WWHP ../workspaces/CMS_jj_bkg_VVtest2_13TeV.root w_all:data_obs_CMS_jj_WWHP
+shapes bkg_fit_jj CMS_jj_WWHP ../workspaces/CMS_jj_bkg_VVtest2_13TeV.root w_all:CMS_bkg_fit_CMS_jj_WWHP_13TeV
+shapes WZ_jj CMS_jj_WWHP ../workspaces/CMS_jj_test2WZ_2600_13TeV.root w_all:WZ_jj_sig_CMS_jj_WWHP
+shapes ZprimeWW_jj CMS_jj_WWHP ../workspaces/CMS_jj_test2ZprimeWW_2600_13TeV.root w_all:ZprimeWW_jj_sig_CMS_jj_WWHP
+---------------
+bin          CMS_jj_WWHP
+observation   1090
+------------------------------
+bin                      CMS_jj_WWHP       CMS_jj_WWHP      CMS_jj_WWHP      
+process                 WZ_jj ZprimeWW_jj     bkg_fit_jj      
+process                 -1          0              1          
+rate                    12.6657       0          1
+--------------------------------
+# signal scaled by 0.0035867 to a cross section of 0.01 pb and also scale factor of 0.9801 are applied.
+lumi_13TeV                          lnN  1.025  1.025    - 
+CMS_acc_13TeV                       lnN  1.02  1.02      - # PDF unc. on acceptance
+CMS_pu_13TeV                        lnN  1.02  1.02      - # pileup
+--------------------------------
+# Parametric shape uncertainties, entered by hand.
+CMS_sig_p1_jes_13TeV                param   0.0   1.0   # dijet mass shift due to JES uncertainty
+CMS_sig_p2_jer_13TeV                param   0.0   1.0   # dijet mass resolution shift due to JER uncertainty
+CMS_bkg_fit_CMS_jj_WWHP_13TeV_norm           flatParam  # Normalization uncertainty on background slope
+CMS_bkg_fit_slope1_CMS_jj_WWHP_13TeV         flatParam  # Mean and absolute uncertainty on background slope
+--------------------------------

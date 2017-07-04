@@ -1,0 +1,38 @@
+# Fully Hadronic VV analysis
+imax 1
+jmax 2
+kmax *
+---------------
+shapes data_obs   CMS_jj_WZLP ../workspaces/CMS_jj_bkg_VVtest2_13TeV.root w_all:data_obs_CMS_jj_WZLP
+shapes bkg_fit_jj CMS_jj_WZLP ../workspaces/CMS_jj_bkg_VVtest2_13TeV.root w_all:CMS_bkg_fit_CMS_jj_WZLP_13TeV
+shapes WZ_jj CMS_jj_WZLP ../workspaces/CMS_jj_test2WZ_2100_13TeV.root w_all:WZ_jj_sig_CMS_jj_WZLP
+shapes ZprimeWW_jj CMS_jj_WZLP ../workspaces/CMS_jj_test2ZprimeWW_2100_13TeV.root w_all:ZprimeWW_jj_sig_CMS_jj_WZLP
+---------------
+bin          CMS_jj_WZLP
+observation   28835
+------------------------------
+bin                      CMS_jj_WZLP       CMS_jj_WZLP      CMS_jj_WZLP      
+process                 WZ_jj ZprimeWW_jj     bkg_fit_jj      
+process                 -1          0              1          
+rate                    0          13.4225       1
+--------------------------------
+# signal scaled by 0.0035867 to a cross section of 0.01 pb and also scale factor of 1.0197 are applied.
+lumi_13TeV                          lnN  1.025  1.025    - 
+CMS_acc_13TeV                       lnN  1.02  1.02      - # PDF unc. on acceptance
+CMS_pu_13TeV                        lnN  1.02  1.02      - # pileup
+--------------------------------
+# Parametric shape uncertainties, entered by hand.
+CMS_sig_p1_jes_13TeV                param   0.0   1.0   # dijet mass shift due to JES uncertainty
+CMS_sig_p2_jer_13TeV                param   0.0   1.0   # dijet mass resolution shift due to JER uncertainty
+CMS_bkg_fit_CMS_jj_WZLP_13TeV_norm           flatParam  # Normalization uncertainty on background slope
+CMS_bkg_fit_slope1_CMS_jj_WZLP_13TeV         flatParam  # Mean and absolute uncertainty on background slope
+--------------------------------
+
+CMS_mass_scale_j_13TeV       lnN      1.08028/0.9493      1.08028/0.9493      -                          
+CMS_mass_res_j_13TeV         lnN      1.03521/0.99577      1.03521/0.99577      -                          
+CMS_scale_j_13TeV            lnN      1.00141/1.00141      1.00141/1.00141      -  # jet energy scale      
+CMS_res_j_13TeV              lnN      1.00141/1.0      1.00141/1.0      -  # jet energy resolution 
+
+CMS_eff_vtag_tau21_pt_13TeV  lnN       1.215/0.803           1.215/0.803        -
+
+CMS_eff_vtag_tau21_sf_13TeV        lnN     0.855/1.095           0.855/1.095        -

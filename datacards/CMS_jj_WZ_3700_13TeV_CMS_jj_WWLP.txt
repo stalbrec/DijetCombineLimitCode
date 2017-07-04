@@ -17,7 +17,7 @@ process                 -1          0              1
 rate                    26.0404       0          1
 --------------------------------
 # signal scaled by 0.0035867 to a cross section of 0.01 pb and also scale factor of 1.0197 are applied.
-lumi_13TeV                          lnN  1.026  1.026    - 
+lumi_13TeV                          lnN  1.025  1.025    - 
 CMS_acc_13TeV                       lnN  1.02  1.02      - # PDF unc. on acceptance
 CMS_pu_13TeV                        lnN  1.02  1.02      - # pileup
 --------------------------------
@@ -27,12 +27,3 @@ CMS_sig_p2_jer_13TeV                param   0.0   1.0   # dijet mass resolution 
 CMS_bkg_fit_CMS_jj_WWLP_13TeV_norm           flatParam  # Normalization uncertainty on background slope
 CMS_bkg_fit_slope1_CMS_jj_WWLP_13TeV         flatParam  # Mean and absolute uncertainty on background slope
 --------------------------------
-
-CMS_eff_vtag_tau21_pt_13TeV  lnN       1.292/0.741           1.292/0.741        -
-
-CMS_eff_vtag_tau21_sf_13TeV        lnN     0.855/1.095           0.855/1.095        -
-
-CMS_mass_scale_j_13TeV       lnN      0.94669/1.05464      0.94669/1.05464      -                          
-CMS_mass_res_j_13TeV         lnN      0.96713/1.02665      0.96713/1.02665      -                          
-CMS_scale_j_13TeV            lnN      1.00444/0.99911      1.00444/0.99911      -  # jet energy scale      
-CMS_res_j_13TeV              lnN      1.00578/1.00267      1.00578/1.00267      -  # jet energy resolution 

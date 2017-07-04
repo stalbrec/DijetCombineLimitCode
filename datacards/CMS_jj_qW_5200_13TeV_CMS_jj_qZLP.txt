@@ -17,7 +17,7 @@ process                 -1          0           1
 rate                    15.4385       0           1
 --------------------------------
 # signal scaled by 0.0035867 to a cross section of 10/fb and also scale factor of 1.03 are applied.
-lumi_13TeV                          lnN  1.026  1.026    - 
+lumi_13TeV                          lnN  1.025  1.025    - 
 CMS_acc_13TeV                       lnN  1.02  1.02      - # PDF unc. on acceptance
 CMS_pu_13TeV                        lnN  1.02  1.02      - # pileup
 --------------------------------
@@ -27,16 +27,10 @@ CMS_sig_p2_jer_13TeV                param   0.0   1.0   # dijet mass resolution 
 CMS_bkg_fit_CMS_jj_qZLP_13TeV_norm           flatParam  # Normalization uncertainty on background slope
 CMS_bkg_fit_slope1_CMS_jj_qZLP_13TeV         flatParam  # Mean and absolute uncertainty on background slope
 CMS_bkg_fit_slope2_CMS_jj_qZLP_13TeV         flatParam  # Mean and absolute uncertainty on background slope
-
-
-
-
-CMS_mass_scale_j_13TeV       lnN      1.04245/0.97224      1.04245/0.97224      -                          
-CMS_mass_res_j_13TeV         lnN      1.03755/0.96082      1.03755/0.96082      -                          
-CMS_scale_j_13TeV            lnN      1.14041/0.99918      1.14041/0.99918      -  # jet energy scale      
-CMS_res_j_13TeV              lnN      0.99918/1.00163      0.99918/1.00163      -  # jet energy resolution 
-
-
+CMS_eff_vtag_tau21_pt_13TeV  lnN       1.100/0.900           1.100/0.900        -
 CMS_eff_vtag_tau21_sf_13TeV        lnN     0.770/1.230           0.770/1.230        -
 
-CMS_eff_vtag_tau21_pt_13TeV  lnN       1.100/0.900           1.100/0.900        -
+CMS_mass_scale_j_13TeV       lnN      1.03574/0.94483      1.03574/0.94483      -                          
+CMS_mass_res_j_13TeV         lnN      1.00777/0.93318      1.00777/0.93318      -                          
+CMS_scale_j_13TeV            lnN      1.1181/1.00233      1.1181/1.00233      -  # jet energy scale      
+CMS_res_j_13TeV              lnN      1.00311/1.00311      1.00311/1.00311      -  # jet energy resolution 

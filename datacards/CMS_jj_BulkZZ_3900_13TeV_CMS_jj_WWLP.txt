@@ -30,9 +30,10 @@ CMS_bkg_fit_slope1_CMS_jj_WWLP_13TeV         flatParam  # Mean and absolute unce
 
 CMS_eff_vtag_tau21_pt_13TeV  lnN       1.300/0.735           1.300/0.735        -
 
-CMS_eff_vtag_tau21_sf_13TeV        lnN     0.855/1.095           0.855/1.095        -
 
 CMS_mass_scale_j_13TeV       lnN      0.9294/1.07685      0.9294/1.07685      -                          
 CMS_mass_res_j_13TeV         lnN      1.00179/0.97766      1.00179/0.97766      -                          
 CMS_scale_j_13TeV            lnN      1.00715/1.00894      1.00715/1.00894      -  # jet energy scale      
 CMS_res_j_13TeV              lnN      0.99643/1.00536      0.99643/1.00536      -  # jet energy resolution 
+
+CMS_eff_vtag_tau21_sf_13TeV        lnN     0.855/1.095           0.855/1.095        -
