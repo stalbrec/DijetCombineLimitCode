@@ -10,11 +10,12 @@ import sys
 import time
 import random
 import numpy as np
+from optparse import OptionParser
 
 tdrstyle.setTDRStyle()
 CMS_lumi.lumi_13TeV = "35.9 fb^{-1}"
 CMS_lumi.writeExtraText = 1
-CMS_lumi.extraText = "Preliminary"
+CMS_lumi.extraText = ""
 CMS_lumi.lumi_sqrtS = "13 TeV" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 iPos = 11
 if( iPos==0 ): CMS_lumi.relPosX = 0.12
@@ -93,7 +94,7 @@ def plotGraph(modelname,channel,radmasses,color,obs=False):
     limits = []
     filenames =[]
     for m in radmasses:
-        filename = "newSF/CMS_jj_"+str(int(m*1000))+"_"+modelname+"_13TeV_CMS_jj_"+channel+"_asymptoticCLs_new.root"
+        filename = "test/CMS_jj_"+str(int(m*1000))+"_"+modelname+"_13TeV_CMS_jj_"+channel+"_asymptoticCLs_new.root"
         #filename = "withoutPDFandScale/CMS_jj_"+str(int(m*1000))+"_"+modelname+"_13TeV_CMS_jj_"+channel+"_asymptoticCLs_new.root"
         filenames.append(filename)
         if  modelname.find("WZ")!=-1:
@@ -109,6 +110,7 @@ def plotGraph(modelname,channel,radmasses,color,obs=False):
         print "using file " + onefile
         file = rt.TFile(onefile)
         tree = file.Get("limit")
+        print tree
         limits = []
         for quantile in tree:
             limits.append(tree.limit)
@@ -149,14 +151,13 @@ def plotGraph(modelname,channel,radmasses,color,obs=False):
     gr1up.SetLineColor(color+2)
     grmean = rt.TGraphErrors(1)
     grmean.SetLineColor(color+4)
-    grmean.SetLineWidth(2)
+    grmean.SetLineWidth(2.5)
     grmean.SetLineStyle(3)
     gr1down = rt.TGraphErrors(1)
     gr1down.SetLineColor(color+2)
     gr2down = rt.TGraphErrors(1)
     gr2down.SetLineColor(color+1)
     
-    grmean.SetLineWidth(2)
     gr1down.SetLineWidth(2)
     gr1up.SetLineWidth(2)
     gr2down.SetLineWidth(2)
@@ -185,7 +186,7 @@ def plotGraph(modelname,channel,radmasses,color,obs=False):
        return [grmean,gr1up,gr2up,gr1down,gr2down] 
 
 def PlotTheoryLine(label):
-    filenameTH = "/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/Limits/%s_xSecUnc.root"%label.split("_")[0]
+    filenameTH = "%s_xSecUnc.root"%label.split("_")[0]
     thFile       = rt.TFile.Open(filenameTH,'READ')   
     print "Opening file " ,thFile.GetName()
     gtheory      = thFile.Get("gtheory")
@@ -269,6 +270,7 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
         print "using file " + onefile
         file = rt.TFile(onefile)
         tree = file.Get("limit")
+        print tree
         limits = []
         for quantile in tree:
             limits.append(tree.limit)
@@ -277,7 +279,7 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
         rad.append(limits[:6])
 
 
-
+    print limits
     mg = rt.TMultiGraph()
     mg.SetTitle("X -> ZZ")
     x = []
@@ -309,7 +311,7 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
     gr1up.SetMarkerColor(0)
     grmean = rt.TGraphErrors(1)
     grmean.SetLineColor(1)
-    grmean.SetLineWidth(2)
+    grmean.SetLineWidth(4)
     grmean.SetLineStyle(3)
     gr1down = rt.TGraphErrors(1)
     gr1down.SetMarkerColor(0)
@@ -357,21 +359,21 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
     c1.GetWindowHeight()
     c1.GetWindowWidth()
     c1.SetLogy()
-    c1.SetGrid()
+    #c1.SetGrid()
     c1.SetLogy()
     c1.cd()
     
     frame = c1.DrawFrame(1.1,0.001, 4.2, 10)
     if "qZ" in label.split("_")[0] or label.find("qW")!=-1: frame = c1.DrawFrame(1.1,0.001, 6.2, 800.)
-    frame.GetYaxis().CenterTitle()
+    #frame.GetYaxis().CenterTitle()
     frame.GetYaxis().SetTitleSize(0.05)
     frame.GetXaxis().SetTitleSize(0.05)
     frame.GetXaxis().SetLabelSize(0.04)
     frame.GetYaxis().SetLabelSize(0.04)
     frame.GetYaxis().SetTitleOffset(1.15)
     frame.GetXaxis().SetTitleOffset(1.05)
-    frame.GetXaxis().CenterTitle()
-    frame.SetMinimum(0.001)
+    #frame.GetXaxis().CenterTitle()
+    frame.SetMinimum(0.0001)
     frame.SetMaximum(50)
     if "WZ" in label.split("_")[0] and ( label.find("_WZ")!=-1 or label.find("_VV")!=-1):
       frame.SetMinimum(0.0001)
@@ -383,7 +385,7 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
       frame.SetMinimum(0.0002)
       frame.SetMaximum(300.)
     frame.GetXaxis().SetNdivisions(508)
-    frame.GetYaxis().CenterTitle(True)
+    #frame.GetYaxis().CenterTitle(True)
     
     
     if "qW" in label.split("_")[0] or "qZ" in label.split("_")[0]:
@@ -457,7 +459,7 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
     gtheorySHADE.SetLineWidth(3)
     
     
-    filenameTH = "/mnt/t3nfs01/data01/shome/dschafer/CMSSW_7_4_7/src/DijetCombineLimitCode/Limits/%s_xSecUnc.root"%label.split("_")[0]
+    filenameTH = "%s_xSecUnc.root"%label.split("_")[0]
     thFile       = rt.TFile.Open(filenameTH,'READ')   
     print "Opening file " ,thFile.GetName()
     gtheory      = thFile.Get("gtheory")
@@ -474,8 +476,18 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
     gtheoryUP.SetLineWidth(1)
     gtheoryDOWN.SetLineWidth(1)
     
-    print "max cross section (observed limit ) : " +str(round(rt.TMath.MaxElement(n,grobs.GetY()),5))+ " pb"
+    print "max cross section (observed limit ) : " +str(round(rt.TMath.MaxElement(n,grobs.GetY()),5))+ " pb" 
     print "min cross section (observed limit ) : " +str(round(rt.TMath.MinElement(n,grobs.GetY()),5))+ " pb"
+
+    tmpmasses = grobs.GetX()
+    tmplimits = grobs.GetY()
+    tmplimitsexp = grmean.GetY()
+    tmptheory = gtheory.GetY()
+    for counter in  range(0,n):
+        print "mass : "+str(tmpmasses[counter]) + " observed limit : "+str(round(tmplimits[counter]*1000,2))+" fb "+" expected limit "+str(round(tmplimitsexp[counter],5)*1000)+ " fb theory "+str(round(gtheory.Eval(tmpmasses[counter]),5)*1000)
+        
+    
+    
     if label.find("Zprime")!=-1:
         root = getIntersectionOfObservedLimitTheoryLine(2.6,gtheory,grobs)
         printTheoryUncAtPoint(root,gtheory,gtheoryUP,gtheoryDOWN)
@@ -555,9 +567,11 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
     #    leg = rt.TLegend(0.43,0.65,0.95,0.89)
     #    leg2 = rt.TLegend(0.43,0.65,0.95,0.89)
     # else:
-    leg = rt.TLegend(0.498995,0.6602591,0.9446734,0.9011917)
-    leg2 = rt.TLegend(0.498995,0.6602591,0.9446734,0.9011917)
-    leg.SetTextSize(0.028)
+    leg = rt.TLegend(0.4,0.6002591,0.9446734,0.9011917)
+    leg2 = rt.TLegend(0.4,0.6002591,0.9446734,0.9011917)
+    #leg.SetTextFont(42)
+    #leg2.SetTextFont(42)
+    leg.SetTextSize(0.038)
     leg.SetLineColor(1)
     leg.SetShadowColor(0)
     leg.SetLineStyle(1)
@@ -565,7 +579,7 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
     leg.SetFillColor(kWhite)
     # leg.SetFillStyle(0)
     leg.SetMargin(0.35)
-    leg2.SetTextSize(0.028)
+    leg2.SetTextSize(0.038)
     leg2.SetLineColor(1)
     leg2.SetShadowColor(0)
     leg2.SetLineStyle(1)
@@ -659,7 +673,7 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
         addInfo.AddText("WW+WZ+ZZ")
         addInfo.AddText("HP+LP")
       
-    addInfo.Draw()
+    #addInfo.Draw()
     addNarrow.Draw()
     c1.Update() 
     frame = c1.GetFrame()
@@ -715,8 +729,8 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
             print y[i]
             gratio.SetPoint(i,x[i],y[i])
         print y
-        gratio.SetMaximum(0.5)
-        gratio.SetMinimum(-0.5)
+        gratio.SetMaximum(0.1)
+        gratio.SetMinimum(-0.1)
         gratio.GetXaxis().SetTitle("m_{jj} (TeV)")
         gratio.GetYaxis().SetTitle("(1- exp. limit alt. func./ exp. limit)")
         gratio.SetMarkerStyle(24)
@@ -797,11 +811,19 @@ def addText(label):
     
     
 if __name__ == '__main__':
-  postfix = "newSF/"
+    
+  argv = sys.argv
+  parser = OptionParser()   
+  parser.add_option("-r", "--region", dest="region", default="VVnew",action="store",
+                              help="select region") 
+  parser.add_option("-s", "--signal", dest="signal", default="BulkWW",action="store",
+                              help="select signal")
+  (opts, args) = parser.parse_args(argv)  
+  postfix = "newSF/"#"newSF/"
 
   channels=["WZ","BulkWW","BulkZZ"]#,"qW","qZ"]
-  channels=["BulkWW"]
-  region = "VVnew"
+  channels=[opts.signal]
+  region = opts.region
   CompareLimits = False #True
   plotExpLimitRatio = ""
   
@@ -833,8 +855,8 @@ if __name__ == '__main__':
     combinedplots_qV=[]
     
     for mass in masses:
-       if mass == 5500:
-            continue;
+       #if mass == 2400 or mass ==1400 or mass == 1900 or mass ==3600 or mass == 3800 or mass == 4100 :
+        #    continue;
        # HPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_VVHPnew_asymptoticCLs.root"]
 #        LPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_VVLPnew_asymptoticCLs.root"]
        if chan.find("q")!=-1:
@@ -855,7 +877,7 @@ if __name__ == '__main__':
     # Plot(HPplots,chan+"_VVHP_new_combined_purity", obs=True)
    
     Plot(combinedplots,chan+"_"+region+"_new_combined", obs=True,CompareLimits=False,plotExpLimitRatio="")  
-    #Plot(combinedplots,chan+"_VVnew_alt4partest_new_combined", obs=True,CompareLimits=True,plotExpLimitRatio="altBulkWW")
+    #Plot(combinedplots,chan+"_WWHP_testDiffRanges2", obs=True,CompareLimits=True,plotExpLimitRatio="testZprimeWW")
 
     
     
