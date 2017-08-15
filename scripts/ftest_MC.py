@@ -604,13 +604,13 @@ def doFit(FunctionType,hMassNEW,g,fFitXmin,fFitXmax,fNbins,xbins,fLabel):
   hist_fit_residual_vsMass =  TH1D("hist_fit_residual_vsMass","hist_fit_residual_vsMass",fNbins,xbins)
   
   for bin in range (1,hMassNEW.GetNbinsX()):
-    if( hMassNEW.GetXaxis().GetBinLowEdge(bin)>=fFitXmin and hMassNEW.GetXaxis().GetBinUpEdge(bin)<=fFitXmax ):
+    if( hMassNEW.GetXaxis().GetBinCenter(bin)>=fFitXmin and hMassNEW.GetXaxis().GetBinCenter(bin)<=fFitXmax ):
        NumberOfVarBins += 1
        data = hMassNEW.GetBinContent(bin)
        # data = g.Integral(hMassNEW.GetXaxis().GetBinLowEdge(bin) , hMassNEW.GetXaxis().GetBinUpEdge(bin) )
        err_data_low = g.GetErrorYlow(bin-1) 
        err_data_high= g.GetErrorYhigh(bin-1)
-       fit = BKGfit.Integral(hMassNEW.GetXaxis().GetBinLowEdge(bin) , hMassNEW.GetXaxis().GetBinUpEdge(bin) )
+       fit = BKGfit.Integral(hMassNEW.GetXaxis().GetBinCenter(bin) , hMassNEW.GetXaxis().GetBinCenter(bin) )
        fit = fit / ( hMassNEW.GetBinWidth(bin) )
        # fit = BKGfit.Eval(hMassNEW.GetBinCenter(bin)) #yields same results
        if(fit > data):
