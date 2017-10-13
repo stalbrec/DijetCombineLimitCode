@@ -3,7 +3,7 @@
 
 import os
 
-steps=[5]
+steps=[1,2,3,4,5]
 masses=[2000,2100]
 
 if 1 in steps:
