@@ -1,0 +1,29 @@
+# Fully Hadronic VV analysis
+imax 1
+jmax 1
+kmax *
+---------------
+shapes data_obs   _invMass ../workspaces/CMS_jj_bkg_VV_2000_13TeV.root w_all:data_obs__invMass
+shapes bkg_fit_jj _invMass ../workspaces/CMS_jj_bkg_VV_2000_13TeV.root w_all:CMS_bkg_fit__invMass_13TeV
+shapes graviton_jj _invMass ../workspaces/CMS_jj_graviton_2000_13TeV.root w_all:graviton_jj_sig__invMass
+---------------
+bin          _invMass
+observation   86651
+------------------------------
+bin                     _invMass       _invMass      
+process                 graviton_jj     bkg_fit_jj     
+process                 0               1          
+rate                    1367.63         1
+--------------------------------
+# signal scaled by 0.1 to a cross section of 1/pb and also scale factor of 0.9801 are applied.
+lumi_13TeV                          lnN  1.026   - 
+CMS_eff_vtag_tau21_sf_13TeV         lnN  1.1556/0.855625       - # tau21 efficiency
+CMS_acc_13TeV                       lnN  1.02    - # PDF unc. on acceptance
+CMS_pu_13TeV                        lnN  1.02    - # pileup
+--------------------------------
+# Parametric shape uncertainties, entered by hand.
+CMS_sig_p1_jes_13TeV                param   0.0   1.0   # dijet mass shift due to JES uncertainty
+CMS_sig_p2_jer_13TeV                param   0.0   1.0   # dijet mass resolution shift due to JER uncertainty
+CMS_bkg_fit__invMass_13TeV_norm           flatParam  # Normalization uncertainty on background slope
+CMS_bkg_fit_slope1__invMass_13TeV         flatParam  # Mean and absolute uncertainty on background slope
+--------------------------------
