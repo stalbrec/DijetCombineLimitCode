@@ -94,17 +94,9 @@ def plotGraph(modelname,channel,radmasses,color,obs=False):
     limits = []
     filenames =[]
     for m in radmasses:
-        filename = "test/CMS_jj_"+str(int(m*1000))+"_"+modelname+"_13TeV_CMS_jj_"+channel+"_asymptoticCLs_new.root"
-        #filename = "withoutPDFandScale/CMS_jj_"+str(int(m*1000))+"_"+modelname+"_13TeV_CMS_jj_"+channel+"_asymptoticCLs_new.root"
+        filename = "Limits/CMS_jj_"+str(int(m*1000))+"_"+modelname+"_13TeV_CMS_jj_"+channel+"_asymptoticCLs_new.root"
         filenames.append(filename)
-        if  modelname.find("WZ")!=-1:
-            efficiencies[m]= 0.01/((0.6991*0.6760))
-        if modelname.find("BulkZZ")!=-1:
-            efficiencies[m]=0.01/((0.6991*0.6991))
-        if modelname.find("BulkZZ")==-1 and modelname.find("WZ")==-1:
-            efficiencies[m]=0.01
-        else:
-            efficiencies[m]=0.01
+        efficiencies[m]=1.0
 
     for onefile in filenames:
         print "using file " + onefile
@@ -219,26 +211,7 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
 
     efficiencies={}
     for mass in radmasses:
-      efficiencies[mass]=0.01# assume 10/fb signal cross section #FOR Wprime=
-      if "WZ" in label.split("_")[0]:
-        print "Taking care of WZ hadronic branching fractions for exclusive samples: 0.6991*0.6760!"
-        efficiencies[mass]=0.01/((0.6991*0.6760)) #assume 10/fb signal and get rid of hadronic branching fraction)
-        
-      elif "BulkWW" in label.split("_")[0] or "Zprime" in label.split("_")[0]:
-        print "Taking care of WW hadronic branching fractions for inclusive samples: 1.!"
-        efficiencies[mass]=0.01
-        
-      elif "BulkZZ" in label.split("_")[0]:
-        print "Taking care of ZZ hadronic branching fractions for exclusive samples: 0.0.6991*0.0.6991!"
-        efficiencies[mass]=0.01/((0.6991*0.6991))
-        
-      elif "qZ" in label.split("_")[0]:
-        print "Taking care of qZ hadronic branching fractions for inclusive samples: 1.!"
-        efficiencies[mass]=0.01
-        
-      elif "qW" in label.split("_")[0]:
-        print "Taking care of qW hadronic branching fractions for inclusive samples: 1.!"
-        efficiencies[mass]=0.01
+      efficiencies[mass]=1.0 # assume 1/pb signal cross section
          
 
     #fChain = []
@@ -388,24 +361,13 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
     #frame.GetYaxis().CenterTitle(True)
     
     
-    if "qW" in label.split("_")[0] or "qZ" in label.split("_")[0]:
-        resonance="q*"
-        frame.GetXaxis().SetTitle("M_{q*} (TeV)")
-    if "RS1" in label.split("_")[0]:
-        resonance="G_{RS}"
-    if "Bulk" in label.split("_")[0]:
+    if "graviton" in label.split("_")[0]:
         frame.GetXaxis().SetTitle("M_{G_{Bulk}} (TeV)")
         resonance="G_{Bulk}"
-    if label.find("BulkWW")!=-1:
-        resonance = "G_{Bulk}/Z'"
-        frame.GetXaxis().SetTitle("M_{G_{Bulk}/Z'} (TeV)")
-    if "WZ" in label.split("_")[0]:
-        resonance="W'"
-        frame.GetXaxis().SetTitle("M_{W'} (TeV)")
-    if "ZprimeWW" in label.split("_")[0]:
-        resonance="Z'"
-        frame.GetXaxis().SetTitle("M_{Z'} (TeV)")
-    frame.GetYaxis().SetTitle("#sigma_{95%} #times BR("+resonance+" #rightarrow "+label.split("_")[0].replace("RS1","").replace("Bulk","").replace("Zprime","")+") (pb)")
+    if "radion" in label.split("_")[0]:
+        resonance="R"
+        frame.GetXaxis().SetTitle("M_{R} (TeV)")
+    frame.GetYaxis().SetTitle("#sigma_{95%} #times BR("+resonance+" #rightarrow "+label.split("_")[0].replace("graviton","").replace("radion","")+") (pb)")
 
     
 
@@ -459,96 +421,55 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
     gtheorySHADE.SetLineWidth(3)
     
     
-    filenameTH = "%s_xSecUnc.root"%label.split("_")[0]
-    thFile       = rt.TFile.Open(filenameTH,'READ')   
-    print "Opening file " ,thFile.GetName()
-    gtheory      = thFile.Get("gtheory")
-    gtheoryUP    = thFile.Get("gtheoryUP")
-    gtheoryDOWN  = thFile.Get("gtheoryDOWN")
-    gtheorySHADE = thFile.Get("grshade")
-    gtheory     .SetName("%s_gtheory"    %label.split("_")[0] )
-    gtheoryUP   .SetName("%s_gtheoryUP"  %label.split("_")[0] )
-    gtheoryDOWN .SetName("%s_gtheoryDOWN"%label.split("_")[0] )
-    gtheorySHADE.SetName("%s_grshade"    %label.split("_")[0] )
-    gtheorySHADE.SetLineColor(0)
-    gtheoryUP.SetLineColor(rt.kRed)
-    gtheoryDOWN.SetLineColor(rt.kRed)
-    gtheoryUP.SetLineWidth(1)
-    gtheoryDOWN.SetLineWidth(1)
+    #filenameTH = "%s_xSecUnc.root"%label.split("_")[0]
+    #thFile       = rt.TFile.Open(filenameTH,'READ')   
+    #print "Opening file " ,thFile.GetName()
+    #gtheory      = thFile.Get("gtheory")
+    #gtheoryUP    = thFile.Get("gtheoryUP")
+    #gtheoryDOWN  = thFile.Get("gtheoryDOWN")
+    #gtheorySHADE = thFile.Get("grshade")
+    #gtheory     .SetName("%s_gtheory"    %label.split("_")[0] )
+    #gtheoryUP   .SetName("%s_gtheoryUP"  %label.split("_")[0] )
+    #gtheoryDOWN .SetName("%s_gtheoryDOWN"%label.split("_")[0] )
+    #gtheorySHADE.SetName("%s_grshade"    %label.split("_")[0] )
+    #gtheorySHADE.SetLineColor(0)
+    #gtheoryUP.SetLineColor(rt.kRed)
+    #gtheoryDOWN.SetLineColor(rt.kRed)
+    #gtheoryUP.SetLineWidth(1)
+    #gtheoryDOWN.SetLineWidth(1)
     
     print "max cross section (observed limit ) : " +str(round(rt.TMath.MaxElement(n,grobs.GetY()),5))+ " pb" 
     print "min cross section (observed limit ) : " +str(round(rt.TMath.MinElement(n,grobs.GetY()),5))+ " pb"
 
-    tmpmasses = grobs.GetX()
-    tmplimits = grobs.GetY()
-    tmplimitsexp = grmean.GetY()
-    tmptheory = gtheory.GetY()
-    for counter in  range(0,n):
-        print "mass : "+str(tmpmasses[counter]) + " observed limit : "+str(round(tmplimits[counter]*1000,2))+" fb "+" expected limit "+str(round(tmplimitsexp[counter],5)*1000)+ " fb theory "+str(round(gtheory.Eval(tmpmasses[counter]),5)*1000)
+    #tmpmasses = grobs.GetX()
+    #tmplimits = grobs.GetY()
+    #tmplimitsexp = grmean.GetY()
+    #tmptheory = gtheory.GetY()
+    #for counter in  range(0,n):
+    #    print "mass : "+str(tmpmasses[counter]) + " observed limit : "+str(round(tmplimits[counter]*1000,2))+" fb "+" expected limit "+str(round(tmplimitsexp[counter],5)*1000)+ " fb theory "+str(round(gtheory.Eval(tmpmasses[counter]),5)*1000)
         
     
     
-    if label.find("Zprime")!=-1:
-        root = getIntersectionOfObservedLimitTheoryLine(2.6,gtheory,grobs)
-        printTheoryUncAtPoint(root,gtheory,gtheoryUP,gtheoryDOWN)
-    if label.find("WZ")!=-1:
-        root = getIntersectionOfObservedLimitTheoryLine(2.6,gtheory,grobs)
-        printTheoryUncAtPoint(root,gtheory,gtheoryUP,gtheoryDOWN)
-    if label.find("qZ")!=-1:
-        root = getIntersectionOfObservedLimitTheoryLine(4.5,gtheory,grobs)
-        printTheoryUncAtPoint(root,gtheory,gtheoryUP,gtheoryDOWN)
-    if label.find("qW")!=-1:
-        root = getIntersectionOfObservedLimitTheoryLine(4.6,gtheory,grobs)
-        printTheoryUncAtPoint(root,gtheory,gtheoryUP,gtheoryDOWN)
+    #if label.find("Zprime")!=-1:
+    #    root = getIntersectionOfObservedLimitTheoryLine(2.6,gtheory,grobs)
+    #    printTheoryUncAtPoint(root,gtheory,gtheoryUP,gtheoryDOWN)
+    #if label.find("WZ")!=-1:
+    #    root = getIntersectionOfObservedLimitTheoryLine(2.6,gtheory,grobs)
+    #    printTheoryUncAtPoint(root,gtheory,gtheoryUP,gtheoryDOWN)
+    #if label.find("qZ")!=-1:
+    #    root = getIntersectionOfObservedLimitTheoryLine(4.5,gtheory,grobs)
+    #    printTheoryUncAtPoint(root,gtheory,gtheoryUP,gtheoryDOWN)
+    #if label.find("qW")!=-1:
+    #    root = getIntersectionOfObservedLimitTheoryLine(4.6,gtheory,grobs)
+    #    printTheoryUncAtPoint(root,gtheory,gtheoryUP,gtheoryDOWN)
     
-    mg.Add(gtheory,"L")
-    mg.Add(gtheoryUP,"L")
-    mg.Add(gtheoryDOWN,"L")
-    mg.Add(gtheorySHADE,"L")
-    gtheory.Draw("L")
-    # gtheoryUP.Draw("L")
-#     gtheoryDOWN.Draw("L")
-    gtheorySHADE.Draw("F")
+    #mg.Add(gtheory,"L")
+    #mg.Add(gtheoryUP,"L")
+    #mg.Add(gtheoryDOWN,"L")
+    #mg.Add(gtheorySHADE,"L")
+    #gtheory.Draw("L")
+    #gtheorySHADE.Draw("F")
    
-    
-    if CompareLimits:
-        modelname = plotExpLimitRatio
-        channel   = "VVnew"
-        if combinedplots[0].find("WWHP")!=-1:
-            channel = "WWHP"
-        if combinedplots[0].find("WZHP")!=-1:
-            channel = "WZHP"
-        if combinedplots[0].find("ZZHP")!=-1:
-            channel = "ZZHP"
-        if combinedplots[0].find("WWLP")!=-1:
-            channel = "WWLP"
-        if combinedplots[0].find("WZLP")!=-1:
-            channel = "WZLP"
-        if combinedplots[0].find("ZZLP")!=-1:
-                channel = "ZZLP"
-        if combinedplots[0].find("qW")!=-1:
-            modelname = "altqW"
-            channel   = "qVnew"
-            if combinedplots[0].find("qWHP")!=-1:
-                channel   = "qWHP"
-            if combinedplots[0].find("qWLP")!=-1:
-                channel   = "qWLP"
-            if combinedplots[0].find("qZHP")!=-1:
-                channel   = "qZHP"
-            if combinedplots[0].find("qZLP")!=-1:
-                channel   = "qZLP"
-            
-       
-        
-        
-       
-        color = 5
-        cgraphs = plotGraph(modelname,channel,radmasses,color,obs)
-        for g in cgraphs:
-            print g
-            #g.SetLineColor(kRed)
-            g.Draw("Lsame")
-    
     
     if "qZ" in label.split("_")[0]:
       ltheory="#sigma_{TH}#timesBR(q*#rightarrowqZ)"
@@ -592,12 +513,12 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
     if obs: leg.AddEntry(grobs, "Observed", "Lp")
     leg.AddEntry(gryellow, "Expected #pm 1 std. deviation", "f")
     leg.AddEntry(grgreen , "Expected #pm 2 std. deviation", "f")
-    leg.AddEntry(gtheory, ltheory, "L")
+    #leg.AddEntry(gtheory, ltheory, "L")
 
     if obs: leg2.AddEntry(grobs, " ", "")
     leg2.AddEntry(grmean, " ", "L")
     leg2.AddEntry(grmean, " ", "L")
-    leg2.AddEntry(gtheorySHADE, " ", "F")
+    #leg2.AddEntry(gtheorySHADE, " ", "F")
 
     if label.find("BulkWW")!=-1:
         gt2 = PlotTheoryLine("ZprimeWW")
@@ -751,8 +672,8 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
   #   del gtheory
   #   del gtheoryUP
   #   del gtheoryDOWN
-    del gtheorySHADE
-    thFile.Close()
+    #del gtheorySHADE
+    #thFile.Close()
 
     
     
@@ -805,6 +726,10 @@ def addText(label):
     if label.find("qVnew")!=-1:
         bla.AddText("qW + qZ")
         bla.AddText("HP + LP")
+    if label.find("graviton")!=-1:
+        bla.AddText("G* to WW")
+    if label.find("radion")!=-1:
+        bla.AddText("R to WW")
     return bla
     
         
@@ -819,74 +744,21 @@ if __name__ == '__main__':
   parser.add_option("-s", "--signal", dest="signal", default="BulkWW",action="store",
                               help="select signal")
   (opts, args) = parser.parse_args(argv)  
-  postfix = "newSF/"#"newSF/"
+  postfix = "Limits/"
 
-  channels=["WZ","BulkWW","BulkZZ"]#,"qW","qZ"]
-  channels=[opts.signal]
-  region = opts.region
+  channels=["graviton","radion"]
+  region="_invMass"
+  #channels=[opts.signal]
+  #region = opts.region
   CompareLimits = False #True
   plotExpLimitRatio = ""
   
   for chan in channels:
-    masses =[m*100 for m in range(12,41+1)]
-    
-    #if chan.find("BulkZZ") != -1: masses =[m*100 for m in range(11,40+1)]
-    if chan.find("q") != -1: masses =[m*100 for m in range(12,60+1)]
-    # if chan.find("qZHPplots") != -1:
-    # masses =[1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000,2100 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000, 3100, 3200, 3300, 3400, 3500, 3600, 3700, 3800, 3900, 4000, 4100, 4200, 4300, 4400, 4500, 4600, 4700, 4800, 4900, 5000, 5100, 5200, 5300, 5400, 5500, 5600, 5700, 5800, 5900, 6000, 6100, 6200]
+    masses =[2000,2100]
 
-    HPplots=[]
-    LPplots=[]
-    WWHPplots=[]
-    WZHPplots=[]
-    ZZHPplots=[]
-    WWLPplots=[]
-    WZLPplots=[]
-    ZZLPplots=[]
-    combinedplots_old=[]
     combinedplots=[]
     
-    qVHPplots=[]
-    qVLPplots=[]
-    qWHPplots=[]
-    qZHPplots=[]
-    qWLPplots=[]
-    qZLPplots=[]
-    combinedplots_qV=[]
-    
     for mass in masses:
-       #if mass == 2400 or mass ==1400 or mass == 1900 or mass ==3600 or mass == 3800 or mass == 4100 :
-        #    continue;
-       # HPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_VVHPnew_asymptoticCLs.root"]
-#        LPplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_VVLPnew_asymptoticCLs.root"]
-       if chan.find("q")!=-1:
-            #combinedplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_qVnew_asymptoticCLs_new.root"]
-            combinedplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_"+region+"_asymptoticCLs_new.root"]
-       else:
-           combinedplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_"+region+"_asymptoticCLs_new.root"]
-           #combinedplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_CMS_jj_VVnew_asymptoticCLs_new.root"]
-      
-      
-    # Plot(WWHPplots,chan+"_WWHP", obs=True)
-#     Plot(WWLPplots,chan+"_WWLP", obs=True)
-#     Plot(WZHPplots,chan+"_WZHP", obs=True)
-#     Plot(WZLPplots,chan+"_WZLP", obs=True)
-#     Plot(ZZHPplots,chan+"_ZZHP", obs=True)
-#     Plot(ZZLPplots,chan+"_ZZLP", obs=True)
-    # Plot(LPplots,chan+"_VVLP_new_combined_purity", obs=True)
-    # Plot(HPplots,chan+"_VVHP_new_combined_purity", obs=True)
-   
-    Plot(combinedplots,chan+"_"+region+"_new_combined", obs=True,CompareLimits=False,plotExpLimitRatio="")  
-    #Plot(combinedplots,chan+"_WWHP_testDiffRanges2", obs=True,CompareLimits=True,plotExpLimitRatio="testZprimeWW")
+       combinedplots+=[postfix+"CMS_jj_"+str(mass)+"_"+chan+"_13TeV_"+region+"_asymptoticCLs_new.root"]
 
-    
-    
-    
-    # Plot(qWHPplots,chan+"_qWHP", obs=True)
-    # Plot(qWLPplots,chan+"_qWLP", obs=True)
-    # Plot(qZHPplots,chan+"_qZHP", obs=True)
-    # Plot(qZLPplots,chan+"_qZLP", obs=True)
-    # # # Plot(qVLPplots,chan+"_qVLP_new_combined_purity", obs=True)
-    # # Plot(qVHPplots,chan+"_qVHP_new_combined_purity", obs=True)
-    # Plot(combinedplots_qV,chan+"_new_combined", obs=True)
-    # # Plot(combinedplots_old,chan+"_old_combined", obs=False)
+    Plot(combinedplots,chan+"_"+region+"_new_combined", obs=True,CompareLimits=False,plotExpLimitRatio="")  
