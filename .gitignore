@@ -5,9 +5,6 @@ Limits/*.pdf
 *.src
 *.out
 *.log
-workspaces/*13TeV*
+workspaces/*
 input/*
-MiniTrees/
-Limits/80X
-Limits/
-explimits80X/
+MiniTrees/*
