@@ -25,11 +25,11 @@ for chan in channels:
 
         for mass in masses:
           print "mass =",mass
-          directory="datacards/"
+
           for point in points:
 
-            outputname = directory+"CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+"_limit"+str(int(point*10))+"_submit.src"
-            logname = directory+"CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+"_limit"+str(int(point*10))+"_submit.out"
+            outputname = "CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+"_limit"+str(int(point*10))+"_submit.src"
+            logname = "CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+"_limit"+str(int(point*10))+"_submit.out"
             outputfile = open(outputname,'w')
             outputfile.write('#!/bin/bash\n')
             outputfile.write("cd ${CMSSW_BASE}/src/DijetCombineLimitCode; eval `scramv1 run -sh`\n")
@@ -52,11 +52,11 @@ for chan in channels:
             print command
             os.system(command)
             if fullToys:
-              command="""bsub -q 8nh -o """+logname+" source "+outpu
+              command="""bsub -q 8nh -o """+logname+" source "+outputname
               # command="""qsub -q all.q """+outputname+" source "+outputname
-              # submitJobsOnT3batch.sh
+               # submitJobsOnT3batch.sh
             else:
-                command="chmod 755 ./"+outputname+";./"+outputname
-                print command
-                os.system(command)
-                os.system("chmod 755 ./"+outputname+";./"+outputname)
+              command="chmod 755 ./"+outputname+";./"+outputname
+              print command
+              os.system(command)
+              os.system("chmod 755 ./"+outputname+";./"+outputname)
