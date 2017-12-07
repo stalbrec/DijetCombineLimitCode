@@ -32,9 +32,9 @@ frac1 = 0.8
 frac2 = 1.2
 
 inputRoot = sys.argv[1]
-print "INPUT = %s"%inputRoot
+# print "INPUT = %s"%inputRoot
 outmjj = int( sys.argv[2] )
-print "outmjj = %s"%outmjj
+# print "outmjj = %s"%outmjj
 if len(sys.argv)>3:
    suffix=sys.argv[3]
 else:
@@ -48,10 +48,10 @@ histnames= [
             ]
 
 if "graviton" in inputRoot:
-  masses=[1200,2000,4500]
+  masses=[1200,2000,4000]
 
 if "radion" in inputRoot:
-  masses=[1200,2000,4500]
+  masses=[1200,2000,4000]
   
 for i in range(len(masses)-1):
    if outmjj>=masses[i] and outmjj<masses[i+1]:

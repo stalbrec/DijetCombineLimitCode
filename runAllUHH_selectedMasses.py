@@ -4,13 +4,13 @@
 import os
 
 steps=[1,2,3,4,5]
-masses=[1200,1400,1600,1800,2000,2500,3000,3500,4000,4500]
+masses=[1200,2000,4000]
 
 if 1 in steps:
  for mass in masses:
   # interpolate between signal MCs
-  os.system('python interpolateUHH.py input/graviton '+str(mass))
-  os.system('python interpolateUHH.py input/radion '+str(mass))
+  os.system('python interpolateUHH_selectedMasses.py input/graviton '+str(mass))
+  os.system('python interpolateUHH_selectedMasses.py input/radion '+str(mass))
 
 if 2 in steps:
  # produce minitrees
@@ -33,4 +33,4 @@ if 4 in steps:
 
 if 5 in steps:
 # for mass in masses:
-  os.system('python Limits/brazilianFlag_theoryUncBand.py')
+  os.system('python Limits/brazilianFlag_theoryUncBand_selectedMasses.py')

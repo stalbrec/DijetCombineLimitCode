@@ -35,12 +35,14 @@ inputRoot = sys.argv[1]
 print "INPUT = %s"%inputRoot
 outmjj = int( sys.argv[2] )
 print "outmjj = %s"%outmjj
-if len(sys.argv)>3:
-   suffix=sys.argv[3]
+cut = sys.argv[3]
+print "cut = %s"%cut #irene
+if len(sys.argv)>4: #irene 
+   suffix=sys.argv[4] #irene
 else:
    suffix=""
 
-
+print "suffix = %s"%suffix
 # print "suffix = %s"%suffix
 histnames= [
             "_invMass", # inclusive
@@ -48,11 +50,11 @@ histnames= [
             ]
 
 if "graviton" in inputRoot:
-  masses=[1200,2000,4500]
+  masses=[1200,2000,4000]
 
 if "radion" in inputRoot:
-  masses=[1200,2000,4500]
-  
+  masses=[1200,2000,4000]
+
 for i in range(len(masses)-1):
    if outmjj>=masses[i] and outmjj<masses[i+1]:
        mjjlow = masses[i]
@@ -61,12 +63,13 @@ if outmjj>=masses[-1]:
    mjjlow = masses[-2]
    mjjhigh = masses[-1]
 
-inputlow = TFile( inputRoot + str(mjjlow) + suffix + '.root' )
-inputhigh = TFile( inputRoot + str(mjjhigh) + suffix +  '.root' )
-output = TFile( inputRoot +'Interpolated' + str(outmjj) + suffix + '.root', 'recreate')
-# print "inputlow = %s"%inputlow
-# print "inputhigh = %s"%inputhigh
-# print "output = %s"%output
+inputlow = TFile( inputRoot +'_'+ cut + "_" + str(mjjlow) + suffix + '.root' ) #irene should I add the cut here?
+inputhigh = TFile( inputRoot +'_'+  cut + "_" +str(mjjhigh) + suffix +  '.root' )
+output = TFile( inputRoot +'_'+cut+'_Interpolated' + str(outmjj) + suffix + '.root', 'recreate') #irene
+
+print "inputlow = %s"%inputlow
+print "inputhigh = %s"%inputhigh
+print "output = %s"%output
 
 print sys.argv[1], outmjj, mjjlow, mjjhigh
 

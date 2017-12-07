@@ -289,7 +289,6 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
     grmean = rt.TGraphErrors(1)
     grmean.SetLineColor(1)
     grmean.SetLineWidth(4)
-#    grmean.SetLineStyle(3)
     grmean.SetLineStyle(2) #irene
     grmean.SetMarkerStyle(20) #irene
     gr1down = rt.TGraphErrors(1)
@@ -409,7 +408,7 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
     gryellow.SetFillStyle(1001)
     gryellow.Draw("Fsame") 
 
-    grmean.Draw("L")
+    grmean.Draw("LP")
     if obs: grobs.Draw("LPsame")
     
 
@@ -626,7 +625,6 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
         print "radion"
     print " observed limit for M=1200 GeV "+str(grobs.Eval(1.2))
     print " observed limit for M=2000 GeV "+str(grobs.Eval(2.0))
-    print " observed limit for M=3000 GeV "+str(grobs.Eval(3.0))
     print " observed limit for M=4000 GeV "+str(grobs.Eval(4.0))
     
     
@@ -687,6 +685,8 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
     
     
     time.sleep(5)
+
+
     
 def addText(label):
     bla = rt.TPaveText(0.9,0.8,0.6,0.7,"NDC")
@@ -764,7 +764,7 @@ if __name__ == '__main__':
   
   for chan in channels:
       for region in regions:
-          masses =[1200,1400,1600,1800,2000,2500,3000,3500,4000]
+          masses =[1200,2000,4000]
 
           combinedplots=[]
     
@@ -775,4 +775,3 @@ if __name__ == '__main__':
               Plot(combinedplots,chan+"_"+region+"_new_combined", obs=True,CompareLimits=False,plotExpLimitRatio="")  
           if region == "_invMass_afterVBFsel":
               Plot(combinedplots,chan+"_"+region+"_new_combined", obs=False,CompareLimits=False,plotExpLimitRatio="")  
-
