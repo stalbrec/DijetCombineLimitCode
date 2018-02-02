@@ -1,8 +1,8 @@
-void MiniTreeProducerDataUHH(string infile="input/radion2000.root"){
+void MiniTreeProducerDataUHH_cut(string selection){
 
  double mgg, mjj,evWeight, mtot, normWeight;
  int categories;
-
+ string infile="input/radion_"+selection+"_2000.root";
  evWeight = 1.0;
  normWeight = 1.;
 
@@ -12,7 +12,7 @@ void MiniTreeProducerDataUHH(string infile="input/radion2000.root"){
  
 
  string suffix ="";
- string sOutFile  = "MiniTrees/DataUHH/dijetUHH_13TeV_miniTree"+suffix+".root";
+ string sOutFile  = "MiniTrees/DataUHH/dijetUHH_13TeV_miniTree"+suffix+"_"+selection+".root";
  int minCategorie = 0;
  int maxCategorie = 2;//irene, before 1
  TFile f1(sOutFile.c_str(), "recreate");

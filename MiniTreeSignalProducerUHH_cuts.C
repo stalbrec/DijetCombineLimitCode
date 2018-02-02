@@ -1,4 +1,4 @@
-void MiniTreeSignalProducerUHH(int samplemin=0, int samplemax=2, int dMass=2000){
+void MiniTreeSignalProducerUHH_cuts(int samplemin=0, int samplemax=2, int dMass=2000, string sSelection=""){
      std::cout << " MiniTreeSignalProducerUHH" << std::endl;
 
  string dir = "";
@@ -21,12 +21,12 @@ void MiniTreeSignalProducerUHH(int samplemin=0, int samplemax=2, int dMass=2000)
    if (iSample == 0) outFile = string("dijetUHH_13TeV_graviton");
    if (iSample == 1) outFile = string("dijetUHH_13TeV_radion");
    
-     string sInFile = dir+"input/" + inFile + Form("Interpolated%d.root", dMass);
+   string sInFile = dir+"input/" + inFile + Form("_%s_Interpolated%d.root", sSelection.c_str(), dMass);
      std::cout << sInFile.c_str() << std::endl;
      TFile file0(sInFile.c_str(), "read");
 
      //     string sOutFile = dir+"MiniTrees/SignalUHH/" + outFile + Form("Interpolated%d_miniTree.root", dMass);
-     string sOutFile = "MiniTrees/SignalUHH/" + outFile + Form("Interpolated%d_miniTree.root", dMass);
+     string sOutFile = "MiniTrees/SignalUHH/" + outFile + Form("_%s_Interpolated%d_miniTree.root",sSelection.c_str(), dMass);
      TFile f1(sOutFile.c_str(), "recreate");
      f1.cd();
 
