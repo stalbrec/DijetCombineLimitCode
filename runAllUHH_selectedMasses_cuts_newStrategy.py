@@ -6,7 +6,6 @@ import os
 #steps=[1,2]#,3]#,4,5]
 steps=[1,2,3,4,5]
 masses=[1200,2000,4000]
-#selections=[DijetM500,DijetM1000,DijetM1500,DijetM2000]
 cuts=["VV","VBF","invM500","invM1000","invM1500","invM2000","invM2500","invM3000","invM3500","invM4000"]
 #cuts=["tau21","tau21_deta4","tau21_deta5","tau21_deta6","tau21_04","tau21_04_deta4","tau21_04_deta5","tau21_04_deta6","tau21_05","tau21_05_deta4","tau21_05_deta5","tau21_05_deta6","tau21_06","tau21_06_deta4","tau21_06_deta5","tau21_06_deta6","tau21_07","tau21_07_deta4","tau21_07_deta5","tau21_07_deta6"]
 #cuts=["check"]
@@ -38,6 +37,7 @@ if 3 in steps:
             os.system('root -b -q "UHHFitter_cuts_newStrategy.cc(\\"'+str(cut)+'\\",'+str(mass)+',1,0,\\\"\\\")"') # radion inclusive
             os.system('root -b -q "UHHFitter_cuts_newStrategy.cc(\\"'+str(cut)+'\\",'+str(mass)+',0,1,\\\"\\\")"') # graviton VBF-only
             os.system('root -b -q "UHHFitter_cuts_newStrategy.cc(\\"'+str(cut)+'\\",'+str(mass)+',1,1,\\\"\\\")"') # radion VBF-only
+            os.system('python Limits/CombineDatacardsUHH_cuts.py '+str(mass)+' '+str(cut))
 
 if 4 in steps:
 #if 1 in steps:
