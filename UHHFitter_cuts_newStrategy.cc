@@ -7,11 +7,14 @@ static const Int_t NCAT = 2;
 Double_t MMIN = 1050.;
 Double_t MMAX = 4500.;
 Double_t SQRTS = 13000.;
-Double_t CHANNEL = 0; //1==VV 2==qV 3==noPurity
+Double_t CHANNEL = 0;
 std::string filePOSTfix="";
 double signalScaler=1./(10.); // assume signal cross section of 1pb (The factor 100. is the number of gen events that is set to 100. for all samples in the interpolation script. Dividing out BR(V-->had)=70% for non-inclusive samples
-double scaleFactorHP=0.99;//1.04; // tau21 and jet mass scale factors data/MC
-double scaleFactorLP=1.03;//0.96; // tau21 and jet mass scale factors data/MC
+double scaleFactorHP=1.0;// tau21 and jet mass scale factors data/MC
+double scaleFactorLP=1.0;// tau21 and jet mass scale factors data/MC
+
+bool constrainBackgroundParametersToSimulation=false; //NewStrategy. This option is useful for optimizing selection, but not adequat for analyzing data.
+bool correlateBackgroundParametersBetweenCategories=true;
 
 string directory = "./" ;
 TColor *col = new TColor();
@@ -411,17 +414,20 @@ vector<RooFitResult*> BkgModelFit(std::string altfunc,RooWorkspace* w, Bool_t do
   mgg->setUnit("GeV");
   
   for (int c = ncat_min; c < ncat_min+ncat; ++c) {
+    int mainCategory=c;
+    if (correlateBackgroundParametersBetweenCategories) mainCategory=0;
+    
     data[c]   = (RooDataSet*) w->data(TString::Format("Data_%s",cat_names.at(c).c_str()));
 
-    w->factory(TString::Format("bkg_fit_slope1_%s[5.,-100.,100.]",cat_names.at(c).c_str()));
-    w->factory(TString::Format("bkg_fit_slope2_%s[5.,-100.,100.]",cat_names.at(c).c_str()));
-    w->factory(TString::Format("bkg_fit_slope3_%s[5.,0.,50.]",cat_names.at(c).c_str()));
-    w->factory(TString::Format("bkg_fit_slope4_%s[100.,-1000.,1000.]",cat_names.at(c).c_str()));
+    w->factory(TString::Format("bkg_fit_slope1_%s[5.,-100.,100.]",cat_names.at(mainCategory).c_str()));
+    w->factory(TString::Format("bkg_fit_slope2_%s[5.,-100.,100.]",cat_names.at(mainCategory).c_str()));
+    w->factory(TString::Format("bkg_fit_slope3_%s[5.,0.,50.]",cat_names.at(mainCategory).c_str()));
+    w->factory(TString::Format("bkg_fit_slope4_%s[100.,-1000.,1000.]",cat_names.at(mainCategory).c_str()));
  
-    RooFormulaVar *p1mod = new RooFormulaVar(TString::Format("p1mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(c).c_str())));
-    RooFormulaVar *p2mod = new RooFormulaVar(TString::Format("p2mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())));
-    RooFormulaVar *p3mod = new RooFormulaVar(TString::Format("p3mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(c).c_str())));
-    RooFormulaVar *p4mod = new RooFormulaVar(TString::Format("p4mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(c).c_str())));
+    RooFormulaVar *p1mod = new RooFormulaVar(TString::Format("p1mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(mainCategory).c_str())));
+    RooFormulaVar *p2mod = new RooFormulaVar(TString::Format("p2mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())));
+    RooFormulaVar *p3mod = new RooFormulaVar(TString::Format("p3mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(mainCategory).c_str())));
+    RooFormulaVar *p4mod = new RooFormulaVar(TString::Format("p4mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(mainCategory).c_str())));
      
     RooFormulaVar *sqrtS = new RooFormulaVar(TString::Format("sqrtS_%s",cat_names.at(c).c_str()),"","@0",*w->var("sqrtS"));
     RooFormulaVar *x = new RooFormulaVar(TString::Format("x_%s",cat_names.at(c).c_str()),"","@0/@1",RooArgList(*mgg, *sqrtS));
@@ -439,26 +445,29 @@ vector<RooFitResult*> BkgModelFit(std::string altfunc,RooWorkspace* w, Bool_t do
     {
       //============== use levelled exponential as alternative function ========================================
        RooFormulaVar *x = new RooFormulaVar(TString::Format("x_%s",cat_names.at(c).c_str()),"","@0",RooArgList(*mgg));
-       p3mod = new RooFormulaVar(TString::Format("p3mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(c).c_str())));
+       p3mod = new RooFormulaVar(TString::Format("p3mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(mainCategory).c_str())));
        bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "exp(-(@0-@1)/(@2+@3*(@0-@1)))", RooArgList(*x, *p1mod, *p2mod, *p3mod));
     }
     if (altfunc.find("alt")!=std::string::npos)
     {
     //============== use alt. four parameter funtion as alternative function ====================================
     x = new RooFormulaVar(TString::Format("x_%s",cat_names.at(c).c_str()),"","@0/@1",RooArgList(*mgg, *sqrtS));
-    p4mod = new RooFormulaVar(TString::Format("p4mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(c).c_str())));
+    p4mod = new RooFormulaVar(TString::Format("p4mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(mainCategory).c_str())));
     bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "( @1*pow(1-@0 + @4*pow(@0,2),@2) ) / ( pow(@0/13000.,@3) )", RooArgList(*x, *p1mod, *p2mod, *p3mod,*p4mod));
     }
     
     RooAbsReal* bkg_fitTmp2  = new RooRealVar(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str()),"",data[c]->sumEntries(),1.0,1000000000);
     w->import(*bkg_fitTmp);
     w->import(*bkg_fitTmp2);
-
-    fitresult[c] = bkg_fitTmp->fitTo(*data[c], Strategy(1),Minos(kFALSE), Range(minMassFit,maxMassFit),SumW2Error(kTRUE), Save(kTRUE),PrintEvalErrors(-1));
-    ((RooRealVar*) w->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(c).c_str())))->setConstant(true); //newStrategy
-    ((RooRealVar*) w->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->setConstant(true); //newStrategy
-    ((RooRealVar*) w->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(c).c_str())))->setConstant(true); //newStrategy
-    ((RooRealVar*) w->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(c).c_str())))->setConstant(true); //newStrategy
+ 
+    if (c==mainCategory)
+      fitresult[c] = bkg_fitTmp->fitTo(*data[c], Strategy(1),Minos(kFALSE), Range(minMassFit,maxMassFit),SumW2Error(kTRUE), Save(kTRUE),PrintEvalErrors(-1));
+    if(constrainBackgroundParametersToSimulation) {
+    ((RooRealVar*) w->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(mainCategory).c_str())))->setConstant(true); //newStrategy
+    ((RooRealVar*) w->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->setConstant(true); //newStrategy
+    ((RooRealVar*) w->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(mainCategory).c_str())))->setConstant(true); //newStrategy
+    ((RooRealVar*) w->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(mainCategory).c_str())))->setConstant(true); //newStrategy
+    }
     //************************************************//
     // Plot jj background fit results per categories 
     //************************************************//
@@ -841,6 +850,9 @@ void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, s
     cout << "For category " << c << endl;
     data[c]      = (RooDataSet*) w->data(TString::Format("Data_%s",cat_names.at(c).c_str()));
     std::cout << data[c] << std::endl;
+
+    int mainCategory=c;
+    if (correlateBackgroundParametersBetweenCategories) mainCategory=0;
     
     RooDataHist* dataBinned;
     std::string name = fileBaseName;
@@ -876,51 +888,51 @@ void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, s
     double max = (wAll->var(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())))->getMax();
     wAll->factory(TString::Format("CMS_bkg_fit_%s_13TeV_norm[%g,%g,%g]", cat_names.at(c).c_str(), mean, min, max));
 
-    mean = (wAll->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(c).c_str())))->getVal();
-    min = (wAll->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(c).c_str())))->getMin();
-    max = (wAll->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(c).c_str())))->getMax();
+    mean = (wAll->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(mainCategory).c_str())))->getVal();
+    min = (wAll->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(mainCategory).c_str())))->getMin();
+    max = (wAll->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(mainCategory).c_str())))->getMax();
 
-    wAll->factory(TString::Format("CMS_bkg_fit_slope1_%s_13TeV[%g,%g,%g]", cat_names.at(c).c_str(), mean, min, max));
+    wAll->factory(TString::Format("CMS_bkg_fit_slope1_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
 
     if ( altfunc.find("alt")!=std::string::npos)
     {
        //================ take alt four parameter as fit function  =======================================
-       mean = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->getVal();
-       min  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->getMin(); 
-       max  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->getMax(); 
-       wAll->factory(TString::Format("CMS_bkg_fit_slope2_%s_13TeV[%g,%g,%g]", cat_names.at(c).c_str(), mean, min, max));
+       mean = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getVal();
+       min  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getMin(); 
+       max  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getMax(); 
+       wAll->factory(TString::Format("CMS_bkg_fit_slope2_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
           
         
-       mean = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(c).c_str())))->getVal();
-       min  = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(c).c_str())))->getMin(); 
-       max  = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(c).c_str())))->getMax(); 
-       wAll->factory(TString::Format("CMS_bkg_fit_slope3_%s_13TeV[%g,%g,%g]", cat_names.at(c).c_str(), mean, min, max));
+       mean = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(mainCategory).c_str())))->getVal();
+       min  = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(mainCategory).c_str())))->getMin(); 
+       max  = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(mainCategory).c_str())))->getMax(); 
+       wAll->factory(TString::Format("CMS_bkg_fit_slope3_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
         
-       mean = (wAll->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(c).c_str())))->getVal();
-       min  = (wAll->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(c).c_str())))->getMin(); 
-       max  = (wAll->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(c).c_str())))->getMax(); 
-       wAll->factory(TString::Format("CMS_bkg_fit_slope4_%s_13TeV[%g,%g,%g]", cat_names.at(c).c_str(), mean, min, max));
+       mean = (wAll->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(mainCategory).c_str())))->getVal();
+       min  = (wAll->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(mainCategory).c_str())))->getMin(); 
+       max  = (wAll->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(mainCategory).c_str())))->getMax(); 
+       wAll->factory(TString::Format("CMS_bkg_fit_slope4_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
     }
     if (altfunc.find("Exp")!=std::string::npos)
     {
         // =============== take levelled exponential as fit function ===================================== 
-       mean = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->getVal();
-       min  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->getMin(); 
-       max  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->getMax(); 
-       wAll->factory(TString::Format("CMS_bkg_fit_slope2_%s_13TeV[%g,%g,%g]", cat_names.at(c).c_str(), mean, min, max));
+       mean = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getVal();
+       min  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getMin(); 
+       max  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getMax(); 
+       wAll->factory(TString::Format("CMS_bkg_fit_slope2_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
         
-       mean = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(c).c_str())))->getVal();
-       min  = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(c).c_str())))->getMin(); 
-       max  = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(c).c_str())))->getMax(); 
-       wAll->factory(TString::Format("CMS_bkg_fit_slope3_%s_13TeV[%g,%g,%g]", cat_names.at(c).c_str(), mean, min, max)); 
+       mean = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(mainCategory).c_str())))->getVal();
+       min  = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(mainCategory).c_str())))->getMin(); 
+       max  = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(mainCategory).c_str())))->getMax(); 
+       wAll->factory(TString::Format("CMS_bkg_fit_slope3_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max)); 
     }
     if (altfunc.find("3par")!=std::string::npos)
     {
         // =============== take 3 parameter as fit function ===================================== 
-       mean = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->getVal();
-       min  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->getMin(); 
-       max  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(c).c_str())))->getMax(); 
-       wAll->factory(TString::Format("CMS_bkg_fit_slope2_%s_13TeV[%g,%g,%g]", cat_names.at(c).c_str(), mean, min, max));
+       mean = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getVal();
+       min  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getMin(); 
+       max  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getMax(); 
+       wAll->factory(TString::Format("CMS_bkg_fit_slope2_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
         
     }
 
@@ -935,38 +947,42 @@ void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, s
   // (2) do reparametrization of background
 
   for (int c = ncat_min; c < ncat_min+ncat; ++c) {
+
+    int mainCategory=c;
+    if (correlateBackgroundParametersBetweenCategories) mainCategory=0;
+
     if ( altfunc.find("alt")!=std::string::npos) {
       wAll->factory(
         TString::Format("EDIT::CMS_bkg_fit_%s_13TeV(bkg_fit_%s,",cat_names.at(c).c_str(),cat_names.at(c).c_str()) +
           TString::Format(" bkg_fit_%s_norm=CMS_bkg_fit_%s_13TeV_norm,", cat_names.at(c).c_str(),cat_names.at(c).c_str())+
-            TString::Format(" bkg_fit_slope1_%s=CMS_bkg_fit_slope1_%s_13TeV,", cat_names.at(c).c_str(),cat_names.at(c).c_str())+
-              TString::Format(" bkg_fit_slope2_%s=CMS_bkg_fit_slope2_%s_13TeV,", cat_names.at(c).c_str(),cat_names.at(c).c_str())+
-                TString::Format(" bkg_fit_slope3_%s=CMS_bkg_fit_slope3_%s_13TeV,", cat_names.at(c).c_str(),cat_names.at(c).c_str())+
-                  TString::Format(" bkg_fit_slope4_%s=CMS_bkg_fit_slope4_%s_13TeV)", cat_names.at(c).c_str(),cat_names.at(c).c_str())
+            TString::Format(" bkg_fit_slope1_%s=CMS_bkg_fit_slope1_%s_13TeV,", cat_names.at(mainCategory).c_str(),cat_names.at(c).c_str())+
+              TString::Format(" bkg_fit_slope2_%s=CMS_bkg_fit_slope2_%s_13TeV,", cat_names.at(mainCategory).c_str(),cat_names.at(c).c_str())+
+                TString::Format(" bkg_fit_slope3_%s=CMS_bkg_fit_slope3_%s_13TeV,", cat_names.at(mainCategory).c_str(),cat_names.at(c).c_str())+
+                  TString::Format(" bkg_fit_slope4_%s=CMS_bkg_fit_slope4_%s_13TeV)", cat_names.at(mainCategory).c_str(),cat_names.at(c).c_str())
                     );
     }
     if ( altfunc.find("Exp")!=std::string::npos) {
       wAll->factory(
         TString::Format("EDIT::CMS_bkg_fit_%s_13TeV(bkg_fit_%s,",cat_names.at(c).c_str(),cat_names.at(c).c_str()) +
           TString::Format(" bkg_fit_%s_norm=CMS_bkg_fit_%s_13TeV_norm,", cat_names.at(c).c_str(),cat_names.at(c).c_str())+
-            TString::Format(" bkg_fit_slope1_%s=CMS_bkg_fit_slope1_%s_13TeV,", cat_names.at(c).c_str(),cat_names.at(c).c_str())+
-              TString::Format(" bkg_fit_slope2_%s=CMS_bkg_fit_slope2_%s_13TeV,", cat_names.at(c).c_str(),cat_names.at(c).c_str())+
-                TString::Format(" bkg_fit_slope3_%s=CMS_bkg_fit_slope3_%s_13TeV,", cat_names.at(c).c_str(),cat_names.at(c).c_str())
+            TString::Format(" bkg_fit_slope1_%s=CMS_bkg_fit_slope1_%s_13TeV,", cat_names.at(mainCategory).c_str(),cat_names.at(c).c_str())+
+              TString::Format(" bkg_fit_slope2_%s=CMS_bkg_fit_slope2_%s_13TeV,", cat_names.at(mainCategory).c_str(),cat_names.at(c).c_str())+
+                TString::Format(" bkg_fit_slope3_%s=CMS_bkg_fit_slope3_%s_13TeV,", cat_names.at(mainCategory).c_str(),cat_names.at(c).c_str())
                     );
     }
     else if (altfunc.find("3par")!=std::string::npos) {
       wAll->factory(
         TString::Format("EDIT::CMS_bkg_fit_%s_13TeV(bkg_fit_%s,",cat_names.at(c).c_str(),cat_names.at(c).c_str()) +
           TString::Format(" bkg_fit_%s_norm=CMS_bkg_fit_%s_13TeV_norm,", cat_names.at(c).c_str(),cat_names.at(c).c_str())+
-            TString::Format(" bkg_fit_slope1_%s=CMS_bkg_fit_slope1_%s_13TeV,", cat_names.at(c).c_str(),cat_names.at(c).c_str())+
-              TString::Format(" bkg_fit_slope2_%s=CMS_bkg_fit_slope2_%s_13TeV)", cat_names.at(c).c_str(),cat_names.at(c).c_str())
+            TString::Format(" bkg_fit_slope1_%s=CMS_bkg_fit_slope1_%s_13TeV,", cat_names.at(mainCategory).c_str(),cat_names.at(c).c_str())+
+              TString::Format(" bkg_fit_slope2_%s=CMS_bkg_fit_slope2_%s_13TeV)", cat_names.at(mainCategory).c_str(),cat_names.at(c).c_str())
                 );
     }
     else {
       wAll->factory(
         TString::Format("EDIT::CMS_bkg_fit_%s_13TeV(bkg_fit_%s,",cat_names.at(c).c_str(),cat_names.at(c).c_str()) +
           TString::Format(" bkg_fit_%s_norm=CMS_bkg_fit_%s_13TeV_norm,", cat_names.at(c).c_str(),cat_names.at(c).c_str())+
-            TString::Format(" bkg_fit_slope1_%s=CMS_bkg_fit_slope1_%s_13TeV)", cat_names.at(c).c_str(),cat_names.at(c).c_str())
+            TString::Format(" bkg_fit_slope1_%s=CMS_bkg_fit_slope1_%s_13TeV)", cat_names.at(mainCategory).c_str(),cat_names.at(c).c_str())
               );
     }
   }
@@ -984,8 +1000,12 @@ void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, s
   std::cout << std::endl;
   
   for (int c = ncat_min; c < ncat_min+ncat; ++c) {
+
+    int mainCategory=c;
+    if (correlateBackgroundParametersBetweenCategories) mainCategory=0;
+
     printf("CMS_bkg_fit_slope1_%s_13TeV  param  %.4f  %.3f   # Mean and absolute uncertainty on background slope\n",
-    cat_names.at(c).c_str(), (wAll->var(TString::Format("CMS_bkg_fit_slope1_%s_13TeV",cat_names.at(c).c_str())))->getVal(), 10.);
+    cat_names.at(c).c_str(), (wAll->var(TString::Format("CMS_bkg_fit_slope1_%s_13TeV",cat_names.at(mainCategory).c_str())))->getVal(), 10.);
   }
 
   return;
@@ -1043,6 +1063,8 @@ void MakeDataCard_1Channel(std::string altfunc, RooWorkspace* w, const char* fil
 
   double scaleFactor=signalScaler;
   
+  int mainCategory=iChan;
+  if (correlateBackgroundParametersBetweenCategories) mainCategory=0;
   
   cout << "For signalsample " <<signalsample<<"and channel "<<iChan<< endl;
   cout << "scalefactor (before HP/LP SF) = " <<scaleFactor<< endl;
@@ -1113,21 +1135,27 @@ void MakeDataCard_1Channel(std::string altfunc, RooWorkspace* w, const char* fil
   
   outFile << Form("CMS_bkg_fit_%s_13TeV_norm           flatParam  # Normalization uncertainty on background slope"    ,cat_names[iChan].c_str()) << endl;
 
-  //  outFile << Form("CMS_bkg_fit_slope1_%s_13TeV         flatParam  # Mean and absolute uncertainty on background slope",cat_names[iChan].c_str()) << endl;  //newStrategy
+  if(!constrainBackgroundParametersToSimulation)
+    outFile << Form("CMS_bkg_fit_slope1_%s_13TeV         flatParam  # Mean and absolute uncertainty on background slope",cat_names[mainCategory].c_str()) << endl;  //newStrategy
 
   std::string name = fileBaseName;
   if (altfunc.find("3par")!=std::string::npos) {
       //======= for 3 parameter fit ================================================
-    //      outFile << Form("CMS_bkg_fit_slope2_%s_13TeV         flatParam  # Mean and absolute uncertainty on background slope",cat_names[iChan].c_str()) << endl;  //newStrategy
+    if(!constrainBackgroundParametersToSimulation)
+      outFile << Form("CMS_bkg_fit_slope2_%s_13TeV         flatParam  # Mean and absolute uncertainty on background slope",cat_names[mainCategory].c_str()) << endl;  //newStrategy
   } else if (altfunc.find("Exp")!=std::string::npos) {
       //======= for levelled exp ================================================
-    //      outFile << Form("CMS_bkg_fit_slope2_%s_13TeV         flatParam  # Mean and absolute uncertainty on background slope",cat_names[iChan].c_str()) << endl;  //newStrategy
-    //      outFile << Form("CMS_bkg_fit_slope3_%s_13TeV         flatParam  # Mean and absolute uncertainty on background slope",cat_names[iChan].c_str()) << endl;outFile << "--------------------------------" << endl;  //newStrategy
+    if(!constrainBackgroundParametersToSimulation) {
+      outFile << Form("CMS_bkg_fit_slope2_%s_13TeV         flatParam  # Mean and absolute uncertainty on background slope",cat_names[mainCategory].c_str()) << endl;  //newStrategy
+      outFile << Form("CMS_bkg_fit_slope3_%s_13TeV         flatParam  # Mean and absolute uncertainty on background slope",cat_names[mainCategory].c_str()) << endl;
+    }
   } else if (name.find("alt")!=std::string::npos) {
      //====================== for four parameter function =======================
-    //      outFile << Form("CMS_bkg_fit_slope2_%s_13TeV         flatParam  # Mean and absolute uncertainty on background slope",cat_names[iChan].c_str()) << endl;  //newStrategy
-    //      outFile << Form("CMS_bkg_fit_slope3_%s_13TeV         flatParam  # Mean and absolute uncertainty on background slope",cat_names[iChan].c_str()) << endl;outFile << "--------------------------------" << endl;  //newStrategy
-    //      outFile << Form("CMS_bkg_fit_slope4_%s_13TeV         flatParam  # Mean and absolute uncertainty on background slope",cat_names[iChan].c_str()) << endl;  //newStrategy
+    if(!constrainBackgroundParametersToSimulation) {
+       outFile << Form("CMS_bkg_fit_slope2_%s_13TeV         flatParam  # Mean and absolute uncertainty on background slope",cat_names[mainCategory].c_str()) << endl;  //newStrategy
+       outFile << Form("CMS_bkg_fit_slope3_%s_13TeV         flatParam  # Mean and absolute uncertainty on background slope",cat_names[mainCategory].c_str()) << endl;
+       outFile << Form("CMS_bkg_fit_slope4_%s_13TeV         flatParam  # Mean and absolute uncertainty on background slope",cat_names[mainCategory].c_str()) << endl;  //newStrategy
+     }
   }
   
   outFile << "--------------------------------" << endl;

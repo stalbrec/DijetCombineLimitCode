@@ -115,7 +115,7 @@ for histname in histnames:
    xvalues=r.vector('double')()
    yvalues=r.vector('double')()
    for x in masses:
-     inputf = TFile( inputRoot + str(x) + suffix + '.root' )
+     inputf = TFile( inputRoot + '_'+ cut + '_' + str(x) + suffix + '.root' )
      f = inputf.Get( hname )
      xvalues.push_back(x)
      yvalues.push_back(f.Integral(f.FindBin(x*0.8),f.FindBin(x*1.2))*10.) #100 000 is 2015 default, test 10 000
@@ -131,7 +131,7 @@ for histname in histnames:
    for i in range(npoints+1) :
      yvalues+=[r.vector('double')()]
    for m in masses:
-     inputf = TFile( inputRoot + str(m) + suffix + '.root' )
+     inputf = TFile( inputRoot + '_'+ cut + '_' + str(m) + suffix + '.root' )
      f = inputf.Get( hname )
      xvalues.push_back(m)
      for i in range(npoints+1):
