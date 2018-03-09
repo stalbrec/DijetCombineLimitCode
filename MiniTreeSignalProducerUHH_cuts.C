@@ -13,20 +13,26 @@ void MiniTreeSignalProducerUHH_cuts(int samplemin=0, int samplemax=2, int dMass=
  for (int iSample = samplemin; iSample < samplemax; iSample++){
      std::cout << " for on sample" << std::endl;
    
-   string inFile;
-   if (iSample == 0) inFile = string("graviton");
-   if (iSample == 1) inFile = string("radion");
+     string inFile;
+     if (iSample == 0) inFile = string("graviton_");
+     if (iSample == 1) inFile = string("radion_");
+     if (iSample == 10) inFile = "";
 
-   string outFile;
-   if (iSample == 0) outFile = string("dijetUHH_13TeV_graviton");
-   if (iSample == 1) outFile = string("dijetUHH_13TeV_radion");
-   
-   string sInFile = dir+"input/" + inFile + Form("_%s_Interpolated%d.root", sSelection.c_str(), dMass);
+     string outFile;
+     if (iSample == 0) outFile = string("dijetUHH_13TeV_graviton");
+     if (iSample == 1) outFile = string("dijetUHH_13TeV_radion");
+     if (iSample == 10) outFile = string("dijetUHH_13TeV");
+
+     string sInFile = dir+"input/" + inFile + Form("%s.root", sSelection.c_str());
+     if(dMass>0)
+       string sInFile = dir+"input/" + inFile + Form("%s%d.root", sSelection.c_str(), dMass);
+
      std::cout << sInFile.c_str() << std::endl;
      TFile file0(sInFile.c_str(), "read");
 
-     //     string sOutFile = dir+"MiniTrees/SignalUHH/" + outFile + Form("Interpolated%d_miniTree.root", dMass);
-     string sOutFile = "MiniTrees/SignalUHH/" + outFile + Form("_%s_Interpolated%d_miniTree.root",sSelection.c_str(), dMass);
+     string sOutFile = "MiniTrees/SignalUHH/" + outFile + Form("_%s_miniTree.root",sSelection.c_str());
+     if(dMass>0)
+       string sOutFile = "MiniTrees/SignalUHH/" + outFile + Form("_%s%d_miniTree.root",sSelection.c_str(), dMass);
      TFile f1(sOutFile.c_str(), "recreate");
      f1.cd();
 
@@ -41,8 +47,8 @@ void MiniTreeSignalProducerUHH_cuts(int samplemin=0, int samplemax=2, int dMass=
      for (int iCat = 0; iCat < 2; iCat++){
        TH1D* hMass;
        string hname;
-       if (iCat == 0) hname = "_invMass;1";
-       if (iCat == 1) hname = "_invMass_afterVBFsel;1";
+       if (iCat == 0) hname = "radion_invMass;1";
+       if (iCat == 1) hname = "radion_invMass_afterVBFsel;1";
        cout << hname << endl;
        hMass = (TH1D*) file0.Get(hname.c_str());
        if(!hMass) continue;
@@ -51,7 +57,9 @@ void MiniTreeSignalProducerUHH_cuts(int samplemin=0, int samplemax=2, int dMass=
        for (int i = 1 ; i < hMass->GetNbinsX()+1; i++){
 	 //if (hMass->GetBinCenter(i) < dMass*0.75 || hMass->GetBinCenter(i) > dMass*1.25) continue;
 	 int N = abs(hMass->GetBinContent(i));
-	 if (i%1000 == 0) cout << "i = " << i << " N = " << N << endl;
+	 if(iSample)
+	    N = abs(hMass->GetBinContent(i)*100);
+	 if (i%100 == 0) cout << "i = " << i << " N = " << N << endl;
 	 
 	 mgg = Axis->GetBinCenter(i);
 	 

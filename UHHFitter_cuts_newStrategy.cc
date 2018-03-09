@@ -9,7 +9,7 @@ Double_t MMAX = 4500.;
 Double_t SQRTS = 13000.;
 Double_t CHANNEL = 0;
 std::string filePOSTfix="";
-double signalScaler=1./(10.); // assume signal cross section of 1pb (The factor 100. is the number of gen events that is set to 100. for all samples in the interpolation script. Dividing out BR(V-->had)=70% for non-inclusive samples
+double signalScaler=1./(10.); // assume signal cross section of 1pb (The factor 10. compensates for the factor in the interpolateUHH script)
 double scaleFactorHP=1.0;// tau21 and jet mass scale factors data/MC
 double scaleFactorLP=1.0;// tau21 and jet mass scale factors data/MC
 
@@ -23,6 +23,7 @@ TColor *col = new TColor();
 void AddSigData(RooWorkspace* w, Float_t mass, int signalsample, std::vector<string> cat_names, string cut);
 void AddBkgData(RooWorkspace* w, std::vector<string> cat_names, std::string altfunc, string cut);
 void SigModelFit(RooWorkspace* w, Float_t mass, TString signalname, std::vector<string> cat_names);
+void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vector<string> cat_names);
 void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, std::vector<string> cat_names);
 vector<RooFitResult*> BkgModelFit(std::string altfunc, RooWorkspace* w, Bool_t dobands, std::vector<string> cat_names);
 void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, std::vector<string> cat_names);
@@ -74,6 +75,10 @@ void runfits(const string cuts="none",const Float_t mass=2000, int signalsample 
   if (signalsample==1){
     signalname="radion_"+cuts;
   }
+  if (signalsample==10){
+    signalname=""+cuts;
+    signalScaler=1./(100.); // assume signal cross section of 1pb (The factor 100. compensates for the factor in the SignaMiniTreeProducer script)
+  }
   
   std::cout<< signalname<<std::endl;
   
@@ -106,7 +111,10 @@ void runfits(const string cuts="none",const Float_t mass=2000, int signalsample 
 
   cout << "FIT SIGNAL" << endl;
 
-  SigModelFit(w, mass, signalname,cat_names);
+  if (signalsample==10)
+    SigModelFitaQGC(w, mass, signalname,cat_names);
+  else
+    SigModelFit(w, mass, signalname,cat_names);
 
   // Make statistical treatment
   // Setup the limit on Higgs production
@@ -174,6 +182,9 @@ void AddSigData(RooWorkspace* w, Float_t mass, int signalsample, std::vector<str
   }
   if (signalsample==1) {
     sigfilename = TString(Form("dijetUHH_13TeV_radion_%s_Interpolated%d_miniTree.root", cut.c_str(), iMass));
+  }
+  if (signalsample==10) {
+    sigfilename = TString(Form("dijetUHH_13TeV_%s_miniTree.root", cut.c_str()));
   }
   TFile sigFile1(inDir+sigfilename);  
   sigFile1.Print();
@@ -273,7 +284,9 @@ void AddBkgData(RooWorkspace* w, std::vector<string> cat_names, std::string altf
   // retrieve the data tree;
   // no common preselection cut applied yet; 
 
-   TString name ("dijetUHH_13TeV_miniTree_"+cut+".root");
+   TString name ("dijetUHH_13TeV_miniTree.root");
+   if (cut!="")
+     TString name ("dijetUHH_13TeV_miniTree_"+cut+".root");
    std::cout << " take file for mini-Trees : "<< name << std::endl;
    TFile dataFile(inDir+name);
   
@@ -380,6 +393,67 @@ void SigModelFit(RooWorkspace* w, Float_t mass, TString signalname, std::vector<
 }
 
 
+void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vector<string> cat_names) {
+  
+  // Int_t ncat = NCAT;
+  Int_t ncat_min = 0;
+  Int_t ncat = NCAT;
+  
+  std::cout << CHANNEL << std::endl;
+  Float_t MASS(1000);
+
+  //******************************************//
+  // Fit signal with model pdfs
+  //******************************************//
+  // retrieve pdfs and datasets from workspace to fit with pdf models
+
+
+
+  RooDataSet* sigToFit[21];
+  RooAbsPdf* jjSig[21];
+
+  Float_t minMassFit(MMIN),maxMassFit(MMAX); 
+
+
+  // Fit Signal 
+
+  for (int c = ncat_min; c < ncat_min+ncat; ++c) {
+    
+    sigToFit[c]  = (RooDataSet*) w->data(TString::Format("SigWeight_%s",cat_names.at(c).c_str()));
+    std::cout << sigToFit[c] << std::endl;
+
+    RooRealVar* m0         = new RooRealVar( "jj_"+signalname+TString::Format("_sig_m0_%s"    ,cat_names.at(c).c_str()), "jj_"+signalname+TString::Format("_sig_m0_%s"    ,cat_names.at(c).c_str()), MASS, 0.01*MASS, 100*MASS);
+    RooRealVar* gm0        = new RooRealVar( "jj_"+signalname+TString::Format("_sig_gm0_%s"   ,cat_names.at(c).c_str()), "jj_"+signalname+TString::Format("_sig_gm0_%s"   ,cat_names.at(c).c_str()), MASS, 0.01*MASS, 100*MASS);
+    RooRealVar* sigmaL      = new RooRealVar( "jj_"+signalname+TString::Format("_sig_sigmaL_%s" ,cat_names.at(c).c_str()), "jj_"+signalname+TString::Format("_sig_sigmaL_%s" ,cat_names.at(c).c_str()), MASS*0.05 ,0.01*0.05*MASS, 100*0.05*MASS);
+    RooRealVar* sigmaR      = new RooRealVar( "jj_"+signalname+TString::Format("_sig_sigmaR_%s" ,cat_names.at(c).c_str()), "jj_"+signalname+TString::Format("_sig_sigmaR_%s" ,cat_names.at(c).c_str()), MASS*0.05 ,0.01*0.05*MASS, 100*0.05*MASS);
+    RooRealVar* scalesigma = new RooRealVar( "jj_"+signalname+TString::Format("_scalesigma_%s",cat_names.at(c).c_str()), "jj_"+signalname+TString::Format("_scalesigma_%s",cat_names.at(c).c_str()), 2., 1.2, 10.);
+    
+    RooFormulaVar* gsigmaL  = new RooFormulaVar( "jj_"+signalname+TString::Format("_sig_gsigmaL_%s",cat_names.at(c).c_str()),"jj_"+signalname+TString::Format("_sig_gsigmaL_%s",cat_names.at(c).c_str()),"@0*@1", RooArgList( *sigmaL, *scalesigma ));
+    RooFormulaVar* gsigmaR  = new RooFormulaVar( "jj_"+signalname+TString::Format("_sig_gsigmaR_%s",cat_names.at(c).c_str()),"jj_"+signalname+TString::Format("_sig_gsigmaR_%s",cat_names.at(c).c_str()),"@0*@1", RooArgList( *sigmaR, *scalesigma ));
+    
+    RooBifurGauss* sigmodel = new RooBifurGauss  ( signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str())        , signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str())        , *w->var("mgg13TeV") ,*m0,*gsigmaL,*gsigmaR);
+    
+    jjSig[c] = (RooAbsPdf*)  sigmodel;
+    jjSig[c] -> fitTo(*sigToFit[c],Range(MMIN,MMAX),SumW2Error(kTRUE),PrintEvalErrors(-1),Save(kTRUE));
+      
+    cout<<"FIT PASSED! Start importing and fixing parameters" <<endl;
+    w->import(*sigmodel  );
+    w->import(*m0        );
+    w->import(*gm0       );
+    w->import(*sigmaL     );
+    w->import(*sigmaR     );
+    w->import(*scalesigma);
+    w->import(*gsigmaL    );
+    w->import(*gsigmaR    );
+      
+    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_sig_m0_%s"    ,cat_names.at(c).c_str())))->setConstant(true);
+    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_sig_gm0_%s"   ,cat_names.at(c).c_str())))->setConstant(true);
+    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_sig_sigmaL_%s" ,cat_names.at(c).c_str())))->setConstant(true);
+    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_sig_sigmaR_%s" ,cat_names.at(c).c_str())))->setConstant(true);
+    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_scalesigma_%s",cat_names.at(c).c_str())))->setConstant(true);
+     
+  }
+}
 
 vector<RooFitResult*> BkgModelFit(std::string altfunc,RooWorkspace* w, Bool_t dobands, std::vector<string> cat_names) {
   
@@ -1088,6 +1162,9 @@ void MakeDataCard_1Channel(std::string altfunc, RooWorkspace* w, const char* fil
   else if(signalsample==1){
     outFile << Form("shapes radion_jj %s ", cat_names[iChan].c_str()) << wsDir+TString::Format(("CMS_jj_"+altfunc+"radion_%.0f_13TeV.root").c_str(), mass ) << Form(" w_all:radion_jj_sig_%s", cat_names[iChan].c_str()) << endl;
   } 
+  else if(signalsample==10){
+    outFile << Form("shapes %s_jj %s ", signalname.Data(),cat_names[iChan].c_str()) << wsDir+TString::Format(("CMS_jj_"+altfunc+"%s_%.0f_13TeV.root").c_str(), signalname.Data(),mass ) << Form(" w_all:%s_jj_sig_%s", signalname.Data(),cat_names[iChan].c_str()) << endl;
+  } 
   
   outFile << "---------------" << endl;
   outFile << Form("bin          %s", cat_names[iChan].c_str()) << endl;
@@ -1095,34 +1172,23 @@ void MakeDataCard_1Channel(std::string altfunc, RooWorkspace* w, const char* fil
   outFile << "------------------------------" << endl;
   
   
+    outFile << "bin                     "<< Form("%s       %s      ", cat_names[iChan].c_str(), cat_names[iChan].c_str() )<< endl;
   if(signalsample==0){
-    outFile << "bin                     "<< Form("%s       %s      ", cat_names[iChan].c_str(), cat_names[iChan].c_str() )<< endl;
     outFile << "process                 graviton_jj     bkg_fit_jj     " << endl;
-    outFile << "process                 0               1          " << endl;
-    outFile << "rate                    "<< signal[iChan]->sumEntries()*scaleFactor<< "         " << 1 << endl;
-
-    cout    << "# signal scaled by " << signalScaler << " to a cross section of 1/pb and also scale factor of " << scaleFactor/signalScaler << " are applied." << endl;
-    outFile << "--------------------------------" << endl;
-    outFile << "# signal scaled by " << signalScaler << " to a cross section of 1/pb and also scale factor of " << scaleFactor/signalScaler << " are applied." << endl;
-  
-    outFile << "lumi_13TeV                          lnN  1.026   - " << endl;
-    outFile << "CMS_eff_vtag_tau21_sf_13TeV         lnN  1.1556/0.855625       - # tau21 efficiency" << endl;
   }   
-  
   else if(signalsample==1){
-    outFile << "bin                     "<< Form("%s       %s      ", cat_names[iChan].c_str(), cat_names[iChan].c_str() )<< endl;
     outFile << "process                 radion_jj     bkg_fit_jj     " << endl;
+  }
+  else if(signalsample==10){
+    outFile << "process                 " << signalname << "_jj     bkg_fit_jj     " << endl;
+  }
     outFile << "process                 0               1          " << endl;
     outFile << "rate                    "<< signal[iChan]->sumEntries()*scaleFactor<< "         " << 1 << endl;
 
     cout    << "# signal scaled by " << signalScaler << " to a cross section of 1/pb and also scale factor of " << scaleFactor/signalScaler << " are applied." << endl;
     outFile << "--------------------------------" << endl;
     outFile << "# signal scaled by " << signalScaler << " to a cross section of 1/pb and also scale factor of " << scaleFactor/signalScaler << " are applied." << endl;
-  
-    outFile << "lumi_13TeV                          lnN  1.026   - " << endl;
-    outFile << "CMS_eff_vtag_tau21_sf_13TeV         lnN  1.1556/0.855625     - # tau21 efficiency" << endl;
-  }   
-  
+ 
   outFile << "CMS_acc_13TeV                       lnN  1.02    - # PDF unc. on acceptance" << endl;
   outFile << "CMS_pu_13TeV                        lnN  1.02    - # pileup" << endl;
   

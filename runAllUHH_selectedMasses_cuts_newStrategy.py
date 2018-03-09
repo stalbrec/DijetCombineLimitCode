@@ -17,14 +17,14 @@ if 1 in steps:
     for mass in masses:
        # interpolate between signal MCs
         for cut in cuts:
-            os.system('python interpolateUHH_selectedMasses_cut.py input/graviton '+str(mass)+' '+str(cut) )
-            os.system('python interpolateUHH_selectedMasses_cut.py input/radion '+str(mass)+' '+str(cut) )
+            os.system('python interpolateUHH_selectedMasses_cut.py input/graviton '+str(mass)+' '+str(cut)+'_Interpolated' )
+            os.system('python interpolateUHH_selectedMasses_cut.py input/radion '+str(mass)+' '+str(cut)+'_Interpolated' )
             
 if 2 in steps:
     # produce minitrees
     for cut in cuts:
         #    print cut
-        os.system('root -b -q "MiniTreeProducerDataUHH_cut.C(\\"'+str(cut)+'\\")"')
+        os.system('root -b -q "MiniTreeProducerDataUHH_cut.C(\\"radion\\",\\"_'+str(cut)+'\\",\\"_2000\\",)"')
         for mass in masses:
             os.system('root -b -q "MiniTreeSignalProducerUHH_cuts.C(0,2,'+str(mass)+',\\"'+str(cut)+'\\")"')
         
