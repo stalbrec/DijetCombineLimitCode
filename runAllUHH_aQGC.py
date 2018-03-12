@@ -3,7 +3,7 @@
 
 import os
 
-steps=[1,2,3]
+steps=[1,2,3,4]
 signals=["WPZ_T0",
         ]
 couplings=["1p08",
