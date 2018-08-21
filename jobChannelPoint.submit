@@ -1,0 +1,15 @@
+executable          = submitwrapper.sh
+transfer_executable = False
+universe            = vanilla
+# input               = mytest.data
+# output              = mytest.out
+# error               = mytest.error
+# log                 = mytest.log
+requirements            = (OpSysAndVer == "SL6" || OpSysAndVer == "CentOS7")
+#Args= $(Items)
+Args= $(var1) $(var2)
+queue var1,var2 from (
+ZZ_M6 6p00
+ZZ_M6 6p02
+ZZ_M6 6p01
+)
