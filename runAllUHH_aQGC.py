@@ -36,4 +36,4 @@ if 3 in steps:
 
 if 4 in steps:
     for signal in signals:
-      os.system('python Limits/brazilianFlag_aQGC.py '+str(signal))
+      os.system('python Limits/brazilianFlag_aQTGC.py '+str(signal))
