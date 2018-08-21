@@ -10,8 +10,8 @@ void MiniTreeProducerDataUHH_cut(string prefix, string selection, string postfix
  cout << sInFile.c_str() << endl;
  TFile file0(sInFile.c_str(), "read");
  
-
- string sOutFile  = "MiniTrees/DataUHH/dijetUHH_13TeV_miniTree"+selection+".root";
+ string sOutFile  = "MiniTrees/DataUHH/dijetUHH_13TeV_miniTree_"+postfix+".root";
+ // string sOutFile  = "MiniTrees/DataUHH/dijetUHH_13TeV_miniTree"+selection+".root";
  int minCategorie = 0;
  int maxCategorie = 2;//irene, before 1
  TFile f1(sOutFile.c_str(), "recreate");
