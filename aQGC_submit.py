@@ -3,25 +3,6 @@ import os,glob,sys
 sys.path.append('/afs/desy.de/user/a/albrechs/aQGCVVjj/python')
 from ROOT import TFile
 import PointName as PN 
-def update_progress(iteration,complete):
-    barLength = 30
-    status = ""
-    progress=float(iteration)/float(complete)
-    if isinstance(progress, int):
-        progress = float(progress)
-    if not isinstance(progress, float):
-        progress = 0
-        status = "error: progress var must be float\r\n"
-    if progress < 0:
-        progress = 0
-        status = "Halt...\r\n"
-    if progress >= 1:
-        progress = 1
-        status = "Done...\r\n"
-    block = int(round(barLength*progress))
-    text = "\rFiles processed: %i/%i [%s] %s"%(int(iteration),int(complete),"#"*block+"-"*(barLength-block),status) 
-    sys.stdout.write(text)
-    sys.stdout.flush()
 
 def testFileForLimits(filename):
     if(not os.path.isfile(filename)):
@@ -44,27 +25,12 @@ def submit(channels,parameters):
     for channel in channels:
         for parameter in parameters:
             signal=channel+'_'+parameter
-            couplings=PN.OpList(parameter)
-            # couplings=["210p00","210p00_SignalInjection","210p00_SidebandData"]
-            # couplings=["6p00","6p00_SignalInjection","6p00_SidebandData"]
-            # couplings=["6p00","6p02","6p01"]
-            # couplings=["m21p00_SignalInjection"]
-            # queue_str='"Queue Arguments From ( \n'
-            #queue_str='(\n'
+            # couplings=PN.OpList(parameter)
+            couplings=['m8p00','m4p00','4p00','8p00']
             queue_str=''
             for coupling in couplings:
                 queue_str+=signal+' '+coupling+'\n'
-                # print coupling
-                #submit_command='qsub -l distro=sld6 -l h_vmem=10G -l h_rt=15:59:59 -cwd -N '+signal+'_'+coupling+'_4 submitwrapper.sh '+signal+' '+coupling+''
-                # submit_command=' condor_submit jobChannelPoint.submit -append "arguments = '+signal+' '+coupling+'" -append "error='+signal+'_'+coupling+'.error" -append "output='+signal+'_'+coupling+'.out" -append "log='+signal+'_'+coupling+'.log"'
-                # print submit_command
-                # os.system(submit_command)
-            # python submitLimits.py ${channels[$i]}_${parameters[$j]}
-            # queue_str=queue_str[:-1]
             queue_str+=')'
-
-            # Args = -i $(Item)
-            # Queue Item in (pasta, chicken
             submitfile=open(signal+'.submit','w')
             submitfile.write(
                 """executable          = submitwrapper.sh
@@ -74,16 +40,14 @@ requirements            = (OpSysAndVer == "SL6" || OpSysAndVer == "CentOS7")
 error="""+signal+""".error
 output="""+signal+""".out
 log="""+signal+""".log
-Args= $(var1) $(var2)
+Args=fit $(var1) $(var2)
 queue var1,var2 from (
 """)
             submitfile.write(queue_str)
             submitfile.close()
-            # submit_command=' condor_submit jobChannelPoint.submit -append "error='+signal+'.error" -append "output='+signal+'.out" -append "log='+signal+'.log"' + ' -append '+queue_str
             submit_command='condor_submit '+signal+'.submit -batch-name '+signal
             if('-d' in args):
-                submit_command+=' -dry-run submit_dryrun.log'            # submit_command='condor_submit '+signal+'.submit -batch-name '+signal+'_'+parameter+' -dry-run test.log'
-            # submit_command='condor_submit jobChannelPoint.submit -dry-run test.log -append "error='+signal+'.error" -append "output='+signal+'.out" -append "log='+signal+'.log"' + ' -append "queue var1,var2 from '+queue_str
+                submit_command+=' -dry-run submit_dryrun.log'
             print submit_command
             os.system(submit_command)
 
@@ -100,7 +64,6 @@ def resubmit(channels, parameters):
             failed=[]
             failed_couplings=[]
             success_couplings=[]
-            # print("checking for failed jobs..") 
             queue_str=''
             for i in range(len(couplings)):
                 coupling=couplings[i]
@@ -108,7 +71,6 @@ def resubmit(channels, parameters):
                     success.append(postfix+"CMS_jj_0_"+chan+'_'+parameter+"_"+str(coupling)+"_13TeV_"+region+"_asymptoticCLs_new.root")
                     success_couplings.append(coupling)
                 else:
-                    # print 'skipping', coupling
                     failed.append(postfix+"CMS_jj_0_"+chan+'_'+parameter+"_"+str(coupling)+"_13TeV_"+region+"_asymptoticCLs_new.root")
                     failed_couplings.append(coupling)
                     queue_str+=signal+' '+coupling+'\n'
@@ -123,19 +85,44 @@ requirements            = (OpSysAndVer == "SL6" || OpSysAndVer == "CentOS7")
 error="""+signal+"""_resub.error
 output="""+signal+"""_resub.out
 log="""+signal+"""_resub.log
-Args= $(var1) $(var2)
+Args=fit $(var1) $(var2)
 queue var1,var2 from (
 """)
             resubmitfile.write(queue_str)
             resubmitfile.close()
-            # submit_command=' condor_submit jobChannelPoint.submit -append "error='+signal+'.error" -append "output='+signal+'.out" -append "log='+signal+'.log"' + ' -append '+queue_str
-            # resubmit_command='condor_submit '+signal+'.resubmit -dry-run test.log -batch-name '+signal+'_'+parameter+'_resub'
             resubmit_command='condor_submit '+signal+'.resubmit -batch-name '+signal+'_resub'
             if('-d' in args):
                 resubmit_command+=' -dry-run resubmit_dryrun.log'
             print resubmit_command
             os.system(resubmit_command)
             
+def submitPlots(channels,parameters):
+    for channel in channels:
+        queue_str=''
+        for parameter in parameters:
+            signal=channel+'_'+parameter
+            queue_str+=signal+'\n'
+        queue_str+=')'
+        submitfile=open(channel+'.submit','w')
+        submitfile.write(
+            """executable          = submitwrapper.sh
+transfer_executable = False
+universe            = vanilla
+requirements            = (OpSysAndVer == "SL6" || OpSysAndVer == "CentOS7")
+error="""+channel+""".error
+output="""+channel+""".out
+log="""+channel+""".log
+Args=plot $(var1)
+queue var1 from (
+""")
+        submitfile.write(queue_str)
+        submitfile.close()
+        submit_command='condor_submit '+channel+'.submit -batch-name '+channel+'_LastStep'
+        if('-d' in args):
+            submit_command+=' -dry-run resubmit_dryrun.log'
+        print submit_command
+        os.system(submit_command)
+
 def local(channels,parameters,coupling=''):
     for channel in channels:
         for parameter in parameters:
@@ -162,6 +149,8 @@ if (__name__=='__main__'):
     elif('-r' in args):
         print 'resubmit'
         resubmit(channels,parameters)
+    elif('-p' in args):
+        submitPlots(channels,parameters)
     else:
         print 'nothing'
     # channels=["VV"]

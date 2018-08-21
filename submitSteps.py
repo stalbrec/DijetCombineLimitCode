@@ -5,22 +5,16 @@ import PointName as PN
 from backup import backup
 
 if (__name__=='__main__'):
-    # channels=['VV']
-    # parameters=["S0","S1","M0","M1","M2","M3","M4","M5","M6","M7","T0","T1","T2","T5","T6","T7","T8","T9"]
-
-    # for channel in channels:
-    #     for parameter in parameters:
-    #         signal=channel+'_'+parameter
-    steps=[1,2,3]
-    # steps=[4]
-    # steps=[1,2,3,4]
-    signal=sys.argv[1]
+    mode=sys.argv[1]
+    if(mode=='fit'):
+        steps=[1,2,3]
+    elif(mode=='plot'):
+        steps=[4]
+    signal=sys.argv[2]
     parameter=signal[-2:]
-    coupling=sys.argv[2]
-    #Changes to next line must be done also in Limits/brazilianFlag_aQTGC.py:~742
-    # couplings=PN.OpList(parameter)
-    # for coupling in couplings:
-    #produce minitrees
+    coupling=sys.argv[3]
+    print signal, coupling , steps
+            
     name=signal+"_"+coupling 
     if 1 in steps:
         os.system('root -b -q "MiniTreeProducerDataUHH_cut.C(\\"\\",\\"\\",\\"'+str(name)+'\\")"')
@@ -33,5 +27,5 @@ if (__name__=='__main__'):
     #run combine
     if 3 in steps:
         os.system('python Limits/CalcAsympLimitsUHH_cuts.py 0 '+str(name))
-    # if 4 in steps:
-    #     os.system('python Limits/brazilianFlag_aQTGC.py '+str(signal))
+    if 4 in steps:
+        os.system('python Limits/brazilianFlag_aQTGC.py '+str(signal))
