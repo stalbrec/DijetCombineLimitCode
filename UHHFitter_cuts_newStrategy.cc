@@ -30,6 +30,7 @@ void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, s
 void SetConstantParams(const RooArgSet* params);
 void MakeDataCard_1Channel(std::string altfunc,RooWorkspace* w, const char* fileBaseName, const char* fileBkgName, int iChan, TString signalname, int signalsample, std::vector<string> cat_names, double mass);
 void MakePlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitresults, TString signalname, std::vector<string> cat_names);
+void MakePrettyPlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitresults, TString signalname, std::vector<string> cat_names);
 
 RooArgSet* defineVariables()
 {
@@ -140,6 +141,7 @@ void runfits(const string cuts="none",const Float_t mass=2000, int signalsample 
   
   // Make plots for data and fit results
   MakePlots(w, mass, fitresults, signalname,cat_names);
+  MakePrettyPlots(w, mass, fitresults, signalname,cat_names);
   
   cout << "DONE WITH SIGNAL " << signalname << " FOR MASS POINT " << mass <<" GEV " << endl;
   cout << "" << endl;
@@ -284,11 +286,12 @@ void AddBkgData(RooWorkspace* w, std::vector<string> cat_names, std::string altf
   // retrieve the data tree;
   // no common preselection cut applied yet; 
 
-   TString name ("dijetUHH_13TeV_miniTree.root");
-   if (cut!="")
-     TString name ("dijetUHH_13TeV_miniTree_"+cut+".root");
-   std::cout << " take file for mini-Trees : "<< name << std::endl;
-   TFile dataFile(inDir+name);
+	TString name ("dijetUHH_13TeV_miniTree.root");
+	if(cut!=""){
+		 name=TString("dijetUHH_13TeV_miniTree_"+cut+".root");
+	}
+	std::cout << " take file for mini-Trees : "<< name << std::endl;
+	TFile dataFile(inDir+name);
   
   
   TTree* dataTree     = (TTree*) dataFile.Get("TCVARS");
@@ -753,7 +756,7 @@ void MakePlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitresults, 
     ctmp->SaveAs(directory+"/plots/sigmodel_"+signalname+TString::Format("%d_%s.pdf", iMass, cat_names.at(c).c_str()));
     ctmp->SaveAs(directory+"/plots/sigmodel_"+signalname+TString::Format("%d_%s.root", iMass, cat_names.at(c).c_str()));
 
-
+    
   }
 
 
@@ -784,10 +787,10 @@ void MakePlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitresults, 
 
   c4->SaveAs((directory+"/plots/backgrounds_log.pdf").c_str());
 
-
+  
   TCanvas* c5 = new TCanvas("c5","jj Background Categories",0,0,2000,2000);
   c5->Divide(3,7);
-
+  
   RooPlot* plotbkg_fit2[21];
   // for (int c = 0; c < ncat; ++c) {
   for (int c = ncat_min; c < ncat_min+ncat; ++c) {
@@ -805,6 +808,215 @@ void MakePlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitresults, 
 
 }
 
+void MakePrettyPlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitresults, TString signalname, std::vector<string> cat_names) {
+  
+  cout << "Start plotting" << endl;
+  
+  Int_t ncat_min = 0;
+  Int_t ncat = NCAT;
+
+  // retrieve data sets from the workspace
+  RooDataSet* dataAll         = (RooDataSet*) w->data("Data");
+  RooDataSet* signalAll       = (RooDataSet*) w->data("Sig");
+
+  RooDataSet* data[21];  
+  RooDataSet* signal[21];
+  RooAbsPdf*  jjGaussSig[21];
+  RooAbsPdf*  jjCBSig[21];
+  RooAbsPdf*  jjSig[21];
+  RooAbsPdf*  bkg_fit[21];  
+
+  // for (int c = 0; c < ncat; ++c) {
+  for (int c = ncat_min; c < ncat_min+ncat; ++c) {
+    data[c]         = (RooDataSet*) w->data(TString::Format("Data_%s",cat_names.at(c).c_str()));
+    signal[c]       = (RooDataSet*) w->data(TString::Format("SigWeight_%s",cat_names.at(c).c_str()));
+    jjGaussSig[c]  = (RooAbsPdf*)  w->pdf(TString::Format("jj_GaussSig_%s",cat_names.at(c).c_str()));
+    jjCBSig[c]     = (RooAbsPdf*)  w->pdf(TString::Format("jj_CBSig_%s",cat_names.at(c).c_str()));
+    jjSig[c]       = (RooAbsPdf*)  w->pdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()));
+    bkg_fit[c]       = (RooAbsPdf*)  w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()));
+  }
+
+  // retrieve mass observable from the workspace
+  RooRealVar* mgg     = w->var("mgg13TeV");  
+  mgg->setUnit("GeV");
+
+  //********************************************//
+  // Plot jj signal fit results per categories 
+  //********************************************//
+  // Plot Signal Categories 
+  //****************************//
+
+  Float_t minMassFit(MMIN),maxMassFit(MMAX);
+  Float_t MASS(mass);
+  Int_t nBinsMass(100);
+  gStyle->SetOptTitle(0);
+  
+  RooPlot* plotjj[21];
+  // for (int c = 0; c < ncat; ++c) {
+  for (int c = ncat_min; c < ncat_min+ncat; ++c) {
+    // plotjj[c] = mgg->frame(Range(minMassFit,maxMassFit),Bins(nBinsMass));
+    
+    // signal[c] ->plotOn(plotjj[c],LineColor(kWhite),MarkerColor(kWhite),MarkerSize(9),PrintEvalErrors(-1));    
+    jjSig[c]  ->plotOn(plotjj[c],LineColor(col->GetColor("#636363")),DrawOption("L"),PrintEvalErrors(-1),Name("signal"),Invisible());
+
+    bkg_fit[c]->plotOn(plotjj[c],LineColor(col->GetColor("#32492b")),PrintEvalErrors(-1),AddTo("signal"));
+    // data[c] ->plotOn(plotjj[c],LineColor(kWhite),MarkerColor(kWhite),PrintEvalErrors(-1),AddTo("signal"));    
+    data[c] ->plotOn(plotjj[c],PrintEvalErrors(-1),AddTo("signal"));    
+
+    // gx.plotOn(frame1,Normalization( n_phys_sig.getVal() , RooAbsReal::NumEvent ) ,
+    // 	      RooFit::DrawOption("F") , RooFit::FillColor(46) , Name("gx_phys") , Invisible() ) ;
+    // px.plotOn(frame1,Normalization( n_phys_bg.getVal() , RooAbsReal::NumEvent ) ,
+    // 	      RooFit::DrawOption("F") , RooFit::FillColor(46) , AddTo("gx_phys")) ;
+    // data->plotOn(frame1) ;
+    // px.plotOn(frame1,Normalization( n_phys_bg.getVal() , RooAbsReal::NumEvent ) ,
+    // 	      RooFit::DrawOption("F") , RooFit::FillColor(46) , Name("px_phys")) ;
+
+    // jjSig[c]  ->plotOn(plotjj[c],Components("jj_GaussSig"+signalname+TString::Format("_%s",cat_names.at(c).c_str())),LineStyle(kDashed),LineColor(col->GetColor("#99d8c9")),PrintEvalErrors(-1));
+    // jjSig[c]  ->plotOn(plotjj[c],Components("jj_CBSig"   +signalname+TString::Format("_%s",cat_names.at(c).c_str())),LineStyle(kDashed),LineColor(col->GetColor("#fdbb84")),PrintEvalErrors(-1));
+    
+    // RooAddPdf sum("sum","g+a",RooArgList(*jjSig[c],*bkg_fit[c]),RooArgList(*mgg,*mgg)) ;
+    // RooAddPdf sum("sum","g+a",RooArgList(*jjSig[c],*bkg_fit[c])) ;
+    // sum.plotOn(plotjj[c],LineColor(kRed),LineStyle(kDashed),Range("fitrange"),NormRange("fitrange"));
+
+    // RooAddPdf sigdata("sigdata","sig+data",RooArgList(*signal[0],*data[0])) ;
+    // RooAddPdf* model = new RooAddPdf("model","g+a",*jjSig[c],*bkg_fit[c]) ;
+    // RooAddPdf* sigdata = new RooAddPdf("sigdata","sig+data",RooArgList(*signal[0],*data[0],"test")) ;
+    // RooAddPdf* sigmodel = new RooAddPdf  ( signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str())        , signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str())        , RooArgList( *gaus, *cb ), RooArgList(*frac),1);
+    // plotboth[c]=mgg->frame(nBinsMass);
+    // sigdata->plotOn(plotboth,LineColor(kWhite),MarkerColor(kWhite));
+    // model.plotOn(plotjj[c],Components(RooArgSet(*jjSig[c],*bkg_fit[c])),LineColor(kBlue),LineStyle(kDashed),Range("fitrange"),NormRange("fitrange"));
+    // model.plotOn(plotboth[c],LineColor(kBlue),Range("fitrange"),NormRange("fitrange"),PrintEvalErrors(-1));
+    // sigdata->plotOn(plotboth);
+    // plotboth[c]->Draw();
+
+    // c6->SaveAs((directory+"/plots/both_pretty.pdf").c_str());
+    // system(("cp "+directory+"/plots/both_pretty.pdf ~/aQGCVVjj/").c_str());
+
+
+    // jjSig[c]   ->paramOn(plotjj[c]);
+    // signal[c]  ->plotOn(plotjj[c],PrintEvalErrors(-1));
+  
+    int W = 800;
+    int H = 600;
+    int H_ref = 600; 
+    int W_ref = 800; 
+    float T = 0.08*H_ref;
+    float B = 0.12*H_ref; 
+    float L = 0.12*W_ref;
+    float R = 0.04*W_ref;
+    
+    // TCanvas* dummy = new TCanvas("dummy", "dummy",50,50,W,H);
+    // dummy->SetFillColor(0);
+    // dummy->SetBorderMode(0);
+    // dummy->SetFrameFillStyle(0);
+    // dummy->SetFrameBorderMode(0);
+    // dummy->SetLeftMargin( L/W );
+    // dummy->SetRightMargin( R/W );
+    // dummy->SetTopMargin( T/H );
+    // dummy->SetBottomMargin( B/H );
+    // dummy->SetTickx(0);
+    // dummy->SetTicky(0);
+    
+    // TH1F *hist = new TH1F("hist", "hist", 400, minMassFit, maxMassFit);
+ 
+    plotjj[c]->SetTitle("");      
+    plotjj[c]->SetMinimum(0.0);
+    plotjj[c]->SetMaximum(1.40*plotjj[c]->GetMaximum());
+    plotjj[c]->GetXaxis()->SetTitle("Dijet invariant mass (GeV)");
+    plotjj[c]->GetYaxis()->SetTitleOffset(1.1);
+
+    TCanvas* ctmp = new TCanvas("ctmp","jj Background Categories",0,0,500,500);
+    ctmp->SetFillColor(0);
+    // ctmp->SetBorderMode(0);
+    // ctmp->SetFrameFillStyle(0);
+    // ctmp->SetFrameBorderMode(0);
+    ctmp->SetLeftMargin( L/W );
+    ctmp->SetRightMargin( R/W );
+    ctmp->SetTopMargin( T/H );
+    ctmp->SetBottomMargin( B/H );
+    ctmp->SetTickx(0);
+    ctmp->SetTicky(0);
+
+    plotjj[c]->Draw();  
+    //    hist->Draw("same");
+    
+    // plotjj[c]->Draw("SAME");
+  //   TLegend *legmc = new TLegend(0.570,0.72,0.85,0.87);
+  //   legmc->AddEntry(plotjj[c]->getObject(5),"CMS data","LPE");
+  //   legmc->AddEntry(plotjj[c]->getObject(1),"Total PDF","L");
+  //   legmc->AddEntry(plotjj[c]->getObject(3),"Crystal Ball comp.","L");
+  //   legmc->AddEntry(plotjj[c]->getObject(2),"Gaussian comp.","L");
+    
+  //   legmc->SetBorderSize(0);
+  //   legmc->SetFillStyle(0);
+  //   legmc->Draw();
+    
+  //   TLatex *lat2 = new TLatex(minMassFit+1.5,0.75*plotjj[c]->GetMaximum(),cat_names.at(c).c_str());
+  //   lat2->Draw();
+
+  //   int iMass = abs(mass);
+
+    // ctmp->SaveAs(directory+"/plots/sigmodel_"+signalname+TString::Format("%d_%s_pretty.pdf", iMass, cat_names.at(c).c_str()));
+    // system("cp "+directory+"/plots/sigmodel_"+signalname+TString::Format("%d_%s_pretty.pdf", iMass, cat_names.at(c).c_str())+" ~/aQGCVVjj/");
+    ctmp->SaveAs((directory+"/plots/both_pretty.pdf").c_str());
+    system(("cp "+directory+"/plots/both_pretty.pdf ~/aQGCVVjj/").c_str());
+  }
+
+  // TCanvas* c6 = new TCanvas("c6","Simultaneous Fit",0,0,2000,2000);
+  // RooPlot* plotboth[2];
+ 
+  // for (int c = ncat_min; c < ncat_min+ncat; ++c) {
+  // }
+
+
+  // //************************************************//
+  // // Plot jj background fit results per categories 
+  // //************************************************//
+  // // Plot Background Categories 
+  // //****************************//
+
+  // TCanvas* c4 = new TCanvas("c4","jj Background Categories",0,0,2000,2000);
+  // c4->Divide(2,1);
+
+  // RooPlot* plotbkg_fit[21];
+  // // for (int c = 0; c < ncat; ++c) {
+  // for (int c = ncat_min; c < ncat_min+ncat; ++c) {
+  //   plotbkg_fit[c] = mgg->frame(Range(minMassFit,maxMassFit),Bins(nBinsMass));
+  //   data[c]->plotOn(plotbkg_fit[c],LineColor(kWhite),MarkerColor(kWhite));    
+  //   bkg_fit[c]->plotOn(plotbkg_fit[c],LineColor(kBlue),Range("fitrange"),NormRange("fitrange"),PrintEvalErrors(-1)); 
+  //   data[c]->plotOn(plotbkg_fit[c]);    
+  //   bkg_fit[c]->paramOn(plotbkg_fit[c],Layout(0.4,0.9,0.9), Format("NEU",AutoPrecision(4)));
+  //   plotbkg_fit[c]->getAttText()->SetTextSize(0.03);
+  //   c4->cd(c+1);
+  //   plotbkg_fit[c]->Draw();  
+  //   gPad->SetLogy(1);
+  //   plotbkg_fit[c]->SetAxisRange(0.1,plotbkg_fit[c]->GetMaximum()*1.5,"Y");
+  // }
+
+
+  // c4->SaveAs((directory+"/plots/backgrounds_log_pretty.pdf").c_str());
+  // system(("cp "+directory+"/plots/backgrounds_log_pretty.pdf ~/aQGCVVjj/").c_str());
+
+  // TCanvas* c5 = new TCanvas("c5","jj Background Categories",0,0,2000,2000);
+  // c5->Divide(2,1);
+  // // c5->Divide(3,7);
+  
+  // RooPlot* plotbkg_fit2[21];
+  // // for (int c = 0; c < ncat; ++c) {
+  // for (int c = ncat_min; c < ncat_min+ncat; ++c) {
+  //   plotbkg_fit2[c] = mgg->frame(nBinsMass);
+  //   data[c]->plotOn(plotbkg_fit[c],LineColor(kWhite),MarkerColor(kWhite));    
+  //   bkg_fit[c]->plotOn(plotbkg_fit[c],LineColor(kBlue),Range("fitrange"),NormRange("fitrange"),PrintEvalErrors(-1)); 
+  //   data[c]->plotOn(plotbkg_fit[c]);    
+  //   bkg_fit[c]->paramOn(plotbkg_fit[c], ShowConstants(true), Layout(0.4,0.9,0.9), Format("NEU",AutoPrecision(4)));
+  //   plotbkg_fit[c]->getAttText()->SetTextSize(0.03);
+  //   c5->cd(c+1);
+  //   plotbkg_fit[c]->Draw();  
+  // }
+
+  // c5->SaveAs((directory+"/plots/backgrounds_pretty.pdf").c_str());
+  // system(("cp "+directory+"/plots/backgrounds_pretty.pdf ~/aQGCVVjj/").c_str());
+}
 
 void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, std::vector<string> cat_names) {
   
