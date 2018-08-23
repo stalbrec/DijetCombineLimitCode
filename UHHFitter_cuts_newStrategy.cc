@@ -785,7 +785,8 @@ void MakePlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitresults, 
   }
 
 
-  c4->SaveAs((directory+"/plots/backgrounds_log.pdf").c_str());
+  // c4->SaveAs((directory+"/plots/backgrounds_log.pdf").c_str());
+	c4->SaveAs(directory+"/plots/backgrounds_log_"+signalname+".pdf");
 
   
   TCanvas* c5 = new TCanvas("c5","jj Background Categories",0,0,2000,2000);
@@ -804,7 +805,8 @@ void MakePlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitresults, 
     plotbkg_fit[c]->Draw();  
   }
 
-  c5->SaveAs((directory+"/plots/backgrounds.pdf").c_str());
+  // c5->SaveAs((directory+"/plots/backgrounds.pdf").c_str());
+  c5->SaveAs(directory+"/plots/backgrounds_"+signalname+".pdf");
 
 }
 
@@ -958,8 +960,8 @@ void MakePrettyPlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitres
 
     // ctmp->SaveAs(directory+"/plots/sigmodel_"+signalname+TString::Format("%d_%s_pretty.pdf", iMass, cat_names.at(c).c_str()));
     // system("cp "+directory+"/plots/sigmodel_"+signalname+TString::Format("%d_%s_pretty.pdf", iMass, cat_names.at(c).c_str())+" ~/aQGCVVjj/");
-    ctmp->SaveAs((directory+"/plots/both_pretty.pdf").c_str());
-    system(("cp "+directory+"/plots/both_pretty.pdf ~/aQGCVVjj/").c_str());
+    // ctmp->SaveAs((directory+"/plots/both_pretty.pdf").c_str());
+    // system(("cp "+directory+"/plots/both_pretty.pdf ~/aQGCVVjj/").c_str());
   }
 
   // TCanvas* c6 = new TCanvas("c6","Simultaneous Fit",0,0,2000,2000);
