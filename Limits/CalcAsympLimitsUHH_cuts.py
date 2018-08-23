@@ -49,7 +49,9 @@ for chan in channels:
               outputfile.write("combine datacards/CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+".txt -M HybridNew --frequentist --grid grid_mX"+str(mass)+"_" + chan + "_13TeV_"+bin+".root -m "+str(mass) + " -n "+chan+str(bin)+" --expectedFromGrid 0.975 &>CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+"_975_fullCLs.out\n")
             else:
                 outputfile.write("combine datacards/CMS_jj_"+chan+str(cut)+"_"+str(mass)+"_13TeV_"+bin+".txt -M Asymptotic -v2 -m "+str(mass) + " -n "+chan+str(cut)+str(bin)+" --rMax 100 --rMin 0.000001 &>CMS_jj_"+chan+str(cut)+"_"+str(mass)+"_13TeV_"+bin+"_asymptoticCLs.out\n")
-                outputfile.write("combine datacards/CMS_jj_"+chan+str(cut)+"_"+str(mass)+"_13TeV_"+bin+".txt -M MaxLikelihoodFit --signif -v2 -m "+str(mass) + " -n "+chan+str(cut)+str(mass)+str(bin)+" --rMax 100 --rMin 0.000001 --plots --saveShapes --out ${CMSSW_BASE}/src/DijetCombineLimitCode/plots &>CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+"_MaxLikelihoodFit.out\n")
+                if(not os.path.exists(os.environ['CMSSW_BASE']+'/src/DijetCombineLimitCode/plots/'+chan)):
+                   os.makedirs(os.environ['CMSSW_BASE']+'/src/DijetCombineLimitCode/plots/'+chan)
+                outputfile.write("combine datacards/CMS_jj_"+chan+str(cut)+"_"+str(mass)+"_13TeV_"+bin+".txt -M MaxLikelihoodFit --signif -v2 -m "+str(mass) + " -n "+chan+str(cut)+str(mass)+str(bin)+" --rMax 100 --rMin 0.000001 --plots --saveShapes --out ${CMSSW_BASE}/src/DijetCombineLimitCode/plots/"+chan+" &>CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+"_MaxLikelihoodFit.out\n")
                 outputfile.write("mv higgsCombine"+chan+str(cut)+str(bin)+".Asymptotic.mH"+str(int(mass))+".root Limits/CMS_jj_"+str(mass)+"_"+chan+str(cut)+"_13TeV_"+bin+"_asymptoticCLs_new.root")
             outputfile.close()
   
