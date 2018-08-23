@@ -25,8 +25,8 @@ def submit(channels,parameters):
     for channel in channels:
         for parameter in parameters:
             signal=channel+'_'+parameter
-            # couplings=PN.OpList(parameter)
-            couplings=['m8p00','m4p00','4p00','8p00']
+            couplings=PN.OpList(parameter)
+            # couplings=['m8p00','m4p00','4p00','8p00']
             queue_str=''
             for coupling in couplings:
                 queue_str+=signal+' '+coupling+'\n'
@@ -37,8 +37,8 @@ def submit(channels,parameters):
 transfer_executable = False
 universe            = vanilla
 requirements            = (OpSysAndVer == "SL6" || OpSysAndVer == "CentOS7")
-error="""+signal+""".error
-output="""+signal+""".out
+error="""+signal+"""_$(var2)_$(ClusterId).$(Process).error
+output="""+signal+"""_$(var2)_$(ClusterId).$(Process).out
 log="""+signal+""".log
 Args=fit $(var1) $(var2)
 queue var1,var2 from (
@@ -82,8 +82,8 @@ def resubmit(channels, parameters):
 transfer_executable = False
 universe            = vanilla
 requirements            = (OpSysAndVer == "SL6" || OpSysAndVer == "CentOS7")
-error="""+signal+"""_resub.error
-output="""+signal+"""_resub.out
+error="""+signal+"""_$(var2)_resub_$(ClusterId).$(Process).error
+output="""+signal+"""_$(var2)_resub_$(ClusterId).$(Process).out
 log="""+signal+"""_resub.log
 Args=fit $(var1) $(var2)
 queue var1,var2 from (
@@ -109,8 +109,8 @@ def submitPlots(channels,parameters):
 transfer_executable = False
 universe            = vanilla
 requirements            = (OpSysAndVer == "SL6" || OpSysAndVer == "CentOS7")
-error="""+channel+""".error
-output="""+channel+""".out
+error=$(var1)_$(ClusterId).$(Process).error
+output=$(var1)_$(ClusterId).$(Process).out
 log="""+channel+""".log
 Args=plot $(var1)
 queue var1 from (
@@ -138,7 +138,7 @@ if (__name__=='__main__'):
     # channels=['VV','ssWW']
     # channels=['ssWW','VV','WPWP','WPWM','WMWM','WPZ','WMZ','ZZ']
     channels=['VV']
-    parameters=["M7"]
+    parameters=["T7"]
     # parameters=["S0","S1","M0","M1","M2","M3","M4","M5","M6","M7","T0","T1","T2","T5","T6","T7","T8","T9"]
     # parameters=['S0']
     # parameters=['M6']
