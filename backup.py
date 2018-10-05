@@ -16,7 +16,7 @@ def backup_point(signal,point,mode='fit'):
     # backup_dir='HTC/'+mode+'/'+channel+'/'+parameter+'/'+point+'_0'
     if(mode=='fit'):
             backup_dir='HTC/'+mode+'/'+channel+'/'+parameter+'/'+point+'_current'
-    elif(mode=='fit'):
+    elif(mode=='plot'):
         backup_dir='HTC/'+mode+'/'+channel+'/'+parameter+'_current'
     i=0
     old_backup_dir=backup_dir
@@ -77,7 +77,8 @@ def backup_point(signal,point,mode='fit'):
         signal+'*.out',
         signal+'*.log',
         'Limits/CMS_jj_0_'+signal+'*_13TeV__invMass_combined_asymptoticCLs_new.root',
-        'Limits/'+signal+'__invMass_combined_new_combined_limits.csv',
+        'Limits/'+signal+'__invMass_combined_new_combined_expected_limits.csv',
+        'Limits/'+signal+'__invMass_combined_new_combined_observed_limits.csv',
         'Limits/brazilianFlag_'+signal+'__invMass_combined_new_combined_13TeV.C',
         'Limits/brazilianFlag_'+signal+'__invMass_combined_new_combined_13TeV.pdf',
     ]
