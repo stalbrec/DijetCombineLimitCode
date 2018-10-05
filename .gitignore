@@ -1,10 +1,17 @@
 roostats*
 plots/*
+backup/*
+HTC/*
 Limits/*.root
 Limits/*.pdf
+Limits/*.csv
+Limits/*13TeV.C
 *.src
 *.out
+*.error
 *.log
+*.root
 workspaces/*
 input/*
 MiniTrees/*
+datacards/*
