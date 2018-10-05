@@ -29,6 +29,60 @@ iPos = 11
 if( iPos==0 ): CMS_lumi.relPosX = 0.12
 iPeriod=4  
 
+
+def extractLimit(grmean,gr1up,gr1down,gtheory,label,obs=False):
+    #####Expected Limits:
+    inter_mean=TGT.getIntersections(grmean,gtheory)
+    inter_1up=TGT.getIntersections(gr1up,gtheory)
+    inter_1down=TGT.getIntersections(gr1down,gtheory)
+
+
+    if(len(inter_mean)<1):
+        inter_mean.append((0,0))
+    if(len(inter_mean)<2):
+        inter_mean.append((0,0))
+
+    if(len(inter_1up)<1):
+        inter_1up.append((0,0))
+    if(len(inter_1up)<2):
+        inter_1up.append((0,0))
+        
+    if(len(inter_1down)<1):
+        inter_1down.append((0,0))
+    if(len(inter_1down)<2):
+        inter_1down.append((0,0))
+
+    
+    #save to csv:
+    # csvfile=open('Limits/%s_%s_limits.csv'%(label.split('_')[0],label.split('_')[1]),'wt')
+    if(obs):
+        expObs='observed'
+    else:
+        expObs='expected'
+        
+    csvfile=open('Limits/%s_%s_limits.csv'%(label,expObs),'wt')
+    csvwriter=csv.DictWriter(csvfile,fieldnames=['parameter','lmean','l1down','l1up','umean','u1down','u1up'])
+    csvwriter.writeheader()
+    csvwriter.writerow({'parameter':label.split('_')[1],
+                        'lmean':inter_mean[0][0],
+                        'l1down':inter_1down[0][0],
+                        'l1up':inter_1up[0][0],
+                        # 'l1down':inter_1down[0][0]-inter_mean[0][0],
+                        # 'l1up':inter_1up[0][0]-inter_mean[0][0],
+                        'umean':inter_mean[1][0],
+                        'u1down':inter_1down[1][0],
+                        'u1up':inter_1up[1][0]
+                        # 'u1down':inter_1down[1][0]-inter_mean[1][0],
+                        # 'u1up':inter_1up[1][0]-inter_mean[1][0]
+                        })
+    csvfile.close()
+    print 'mean:',inter_mean
+    print '1up:',inter_1up
+    print '1down:',inter_1down
+
+    return [inter_mean,inter_1up,inter_1down]
+
+
 def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):    
     radmasses = []
     for f in files:
@@ -162,7 +216,7 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
     #frame.GetYaxis().CenterTitle(True)
     
     
-    frame.GetXaxis().SetTitle("F_{%s}/#Lambda (TeV^{-4})"%label.split('_')[1])
+    frame.GetXaxis().SetTitle("F_{%s}/#Lambda^{-4} (TeV^{-4})"%label.split('_')[1])
     frame.GetYaxis().SetTitle("Signal strength")
 
     
@@ -219,48 +273,18 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
         gtheory.SetPoint(i,radmasses[i],1)
     
     ###Steffen: calculate intersection of theory with mean & +- 1 sigma
-    inter_mean=TGT.getIntersections(grmean,gtheory)
-    inter_1up=TGT.getIntersections(gr1up,gtheory)
-    inter_1down=TGT.getIntersections(gr1down,gtheory)
-
-
-    if(len(inter_mean)<1):
-        inter_mean.append((0,0))
-    if(len(inter_mean)<2):
-        inter_mean.append((0,0))
-
-    if(len(inter_1up)<1):
-        inter_1up.append((0,0))
-    if(len(inter_1up)<2):
-        inter_1up.append((0,0))
-        
-    if(len(inter_1down)<1):
-        inter_1down.append((0,0))
-    if(len(inter_1down)<2):
-        inter_1down.append((0,0))
-
     
-    #save to csv:
-    # csvfile=open('Limits/%s_%s_limits.csv'%(label.split('_')[0],label.split('_')[1]),'wt')
-    csvfile=open('Limits/%s_limits.csv'%label,'wt')
-    csvwriter=csv.DictWriter(csvfile,fieldnames=['parameter','lmean','l1down','l1up','umean','u1down','u1up'])
-    csvwriter.writeheader()
-    csvwriter.writerow({'parameter':label.split('_')[1],
-                        'lmean':inter_mean[0][0],
-                        'l1down':inter_1down[0][0],
-                        'l1up':inter_1up[0][0],
-                        # 'l1down':inter_1down[0][0]-inter_mean[0][0],
-                        # 'l1up':inter_1up[0][0]-inter_mean[0][0],
-                        'umean':inter_mean[1][0],
-                        'u1down':inter_1down[1][0],
-                        'u1up':inter_1up[1][0]
-                        # 'u1down':inter_1down[1][0]-inter_mean[1][0],
-                        # 'u1up':inter_1up[1][0]-inter_mean[1][0]
-                        })
-    csvfile.close()
-    print 'mean:',inter_mean
-    print '1up:',inter_1up
-    print '1down:',inter_1down
+    expectedLimits=extractLimit(grmean,gr1up,gr1down,gtheory,label)    
+    inter_mean=expectedLimits[0]
+    inter_1up=expectedLimits[1]
+    inter_1down=expectedLimits[2] 
+    if(obs):
+        observedLimits=extractLimit(grobs,gr1up,gr1down,gtheory,label,True)         
+        inter_mean_obs=observedLimits[0]
+    
+    # frame.GetXaxis().SetRangeUser()
+    frame.GetXaxis().SetRangeUser(inter_mean[0][0]*2.,inter_mean[1][0]*2.)
+
     
     #lower limit:
     l1down=TGraph()
@@ -291,6 +315,18 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
     lmean.SetMarkerSize(1.5)
     lmean.Draw("LPSAME")
 
+    if(obs):
+        lmean_obs=TGraph()
+        lmean_obs.SetPoint(0,inter_mean_obs[0][0],0)
+        lmean_obs.SetPoint(1,inter_mean_obs[0][0],1)
+        lmean_obs.SetLineStyle(3)
+        lmean_obs.SetLineWidth(2)
+        lmean_obs.SetLineColor(12)
+        lmean_obs.SetMarkerStyle(23)
+        lmean_obs.SetMarkerColor(12)
+        lmean_obs.SetMarkerSize(1.5)
+        lmean_obs.Draw("LPSAME")
+    
     #upper limit:
     u1down=TGraph()
     u1down.SetPoint(0,inter_1down[1][0],0)
@@ -319,6 +355,19 @@ def Plot(files, label, obs,CompareLimits=False,plotExpLimitRatio=""):
     umean.SetMarkerColor(1)
     umean.SetMarkerSize(1.5)
     umean.Draw("LPSAME")
+
+    if(obs):
+        umean_obs=TGraph()
+        umean_obs.SetPoint(0,inter_mean_obs[1][0],0)
+        umean_obs.SetPoint(1,inter_mean_obs[1][0],1)
+        umean_obs.SetLineStyle(3)
+        umean_obs.SetLineWidth(2)
+        umean_obs.SetLineColor(12)
+        umean_obs.SetMarkerStyle(23)
+        umean_obs.SetMarkerColor(12)
+        umean_obs.SetMarkerSize(1.5)
+        umean_obs.Draw("LPSAME")
+
    
     print "max cross section (observed limit ) : " +str(round(rt.TMath.MaxElement(n,grobs.GetY()),5))+ " pb" 
     print "min cross section (observed limit ) : " +str(round(rt.TMath.MinElement(n,grobs.GetY()),5))+ " pb"
@@ -583,6 +632,10 @@ if __name__ == '__main__':
 
     chan=sys.argv[1]
     # regions=["_invMass","_invMass_afterVBFsel","_invMass_combined"]
+
+    FromBackup=False
+    backup_path = '/nfs/dust/cms/user/albrechs/CMSSW_8_1_0/src/DijetCombineLimitCode/HTC/plot/'+chan.split('_')[0]+'/'+chan.split('_')[1]+'_current/'
+    
     regions=["_invMass_combined"]
     
     CompareLimits = False #True
@@ -639,6 +692,10 @@ if __name__ == '__main__':
         #     continue
         failed=[]
         for coupling in couplings:
+            if(FromBackup):
+                os.system('cp '+backup_path+"CMS_jj_0_"+chan+"_"+str(coupling)+"_13TeV_"+region+"_asymptoticCLs_new.root "+postfix+"CMS_jj_0_"+chan+"_"+str(coupling)+"_13TeV_"+region+"_asymptoticCLs_new.root")
+            # for coup in couplings:
+            # coupling=coup+'_SignalInjection'
             if(testFileForLimits(postfix+"CMS_jj_0_"+chan+"_"+str(coupling)+"_13TeV_"+region+"_asymptoticCLs_new.root")):
                combinedplots+=[postfix+"CMS_jj_0_"+chan+"_"+str(coupling)+"_13TeV_"+region+"_asymptoticCLs_new.root"]
             else:
@@ -649,7 +706,7 @@ if __name__ == '__main__':
             Plot(combinedplots,chan+"_"+region+"_new_combined", obs=False,CompareLimits=False,plotExpLimitRatio="")  
             gSystem.ProcessEvents()
         else:
-            Plot(combinedplots,chan+"_"+region+"_new_combined", obs=False,CompareLimits=False,plotExpLimitRatio="")  
+            Plot(combinedplots,chan+"_"+region+"_new_combined", obs=True,CompareLimits=False,plotExpLimitRatio="")  
             gSystem.ProcessEvents()
         print 'Failed (N=%i):'%len(failed)
         for i in range(len(failed)):
