@@ -3,7 +3,7 @@ import os,glob,sys
 sys.path.append('/afs/desy.de/user/a/albrechs/aQGCVVjj/python')
 from ROOT import TFile
 import PointName as PN 
-
+from backup import backup_point
 def testFileForLimits(filename):
     if(not os.path.isfile(filename)):
         # print filename, 'does not exists!'
@@ -30,6 +30,7 @@ def submit(channels,parameters):
             queue_str=''
             for coupling in couplings:
                 queue_str+=signal+' '+coupling+'\n'
+                # queue_str+=signal+' '+coupling+'_SignalInjection\n'
             queue_str+=')'
             submitfile=open(signal+'.submit','w')
             submitfile.write(
@@ -128,18 +129,32 @@ def local(channels,parameters,coupling=''):
         for parameter in parameters:
             signal=channel+'_'+parameter
             if coupling=='':
-                coupling="m21p00_SignalInjection"
+                # coupling="m21p00_SignalInjection"
+                coupling="m15p40_SignalInjection"
             submit_command='./submitwrapper.sh '+signal+' '+coupling
             print submit_command
             os.system(submit_command)
+
+def backup_local(channels,parameters):
+    for channel in channels:
+        for parameter in parameters:
+            signal=channel+'_'+parameter
+            couplings=PN.OpList(parameter)
+            for i in range(len(couplings)):
+                coupling=couplings[i]
+                backup_point(signal,coupling,'fit')
+                backup_point(signal,coupling,'plot')    
     
 if (__name__=='__main__'):
     # channels=['VV','ssWW','ZZ']
     # channels=['VV','ssWW']
     # channels=['ssWW','VV','WPWP','WPWM','WMWM','WPZ','WMZ','ZZ']
     channels=['VV']
-    parameters=["T7"]
+    parameters=["T8"]
+    # channels=['WPWP','WPWM','WMWM','WPZ','WMZ']
+    # channels=['ZZ']
     # parameters=["S0","S1","M0","M1","M2","M3","M4","M5","M6","M7","T0","T1","T2","T5","T6","T7","T8","T9"]
+    # parameters=["T0"]
     # parameters=['S0']
     # parameters=['M6']
     args=sys.argv[1:]
@@ -151,6 +166,8 @@ if (__name__=='__main__'):
         resubmit(channels,parameters)
     elif('-p' in args):
         submitPlots(channels,parameters)
+    elif('-b' in args):
+        backup_local(channels,parameters)
     else:
         print 'nothing'
     # channels=["VV"]
