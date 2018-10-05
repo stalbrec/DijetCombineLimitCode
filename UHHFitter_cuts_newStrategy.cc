@@ -434,7 +434,25 @@ void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vec
     RooFormulaVar* gsigmaL  = new RooFormulaVar( "jj_"+signalname+TString::Format("_sig_gsigmaL_%s",cat_names.at(c).c_str()),"jj_"+signalname+TString::Format("_sig_gsigmaL_%s",cat_names.at(c).c_str()),"@0*@1", RooArgList( *sigmaL, *scalesigma ));
     RooFormulaVar* gsigmaR  = new RooFormulaVar( "jj_"+signalname+TString::Format("_sig_gsigmaR_%s",cat_names.at(c).c_str()),"jj_"+signalname+TString::Format("_sig_gsigmaR_%s",cat_names.at(c).c_str()),"@0*@1", RooArgList( *sigmaR, *scalesigma ));
     
-    RooBifurGauss* sigmodel = new RooBifurGauss  ( signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str())        , signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str())        , *w->var("mgg13TeV") ,*m0,*gsigmaL,*gsigmaR);
+    RooBifurGauss* sigmodel = new RooBifurGauss  ( signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()), *w->var("mgg13TeV") ,*m0,*gsigmaL,*gsigmaR);
+
+
+		// RooBifurGauss* bifur = new RooBifurGauss  ( signalname+"_jj"+TString::Format("_sig_bifur_%s",cat_names.at(c).c_str())        , signalname+"_jj"+TString::Format("_sig_bifur_%s",cat_names.at(c).c_str())        , *w->var("mgg13TeV") ,*m0,*gsigmaL,*gsigmaR);
+
+    // // RooRealVar* PDFnuisance         = new RooRealVar( "jj_"+signalname+TString::Format("_sig_PDFnuisance_%s"    ,cat_names.at(c).c_str()), "jj_"+signalname+TString::Format("_sig_PDFnuisance_%s"    ,cat_names.at(c).c_str()), 0,-10,10);
+    // RooRealVar* PDFnuisance         = new RooRealVar( "CMS_sig_pdf_13TeV","CMS_sig_pdf_13TeV", 0.,-1,1);
+    // RooRealVar* PDFp0         = new RooRealVar( "jj_"+signalname+TString::Format("_sig_PDFp0_%s"    ,cat_names.at(c).c_str()), "jj_"+signalname+TString::Format("_sig_PDFp0_%s"    ,cat_names.at(c).c_str()), 0.022);
+    // RooRealVar* PDFp1         = new RooRealVar( "jj_"+signalname+TString::Format("_sig_PDFp1_%s"    ,cat_names.at(c).c_str()), "jj_"+signalname+TString::Format("_sig_PDFp1_%s"    ,cat_names.at(c).c_str()), 1.42e-5);
+    // // RooGenericPdf* PDFshift  = new RooGenericPdf( signalname+"_jj"+TString::Format("_PDFshift_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_PDFshift_%s",cat_names.at(c).c_str()),"1+0*CMS_sig_pdf_13TeV*(jj_"+signalname+TString::Format("_sig_PDFp0_%s"    ,cat_names.at(c).c_str())+"+"+"jj_"+signalname+TString::Format("_sig_PDFp1_%s"    ,cat_names.at(c).c_str())+"*mgg13TeV)", RooArgList( *PDFp0, *PDFp1,*w->var("mgg13TeV"),*PDFnuisance));
+    // // RooGenericPdf* PDFshift  = new RooGenericPdf( signalname+"_jj"+TString::Format("_PDFshift_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_PDFshift_%s",cat_names.at(c).c_str()),"1.+@2*(@0+@3*@1)", RooArgList( *PDFp0, *PDFp1,*PDFnuisance,*mgg));
+    // RooGenericPdf* PDFshift  = new RooGenericPdf( signalname+"_jj"+TString::Format("_PDFshift_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_PDFshift_%s",cat_names.at(c).c_str()),"1.+@3*(@2+@0*@1)", RooArgList(*w->var("mgg13TeV"),*PDFp1,*PDFp0,*PDFnuisance));
+
+    // // RooFFTConvPdf* sigmodel = new RooFFTConvPdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()),*w->var("mgg13TeV"),*PDFshift,*bifur,3);
+    // // RooGenericPdf* sigmodel = new RooGenericPdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()), signalname+"_jj"+TString::Format("_sig_bifur_%s",cat_names.at(c).c_str())+"*"+signalname+"_jj"+TString::Format("_PDFshift_%s",cat_names.at(c).c_str()),RooArgList(*bifur,*PDFshift));
+    // // RooGenericPdf* sigmodel = new RooGenericPdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_sig_bifur_%s",cat_names.at(c).c_str()),RooArgList(*bifur));
+    // RooAddPdf* sigmodel = new RooAddPdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()),RooArgList(*bifur,*bifur),RooArgList(*PDFshift),1);
+
+		//    PDFnuisance->setConstant(true);
     
     jjSig[c] = (RooAbsPdf*)  sigmodel;
     jjSig[c] -> fitTo(*sigToFit[c],Range(MMIN,MMAX),SumW2Error(kTRUE),PrintEvalErrors(-1),Save(kTRUE));
@@ -448,12 +466,20 @@ void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vec
     w->import(*scalesigma);
     w->import(*gsigmaL    );
     w->import(*gsigmaR    );
-      
+    // w->import(*bifur    );
+    // w->import(*PDFp0    );
+    // w->import(*PDFp1    );
+    // w->import(*PDFnuisance );
+    // w->import(*PDFshift );
+
+
     ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_sig_m0_%s"    ,cat_names.at(c).c_str())))->setConstant(true);
     ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_sig_gm0_%s"   ,cat_names.at(c).c_str())))->setConstant(true);
     ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_sig_sigmaL_%s" ,cat_names.at(c).c_str())))->setConstant(true);
     ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_sig_sigmaR_%s" ,cat_names.at(c).c_str())))->setConstant(true);
     ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_scalesigma_%s",cat_names.at(c).c_str())))->setConstant(true);
+    // ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_sig_PDFp0_%s",cat_names.at(c).c_str())))->setConstant(true);
+    // ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_sig_PDFp1_%s",cat_names.at(c).c_str())))->setConstant(true);
      
   }
 }
@@ -1056,7 +1082,7 @@ void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, st
   // (2) Systematics on energy scale and resolution put in larges systematic from JES/JER/PDF -> add uncertainties in quadrature
 
   wAll->factory("CMS_sig_p1_jes_13TeV[0.0,-10.0,10.0]");
-  wAll->factory("CMS_jj_sig_p1_jes_13TeV[0.022,0.022,0.022]"); // JES uncertainty
+  wAll->factory("CMS_jj_sig_p1_jes_13TeV[0.01,0.01,0.01]"); // JES uncertainty
   wAll->factory("sum::CMS_sig_p1_jes_sum_13TeV(1.0,prod::CMS_sig_p1_jes_prod_13TeV(CMS_sig_p1_jes_13TeV, CMS_jj_sig_p1_jes_13TeV))");
   // put systematics for PDF (impact on shape) -> peak
 
@@ -1064,7 +1090,7 @@ void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, st
     wAll->factory("prod::CMS_jj_"+signalname+"_sig_m0_"+TString::Format("%s_13TeV",cat_names.at(c).c_str())+"(jj_"+signalname+"_sig_m0_"+TString::Format("%s",cat_names.at(c).c_str())+", CMS_sig_p1_jes_sum_13TeV)");
     
   }
-
+	
   // (3) Systematics on resolution: create new sigmas
 
 
@@ -1096,6 +1122,19 @@ void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, st
             " jj_"+signalname+TString::Format("_sig_gsigma_%s=CMS_jj_",cat_names.at(c).c_str())+signalname+TString::Format("_sig_gsigma_%s_13TeV)", cat_names.at(c).c_str())
               );
   }
+  // std::cout<<"------------------"<<std::endl;
+  // std::cout<<"------------------"<<std::endl;
+  // wAll->var("mgg13TeV")->setVal(1200.);
+  // wAll->var("CMS_sig_pdf_13TeV")->setVal(1.);
+
+  // wAll->var("ZZ_T0_1p08_jj_PDFshift__invMass")->printValue();
+  // wAll->var("jj_ZZ_T0_1p08_sig_PDFp0__invMass")->printValue();
+  // wAll->var("jj_ZZ_T0_1p08_sig_PDFp1__invMass")->printValue();
+  // wAll->var("mgg13TeV")->printValue();
+  // wAll->var("CMS_sig_pdf_13TeV")->printValue();
+  // std::cout<<"------------------"<<std::endl;
+  // std::cout<<"------------------"<<std::endl;
+
   std::cout << " print wAll workspace " << std::endl;
   wAll->Print();
   TString filename(wsDir+TString(fileBaseName)+".root");
@@ -1403,15 +1442,22 @@ void MakeDataCard_1Channel(std::string altfunc, RooWorkspace* w, const char* fil
     outFile << "--------------------------------" << endl;
     outFile << "# signal scaled by " << signalScaler << " to a cross section of 1/pb and also scale factor of " << scaleFactor/signalScaler << " are applied." << endl;
  
-  outFile << "CMS_acc_13TeV                       lnN  1.02    - # PDF unc. on acceptance" << endl;
+  // outFile << "CMS_acc_13TeV                       lnN  1.02    - # PDF unc. on acceptance" << endl;
+  outFile << "CMS_pdf_13TeV                       lnN  1.055    - # PDF" << endl;
+  outFile << "CMS_qcd_13TeV                       lnN  1.21    - # QCDScale" << endl;
   outFile << "CMS_pu_13TeV                        lnN  1.02    - # pileup" << endl;
+  outFile << "CMS_lumi_13TeV                      lnN  1.026   - # luminosity" << endl;
+  outFile << "CMS_jes_13TeV                       lnN  1.06    - # jet energy scale" << endl;
+  outFile << "CMS_vtag_13TeV                      lnN  1.12    - # 2xvtagging (tau21<0.4, high pur https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetWtagging#Recipes_to_obtain_the_PUPPI_soft)" << endl;
   
   outFile << "--------------------------------" << endl;
   
 
   outFile << "# Parametric shape uncertainties, entered by hand." << endl;
   outFile << Form("CMS_sig_p1_jes_13TeV                param   0.0   1.0   # dijet mass shift due to JES uncertainty"           ) << endl;
-  outFile << Form("CMS_sig_p2_jer_13TeV                param   0.0   1.0   # dijet mass resolution shift due to JER uncertainty") << endl;
+  // outFile << Form("CMS_sig_p2_jer_13TeV                param   0.0   1.0   # dijet mass resolution shift due to JER uncertainty") << endl;
+  // outFile << Form("CMS_sig_pdf_13TeV                   param   0.0   1.0   # signal shape shift due to PDF uncertainty") << endl;
+  // outFile << Form("CMS_sig_qcd_13TeV                   param   0.0   1.0   # signal shape shift due to qcd scale uncertainty") << endl;
   
   outFile << Form("CMS_bkg_fit_%s_13TeV_norm           flatParam  # Normalization uncertainty on background slope"    ,cat_names[iChan].c_str()) << endl;
 
