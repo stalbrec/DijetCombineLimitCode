@@ -1,22 +1,18 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import os,glob,sys
-sys.path.append('/afs/desy.de/user/a/albrechs/aQGCVVjj/python')
 from ROOT import TFile
 import PointName as PN 
-from backup import backup_point
+
 def testFileForLimits(filename):
     if(not os.path.isfile(filename)):
-        # print filename, 'does not exists!'
         return False
     file=TFile(filename)
     tree=file.Get('limit')
     if(not tree):
-        # print filename,'does not have any trees!'
         return False
     N_limits=tree.GetEntries()
-    # file.Close()
     if(not (N_limits==6)):
-        # print filename, 'is not complete!'
         return False
     else:
         return True
@@ -49,7 +45,7 @@ queue var1,var2 from (
             submit_command='condor_submit '+signal+'.submit -batch-name '+signal
             if('-d' in args):
                 submit_command+=' -dry-run submit_dryrun.log'
-            print submit_command
+            print(submit_command)
             os.system(submit_command)
 
 def resubmit(channels, parameters):
@@ -94,7 +90,7 @@ queue var1,var2 from (
             resubmit_command='condor_submit '+signal+'.resubmit -batch-name '+signal+'_resub'
             if('-d' in args):
                 resubmit_command+=' -dry-run resubmit_dryrun.log'
-            print resubmit_command
+            print(resubmit_command)
             os.system(resubmit_command)
             
 def submitPlots(channels,parameters):
@@ -121,7 +117,7 @@ queue var1 from (
         submit_command='condor_submit '+channel+'.submit -batch-name '+channel+'_LastStep'
         if('-d' in args):
             submit_command+=' -dry-run resubmit_dryrun.log'
-        print submit_command
+        print(submit_command)
         os.system(submit_command)
 
 def local(channels,parameters,coupling=''):
@@ -132,45 +128,20 @@ def local(channels,parameters,coupling=''):
                 # coupling="m21p00_SignalInjection"
                 coupling="m15p40_SignalInjection"
             submit_command='./submitwrapper.sh '+signal+' '+coupling
-            print submit_command
+            print(submit_command)
             os.system(submit_command)
-
-def backup_local(channels,parameters):
-    for channel in channels:
-        for parameter in parameters:
-            signal=channel+'_'+parameter
-            couplings=PN.OpList(parameter)
-            for i in range(len(couplings)):
-                coupling=couplings[i]
-                backup_point(signal,coupling,'fit')
-                backup_point(signal,coupling,'plot')    
     
 if (__name__=='__main__'):
-    # channels=['VV','ssWW','ZZ']
-    # channels=['VV','ssWW']
-    # channels=['ssWW','VV','WPWP','WPWM','WMWM','WPZ','WMZ','ZZ']
-    channels=['VV']
-    parameters=["T8"]
-    # channels=['WPWP','WPWM','WMWM','WPZ','WMZ']
-    # channels=['ZZ']
-    # parameters=["S0","S1","M0","M1","M2","M3","M4","M5","M6","M7","T0","T1","T2","T5","T6","T7","T8","T9"]
-    # parameters=["T0"]
-    # parameters=['S0']
-    # parameters=['M6']
+    channels=['ZZ']
+    parameters=["S0","S1","S2","M0","M1","M2","M3","M4","M5","M7","T0","T1","T2","T5","T6","T7","T8","T9"]
     args=sys.argv[1:]
     if('-s' in args):
-        print 'submit'
+        print('submit')
         submit(channels,parameters)
     elif('-r' in args):
-        print 'resubmit'
+        print('resubmit')
         resubmit(channels,parameters)
     elif('-p' in args):
         submitPlots(channels,parameters)
-    elif('-b' in args):
-        backup_local(channels,parameters)
     else:
-        print 'nothing'
-    # channels=["VV"]
-    # parameters=["M7"]
-    # coupling='4p00'
-    # local(channels,parameters,coupling)
+        print('nothing')
