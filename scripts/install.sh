@@ -10,9 +10,9 @@ eval `scramv1 runtime -sh`
 git clone https://github.com/stalbrec/DijetCombineLimitCode
 cd DijetCombineLimitCode
 git fetch origin
-git checkout johanna
+git checkout aQGC_2020
 
 DIJETDIR=$(pwd)
-sed -i "" "s+REPLACEDIJETDIR+${DIJETDIR}+g" ../submitwrapper.sh
+sed -i "s+REPLACEDIJETDIR+${DIJETDIR}+g" submitwrapper.sh
 
 scram b clean; scram b -j8
