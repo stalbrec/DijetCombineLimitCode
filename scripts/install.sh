@@ -24,4 +24,9 @@ git checkout aQGC_2020
 
 sed -i "s+REPLACEDIJETDIR+${CMSSW_BASE}/src/DijetCombineLimitCode+g" ${CMSSW_BASE}/src/DijetCombineLimitCode/submitwrapper.sh
 
+cd $CMSSW_BASE/src
+
 scram b clean; scram b -j8
+
+cd DijetCombineLimitCode
+
