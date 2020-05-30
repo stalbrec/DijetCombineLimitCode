@@ -7,7 +7,7 @@ cd CMSSW_8_1_0/src
 
 eval `scramv1 runtime -sh`
 
-# git clone https://github.com/stalbrec/...
+git clone https://github.com/stalbrec/DijetCombineLimitCode
 cd DijetCombineLimitCode
 git fetch origin
 git checkout johanna
