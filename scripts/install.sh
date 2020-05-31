@@ -17,6 +17,9 @@ git checkout v7.0.13
 
 cd $CMSSW_BASE/src
 
+echo 'installing combineHarvester'
+git clone https://github.com/cms-analysis/CombineHarvester.git 
+
 git clone https://github.com/stalbrec/DijetCombineLimitCode
 cd DijetCombineLimitCode
 git fetch origin
