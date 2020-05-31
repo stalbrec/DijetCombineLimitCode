@@ -140,8 +140,8 @@ void runfits(const string cuts="none",const Float_t mass=2000, int signalsample 
   cout << "MAKE PLOTS" << endl;
   
   // Make plots for data and fit results
-  MakePlots(w, mass, fitresults, signalname,cat_names);
-  MakePrettyPlots(w, mass, fitresults, signalname,cat_names);
+  // MakePlots(w, mass, fitresults, signalname,cat_names);
+  // MakePrettyPlots(w, mass, fitresults, signalname,cat_names);
   
   cout << "DONE WITH SIGNAL " << signalname << " FOR MASS POINT " << mass <<" GEV " << endl;
   cout << "" << endl;
@@ -1443,8 +1443,8 @@ void MakeDataCard_1Channel(std::string altfunc, RooWorkspace* w, const char* fil
     outFile << "# signal scaled by " << signalScaler << " to a cross section of 1/pb and also scale factor of " << scaleFactor/signalScaler << " are applied." << endl;
  
   // outFile << "CMS_acc_13TeV                       lnN  1.02    - # PDF unc. on acceptance" << endl;
-  outFile << "CMS_pdf_13TeV                       lnN  1.055    - # PDF" << endl;
-  outFile << "CMS_qcd_13TeV                       lnN  1.21    - # QCDScale" << endl;
+  // outFile << "CMS_pdf_13TeV                       lnN  1.055    - # PDF" << endl;
+  // outFile << "CMS_qcd_13TeV                       lnN  1.21    - # QCDScale" << endl;
   outFile << "CMS_pu_13TeV                        lnN  1.02    - # pileup" << endl;
   outFile << "CMS_lumi_13TeV                      lnN  1.026   - # luminosity" << endl;
   outFile << "CMS_jes_13TeV                       lnN  1.06    - # jet energy scale" << endl;
