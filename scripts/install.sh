@@ -33,3 +33,9 @@ scram b clean; scram b -j8
 
 cd DijetCombineLimitCode
 
+echo "creating some mandatory directories"
+mkdir -p MiniTrees/DataUHH
+mkdir -p MiniTrees/SignalUHH
+mkdir -p workspaces
+
+
