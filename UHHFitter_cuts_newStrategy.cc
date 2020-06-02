@@ -24,7 +24,7 @@ void AddSigData(RooWorkspace* w, Float_t mass, int signalsample, std::vector<str
 void AddBkgData(RooWorkspace* w, std::vector<string> cat_names, std::string altfunc, string cut);
 void SigModelFit(RooWorkspace* w, Float_t mass, TString signalname, std::vector<string> cat_names);
 void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vector<string> cat_names);
-void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, std::vector<string> cat_names);
+void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, int signalsample, std::vector<string> cat_names);
 vector<RooFitResult*> BkgModelFit(std::string altfunc, RooWorkspace* w, Bool_t dobands, std::vector<string> cat_names);
 void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, std::vector<string> cat_names);
 void SetConstantParams(const RooArgSet* params);
@@ -122,7 +122,7 @@ void runfits(const string cuts="none",const Float_t mass=2000, int signalsample 
 
   cout << "CREATE SIGNAL WS" << endl;
 
-  MakeSigWS(w, fileBaseName, signalname,cat_names);
+  MakeSigWS(w, fileBaseName, signalname,signalsample,cat_names);
 
   cout << "CREATE BACKGROUND" << endl;
   AddBkgData(w,cat_names,altfunc, cuts);
@@ -434,7 +434,7 @@ void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vec
     RooFormulaVar* gsigmaL  = new RooFormulaVar( "jj_"+signalname+TString::Format("_sig_gsigmaL_%s",cat_names.at(c).c_str()),"jj_"+signalname+TString::Format("_sig_gsigmaL_%s",cat_names.at(c).c_str()),"@0*@1", RooArgList( *sigmaL, *scalesigma ));
     RooFormulaVar* gsigmaR  = new RooFormulaVar( "jj_"+signalname+TString::Format("_sig_gsigmaR_%s",cat_names.at(c).c_str()),"jj_"+signalname+TString::Format("_sig_gsigmaR_%s",cat_names.at(c).c_str()),"@0*@1", RooArgList( *sigmaR, *scalesigma ));
     
-    RooBifurGauss* sigmodel = new RooBifurGauss  ( signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()), *w->var("mgg13TeV") ,*m0,*gsigmaL,*gsigmaR);
+    RooBifurGauss* sigmodel = new RooBifurGauss  ( signalname+"_jj"+TString::Format("_sig_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()), *w->var("mgg13TeV") ,*m0,*gsigmaL,*gsigmaR);
 
 
 		// RooBifurGauss* bifur = new RooBifurGauss  ( signalname+"_jj"+TString::Format("_sig_bifur_%s",cat_names.at(c).c_str())        , signalname+"_jj"+TString::Format("_sig_bifur_%s",cat_names.at(c).c_str())        , *w->var("mgg13TeV") ,*m0,*gsigmaL,*gsigmaR);
@@ -1046,7 +1046,7 @@ void MakePrettyPlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitres
   // system(("cp "+directory+"/plots/backgrounds_pretty.pdf ~/aQGCVVjj/").c_str());
 }
 
-void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, std::vector<string> cat_names) {
+void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, int signalsample, std::vector<string> cat_names) {
   
   TString wsDir   = directory+"/workspaces/"+filePOSTfix;
   Int_t ncat_min = 0;
@@ -1069,7 +1069,8 @@ void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, st
 
   for (int c = ncat_min; c < ncat_min+ncat; ++c) {
     jjSigPdf[c] = (RooAbsPdf*)  w->pdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()));
-    wAll->import(*w->pdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str())));
+    if(signalsample == 10)wAll->import(*w->pdf(signalname+"_jj"+TString::Format("_sig_%s",cat_names.at(c).c_str())));
+    else wAll->import(*w->pdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str())));
   }
 
   cout<< ""<<endl;
@@ -1099,7 +1100,43 @@ void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, st
   wAll->factory("CMS_jj_sig_p2_jer_13TeV[0.1,0.1,0.1]"); // JER uncertainty
   wAll->factory("sum::CMS_sig_p2_jer_sum_13TeV(1.0,prod::CMS_sig_p2_jer_prod_13TeV(CMS_sig_p2_jer_13TeV, CMS_jj_sig_p2_jer_13TeV))");  
  
+  // This is for signal != 10 (radion/graviton)
+  if(signalsample == 10){
+  for (int c = ncat_min; c < ncat_min+ncat; ++c) {
+     wAll->factory("prod::CMS_jj_"+signalname+"_sig_sigmaL_"+TString::Format("%s_13TeV",cat_names.at(c).c_str())+"(jj_"+signalname+"_sig_sigmaL_"+TString::Format("%s",cat_names.at(c).c_str())+", CMS_sig_p2_jer_sum_13TeV)");
+     wAll->factory("prod::CMS_jj_"+signalname+"_sig_sigmaR_"+TString::Format("%s_13TeV",cat_names.at(c).c_str())+"(jj_"+signalname+"_sig_sigmaR_"+TString::Format("%s",cat_names.at(c).c_str())+", CMS_sig_p2_jer_sum_13TeV)");
+    
   
+    wAll->factory("prod::CMS_jj_"+signalname+"_sig_gsigmaL_"+TString::Format("%s_13TeV",cat_names.at(c).c_str())+"(jj_"+signalname+"_sig_gsigmaL_"+TString::Format("%s",cat_names.at(c).c_str())+", CMS_sig_p2_jer_sum_13TeV)");
+    wAll->factory("prod::CMS_jj_"+signalname+"_sig_gsigmaR_"+TString::Format("%s_13TeV",cat_names.at(c).c_str())+"(jj_"+signalname+"_sig_gsigmaR_"+TString::Format("%s",cat_names.at(c).c_str())+", CMS_sig_p2_jer_sum_13TeV)");
+  }
+
+    // (4) do reparametrization of signal
+  for (int c = ncat_min; c < ncat_min+ncat; ++c) {
+     std::cout << "print out what happens here : " << std::endl;
+     
+     std::cout <<"EDIT::"+signalname+"_jj" + TString::Format("_sig_%s(",cat_names.at(c).c_str()) +
+      signalname+"_jj" + TString::Format("_%s,",cat_names.at(c).c_str()) +
+      " jj_"+signalname+TString::Format("_sig_m0_%s=CMS_jj_",cat_names.at(c).c_str())+signalname+TString::Format("_sig_m0_%s_13TeV, ", cat_names.at(c).c_str()) +
+      " jj_"+signalname+TString::Format("_sig_sigmaL_%s=CMS_jj_",cat_names.at(c).c_str())+signalname+TString::Format("_sig_sigmaL_%s_13TeV, ", cat_names.at(c).c_str()) +
+      " jj_"+signalname+TString::Format("_sig_sigmaR_%s=CMS_jj_",cat_names.at(c).c_str())+signalname+TString::Format("_sig_sigmaR_%s_13TeV, ", cat_names.at(c).c_str()) +
+      " jj_"+signalname+TString::Format("_sig_gsigmaL_%s=CMS_jj_",cat_names.at(c).c_str())+signalname+TString::Format("_sig_gsigmaL_%s_13TeV)", cat_names.at(c).c_str())+
+      " jj_"+signalname+TString::Format("_sig_gsigmaR_%s=CMS_jj_",cat_names.at(c).c_str())+signalname+TString::Format("_sig_gsigmaR_%s_13TeV)", cat_names.at(c).c_str()) << std::endl;
+    wAll->factory(
+      "EDIT::"+signalname+"_jj" + TString::Format("_sig_%s(",cat_names.at(c).c_str()) +
+      signalname+"_jj" + TString::Format("_%s,",cat_names.at(c).c_str()) +
+      " jj_"+signalname+TString::Format("_sig_m0_%s=CMS_jj_",cat_names.at(c).c_str())+signalname+TString::Format("_sig_m0_%s_13TeV, ", cat_names.at(c).c_str()) +
+      " jj_"+signalname+TString::Format("_sig_sigmaL_%s=CMS_jj_",cat_names.at(c).c_str())+signalname+TString::Format("_sig_sigmaL_%s_13TeV, ", cat_names.at(c).c_str()) +
+      " jj_"+signalname+TString::Format("_sig_sigmaR_%s=CMS_jj_",cat_names.at(c).c_str())+signalname+TString::Format("_sig_sigmaR_%s_13TeV, ", cat_names.at(c).c_str()) +
+      " jj_"+signalname+TString::Format("_sig_gsigmaL_%s=CMS_jj_",cat_names.at(c).c_str())+signalname+TString::Format("_sig_gsigmaL_%s_13TeV)", cat_names.at(c).c_str())+
+      " jj_"+signalname+TString::Format("_sig_gsigmaR_%s=CMS_jj_",cat_names.at(c).c_str())+signalname+TString::Format("_sig_gsigmaR_%s_13TeV)", cat_names.at(c).c_str())
+              );
+  }
+
+// EDIT::ZZ_T0_0p12_jj_sig__invMass(ZZ_T0_0p12_jj__invMass, jj_ZZ_T0_0p12_sig_m0__invMass=CMS_jj_ZZ_T0_0p12_sig_m0__invMass_13TeV,  jj_ZZ_T0_0p12_sig_sigma__invMass=CMS_jj_ZZ_T0_0p12_sig_sigma__invMass_13TeV,  jj_ZZ_T0_0p12_sig_gsigma__invMass=CMS_jj_ZZ_T0_0p12_sig_gsigma__invMass_13TeV)
+
+    
+  }else{
   for (int c = ncat_min; c < ncat_min+ncat; ++c) {
      wAll->factory("prod::CMS_jj_"+signalname+"_sig_sigma_"+TString::Format("%s_13TeV",cat_names.at(c).c_str())+"(jj_"+signalname+"_sig_sigma_"+TString::Format("%s",cat_names.at(c).c_str())+", CMS_sig_p2_jer_sum_13TeV)");
     
@@ -1121,6 +1158,7 @@ void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, st
           " jj_"+signalname+TString::Format("_sig_sigma_%s=CMS_jj_",cat_names.at(c).c_str())+signalname+TString::Format("_sig_sigma_%s_13TeV, ", cat_names.at(c).c_str()) +
             " jj_"+signalname+TString::Format("_sig_gsigma_%s=CMS_jj_",cat_names.at(c).c_str())+signalname+TString::Format("_sig_gsigma_%s_13TeV)", cat_names.at(c).c_str())
               );
+  }
   }
   // std::cout<<"------------------"<<std::endl;
   // std::cout<<"------------------"<<std::endl;
