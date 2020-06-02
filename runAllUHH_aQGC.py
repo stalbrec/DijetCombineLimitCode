@@ -4,11 +4,9 @@
 import os
 
 steps=[1,2,3,4]
-signals=["WPZ_T0",
+signals=["ZZ_T0",
         ]
-couplings=["1p08",
-           "2p04",
-	   "3p00",
+couplings=["0p12",
           ]
 
 if 1 in steps:
