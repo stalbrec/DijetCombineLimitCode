@@ -53,6 +53,8 @@ for chan in channels:
                    os.makedirs(os.environ['CMSSW_BASE']+'/src/DijetCombineLimitCode/plots/'+chan)
                 outputfile.write("combine datacards/CMS_jj_"+chan+str(cut)+"_"+str(mass)+"_13TeV_"+bin+".txt -M FitDiagnostics --signif -v2 -m "+str(mass) + " -n "+chan+str(cut)+str(mass)+str(bin)+" --rMax 100 --rMin 0.000001 --plots --saveShapes --out ${CMSSW_BASE}/src/DijetCombineLimitCode/plots/"+chan+" &>CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+"_MaxLikelihoodFit.out\n")
                 outputfile.write("mv higgsCombine"+chan+str(cut)+str(bin)+".AsymptoticLimits.mH"+str(int(mass))+".root Limits/CMS_jj_"+str(mass)+"_"+chan+str(cut)+"_13TeV_"+bin+"_asymptoticCLs_new.root\n")
+                if('combined' in bin):
+                  outputfile.write("PostFitShapesFromWorkspace -w "+os.environ['CMSSW_BASE']+"/src/DijetCombineLimitCode/workspaces/CMS_jj_"+chan+str(cut)+"_"+str(mass)+"_13TeV_"+bin+".root -o ${CMSSW_BASE}/src/DijetCombineLimitCode/plots/"+chan+"/fit_shapes_"+chan+str(mass)+"_"+bin+".root --postfit --sampling -f ${CMSSW_BASE}/src/DijetCombineLimitCode/plots/"+chan+"/fitDiagnostics"+chan+str(mass)+bin+".root:fit_s")
             outputfile.close()
   
             command="rm "+logname
