@@ -19,5 +19,5 @@ for signal in signals:
   os.system( command  )
   #create combined workspace solely for CombineHarvester
   text2workspace_command = "text2workspace.py "+card+"_combined.txt; mv "+card+'_combined.root workspaces/'
-  print(command)
-  os.system(command)
+  print(text2workspace_command)
+  os.system(text2workspace_command)
