@@ -35,6 +35,7 @@ for chan in channels:
 
             outputname = directory+"CMS_jj_"+chan+str(cut)+"_"+str(mass)+"_13TeV_"+bin+"_limit"+str(int(point*10))+"_submit.src"
             logname = directory+"CMS_jj_"+chan+str(cut)+"_"+str(mass)+"_13TeV_"+bin+"_limit"+str(int(point*10))+"_submit.out"
+            # os.system("rm "+outputname)
             outputfile = open(outputname,'w')
             outputfile.write('#!/bin/bash\n')
             outputfile.write("cd ${CMSSW_BASE}/src/DijetCombineLimitCode; eval `scramv1 run -sh`\n")
@@ -48,11 +49,14 @@ for chan in channels:
               outputfile.write("combine datacards/CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+".txt -M HybridNew --frequentist --grid grid_mX"+str(mass)+"_" + chan + "_13TeV_"+bin+".root -m "+str(mass) + " -n "+chan+str(bin)+" --expectedFromGrid 0.025 &>CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+"_025_fullCLs.out\n")
               outputfile.write("combine datacards/CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+".txt -M HybridNew --frequentist --grid grid_mX"+str(mass)+"_" + chan + "_13TeV_"+bin+".root -m "+str(mass) + " -n "+chan+str(bin)+" --expectedFromGrid 0.975 &>CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+"_975_fullCLs.out\n")
             else:
-                outputfile.write("combine datacards/CMS_jj_"+chan+str(cut)+"_"+str(mass)+"_13TeV_"+bin+".txt -M AsymptoticLimits -v2 -m "+str(mass) + " -n "+chan+str(cut)+str(bin)+" --rMax 100 --rMin 0.000001 &>CMS_jj_"+chan+str(cut)+"_"+str(mass)+"_13TeV_"+bin+"_asymptoticCLs.out\n")
+                if(not os.path.exists(os.environ['CMSSW_BASE']+'/src/DijetCombineLimitCode/logs/'+chan)):
+                   os.makedirs(os.environ['CMSSW_BASE']+'/src/DijetCombineLimitCode/logs/'+chan)
+                outputfile.write("combine datacards/CMS_jj_"+chan+str(cut)+"_"+str(mass)+"_13TeV_"+bin+".txt -M AsymptoticLimits -v2 -m "+str(mass) + " -n "+chan+str(cut)+str(bin)+" --rMax 100 --rMin 0.000001 &>${CMSSW_BASE}/src/DijetCombineLimitCode/logs/"+chan+"/CMS_jj_"+chan+str(cut)+"_"+str(mass)+"_13TeV_"+bin+"_asymptoticCLs.out\n")
                 if(not os.path.exists(os.environ['CMSSW_BASE']+'/src/DijetCombineLimitCode/plots/'+chan)):
                    os.makedirs(os.environ['CMSSW_BASE']+'/src/DijetCombineLimitCode/plots/'+chan)
-                outputfile.write("combine datacards/CMS_jj_"+chan+str(cut)+"_"+str(mass)+"_13TeV_"+bin+".txt -M FitDiagnostics --signif -v2 -m "+str(mass) + " -n "+chan+str(cut)+str(mass)+str(bin)+" --rMax 100 --rMin 0.000001 --plots --saveShapes --out ${CMSSW_BASE}/src/DijetCombineLimitCode/plots/"+chan+" &>CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+"_MaxLikelihoodFit.out\n")
+                outputfile.write("combine datacards/CMS_jj_"+chan+str(cut)+"_"+str(mass)+"_13TeV_"+bin+".txt -M FitDiagnostics --signif -v2 -m "+str(mass) + " -n "+chan+str(cut)+str(mass)+str(bin)+" --rMax 100 --rMin 0.000001 --plots --saveShapes --out ${CMSSW_BASE}/src/DijetCombineLimitCode/plots/"+chan+" &>${CMSSW_BASE}/src/DijetCombineLimitCode/logs/"+chan+"/CMS_jj_"+chan+"_"+str(mass)+"_13TeV_"+bin+"_MaxLikelihoodFit.out\n")
                 outputfile.write("mv higgsCombine"+chan+str(cut)+str(bin)+".AsymptoticLimits.mH"+str(int(mass))+".root Limits/CMS_jj_"+str(mass)+"_"+chan+str(cut)+"_13TeV_"+bin+"_asymptoticCLs_new.root\n")
+                outputfile.write("mv higgsCombine"+chan+str(cut)+str(mass)+str(bin)+".FitDiagnostics.mH"+str(int(mass))+".root Limits/CMS_jj_"+str(mass)+"_"+chan+str(cut)+"_13TeV_"+bin+"_FitDiagnostics_new.root\n")
                 if('combined' in bin):
                   outputfile.write("PostFitShapesFromWorkspace -w "+os.environ['CMSSW_BASE']+"/src/DijetCombineLimitCode/workspaces/CMS_jj_"+chan+str(cut)+"_"+str(mass)+"_13TeV_"+bin+".root -o ${CMSSW_BASE}/src/DijetCombineLimitCode/plots/"+chan+"/fit_shapes_"+chan+str(mass)+"_"+bin+".root --postfit --sampling -f ${CMSSW_BASE}/src/DijetCombineLimitCode/plots/"+chan+"/fitDiagnostics"+chan+str(mass)+bin+".root:fit_s")
             outputfile.close()
