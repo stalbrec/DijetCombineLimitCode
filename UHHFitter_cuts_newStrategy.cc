@@ -415,14 +415,15 @@ void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vec
 
   Float_t minMassFit(MMIN),maxMassFit(MMAX); 
 
+  RooRealVar* mgg     = w->var("mgg13TeV");  
+  mgg->setUnit("GeV");
+
   //not working yet
   // Fit Signal -> EFT par4 / SM -> par 3
   for(int c = ncat_min; c < ncat_min+ncat; ++c){
     
-    sigToFit[c] = (RooDataSet*) w->data(TString::Format("SigWeight_%s",cat_names.at(c).cstr()));
+    sigToFit[c] = (RooDataSet*) w->data(TString::Format("SigWeight_%s",cat_names.at(c).c_str()));
     std::cout << sigToFit[c] <<std::endl;
-
-
                                                 //what is this ? how to adjust??_______________________***???
     w->factory(TString::Format("sig_fit_slope1_%s[5.,-100.,100.]",cat_names.at(c).c_str()));
     w->factory(TString::Format("sig_fit_slope2_%s[5.,-100.,100.]",cat_names.at(c).c_str()));
@@ -436,12 +437,13 @@ void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vec
 
     RooFormulaVar *sqrtS = new RooFormulaVar(TString::Format("sqrtS_%s",cat_names.at(c).c_str()),"","@0",*w->var("sqrtS"));
     RooFormulaVar *x = new RooFormulaVar(TString::Format("x_%s",cat_names.at(c).c_str()),"","@0/@1",RooArgList(*mgg, *sqrtS));
-    
+    RooAbsPdf* sigmodel;
+
     x = new RooFormulaVar(TString::Format("x_%s",cat_names.at(c).c_str()),"","@0/@1",RooArgList(*mgg, *sqrtS));
     p4mod = new RooFormulaVar(TString::Format("p4mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope4_%s",cat_names.at(c).c_str())));
-    sig_fitTmp = new RooGenericPdf(TString::Format("sig_fit_%s",cat_names.at(c).c_str()), "( @1*pow(1-@0 + @4*pow(@0,2),@2) ) / ( pow(@0/13000.,@3) )", RooArgList(*x, *p1mod, *p2mod, *p3mod,*p4mod));
+    sigmodel = new RooGenericPdf(TString::Format("sig_fit_%s",cat_names.at(c).c_str()), "( @1*pow(1-@0 + @4*pow(@0,2),@2) ) / ( pow(@0/13000.,@3) )", RooArgList(*x, *p1mod, *p2mod, *p3mod,*p4mod));
 
-    jjSig[c] = (RooAbsPdf*)  p4mod;
+    jjSig[c] = (RooAbsPdf*)  sigmodel;
     jjSig[c] -> fitTo(*sigToFit[c],Range(MMIN,MMAX),SumW2Error(kTRUE),PrintEvalErrors(-1),Save(kTRUE));
 
     cout<<"FIT PASSED! Start importing and fixing parameters" <<endl;
