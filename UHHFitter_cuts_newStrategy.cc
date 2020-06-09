@@ -415,7 +415,7 @@ void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vec
 
   Float_t minMassFit(MMIN),maxMassFit(MMAX); 
 
-  RooRealVar* mgg     = w->var("mgg13TeV");  
+  RooRealVar* mgg = w->var("mgg13TeV");  
   mgg->setUnit("GeV");
 
   //not working yet
