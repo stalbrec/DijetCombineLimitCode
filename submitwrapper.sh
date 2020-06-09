@@ -1,7 +1,7 @@
 #!/bin/bash
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 
-DIJETDIR=REPLACEDIJETDIR
+DIJETDIR=/nfs/dust/cms/user/loemkerj/bachelor/CMSSW_10_2_13/src/DijetCombineLimitCode
 
 cd $DIJETDIR
 eval `scram runtime -sh`

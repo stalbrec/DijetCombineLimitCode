@@ -3,10 +3,10 @@
 
 import os
 
-steps=[1,2,3,4]
-signals=["ZZ_T0",
+steps=[1,2,3]
+signals=["ZZ_T7",
         ]
-couplings=["0p12",
+couplings=["1p20",
           ]
 
 if 1 in steps:
