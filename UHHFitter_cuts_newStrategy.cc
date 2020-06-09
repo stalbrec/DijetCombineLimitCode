@@ -410,78 +410,53 @@ void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vec
   //******************************************//
   // retrieve pdfs and datasets from workspace to fit with pdf models
 
-
-
   RooDataSet* sigToFit[21];
   RooAbsPdf* jjSig[21];
 
   Float_t minMassFit(MMIN),maxMassFit(MMAX); 
 
-
-  // Fit Signal 
-
-  for (int c = ncat_min; c < ncat_min+ncat; ++c) {
+  //not working yet
+  // Fit Signal -> EFT par4 / SM -> par 3
+  for(int c = ncat_min; c < ncat_min+ncat; ++c){
     
-    sigToFit[c]  = (RooDataSet*) w->data(TString::Format("SigWeight_%s",cat_names.at(c).c_str()));
-    std::cout << sigToFit[c] << std::endl;
+    sigToFit[c] = (RooDataSet*) w->data(TString::Format("SigWeight_%s",cat_names.at(c).cstr()));
+    std::cout << sigToFit[c] <<std::endl;
 
-    RooRealVar* m0         = new RooRealVar( "jj_"+signalname+TString::Format("_sig_m0_%s"    ,cat_names.at(c).c_str()), "jj_"+signalname+TString::Format("_sig_m0_%s"    ,cat_names.at(c).c_str()), MASS, 0.01*MASS, 100*MASS);
-    RooRealVar* gm0        = new RooRealVar( "jj_"+signalname+TString::Format("_sig_gm0_%s"   ,cat_names.at(c).c_str()), "jj_"+signalname+TString::Format("_sig_gm0_%s"   ,cat_names.at(c).c_str()), MASS, 0.01*MASS, 100*MASS);
-    RooRealVar* sigmaL      = new RooRealVar( "jj_"+signalname+TString::Format("_sig_sigmaL_%s" ,cat_names.at(c).c_str()), "jj_"+signalname+TString::Format("_sig_sigmaL_%s" ,cat_names.at(c).c_str()), MASS*0.05 ,0.01*0.05*MASS, 100*0.05*MASS);
-    RooRealVar* sigmaR      = new RooRealVar( "jj_"+signalname+TString::Format("_sig_sigmaR_%s" ,cat_names.at(c).c_str()), "jj_"+signalname+TString::Format("_sig_sigmaR_%s" ,cat_names.at(c).c_str()), MASS*0.05 ,0.01*0.05*MASS, 100*0.05*MASS);
-    RooRealVar* scalesigma = new RooRealVar( "jj_"+signalname+TString::Format("_scalesigma_%s",cat_names.at(c).c_str()), "jj_"+signalname+TString::Format("_scalesigma_%s",cat_names.at(c).c_str()), 2., 1.2, 10.);
+
+                                                //what is this ? how to adjust??_______________________***???
+    w->factory(TString::Format("sig_fit_slope1_%s[5.,-100.,100.]",cat_names.at(c).c_str()));
+    w->factory(TString::Format("sig_fit_slope2_%s[5.,-100.,100.]",cat_names.at(c).c_str()));
+    w->factory(TString::Format("sig_fit_slope3_%s[5.,0.,50.]",cat_names.at(c).c_str()));
+    w->factory(TString::Format("sig_fit_slope4_%s[100.,-1000.,1000.]",cat_names.at(c).c_str()));
+
+    RooFormulaVar *p1mod = new RooFormulaVar(TString::Format("p1mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope1_%s",cat_names.at(c).c_str())));
+    RooFormulaVar *p2mod = new RooFormulaVar(TString::Format("p2mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope2_%s",cat_names.at(c).c_str())));
+    RooFormulaVar *p3mod = new RooFormulaVar(TString::Format("p3mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope3_%s",cat_names.at(c).c_str())));
+    RooFormulaVar *p4mod = new RooFormulaVar(TString::Format("p4mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope4_%s",cat_names.at(c).c_str())));
+
+    RooFormulaVar *sqrtS = new RooFormulaVar(TString::Format("sqrtS_%s",cat_names.at(c).c_str()),"","@0",*w->var("sqrtS"));
+    RooFormulaVar *x = new RooFormulaVar(TString::Format("x_%s",cat_names.at(c).c_str()),"","@0/@1",RooArgList(*mgg, *sqrtS));
     
-    RooFormulaVar* gsigmaL  = new RooFormulaVar( "jj_"+signalname+TString::Format("_sig_gsigmaL_%s",cat_names.at(c).c_str()),"jj_"+signalname+TString::Format("_sig_gsigmaL_%s",cat_names.at(c).c_str()),"@0*@1", RooArgList( *sigmaL, *scalesigma ));
-    RooFormulaVar* gsigmaR  = new RooFormulaVar( "jj_"+signalname+TString::Format("_sig_gsigmaR_%s",cat_names.at(c).c_str()),"jj_"+signalname+TString::Format("_sig_gsigmaR_%s",cat_names.at(c).c_str()),"@0*@1", RooArgList( *sigmaR, *scalesigma ));
-    
-    RooBifurGauss* sigmodel = new RooBifurGauss  ( signalname+"_jj"+TString::Format("_sig_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()), *w->var("mgg13TeV") ,*m0,*gsigmaL,*gsigmaR);
+    x = new RooFormulaVar(TString::Format("x_%s",cat_names.at(c).c_str()),"","@0/@1",RooArgList(*mgg, *sqrtS));
+    p4mod = new RooFormulaVar(TString::Format("p4mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope4_%s",cat_names.at(c).c_str())));
+    sig_fitTmp = new RooGenericPdf(TString::Format("sig_fit_%s",cat_names.at(c).c_str()), "( @1*pow(1-@0 + @4*pow(@0,2),@2) ) / ( pow(@0/13000.,@3) )", RooArgList(*x, *p1mod, *p2mod, *p3mod,*p4mod));
 
-
-		// RooBifurGauss* bifur = new RooBifurGauss  ( signalname+"_jj"+TString::Format("_sig_bifur_%s",cat_names.at(c).c_str())        , signalname+"_jj"+TString::Format("_sig_bifur_%s",cat_names.at(c).c_str())        , *w->var("mgg13TeV") ,*m0,*gsigmaL,*gsigmaR);
-
-    // // RooRealVar* PDFnuisance         = new RooRealVar( "jj_"+signalname+TString::Format("_sig_PDFnuisance_%s"    ,cat_names.at(c).c_str()), "jj_"+signalname+TString::Format("_sig_PDFnuisance_%s"    ,cat_names.at(c).c_str()), 0,-10,10);
-    // RooRealVar* PDFnuisance         = new RooRealVar( "CMS_sig_pdf_13TeV","CMS_sig_pdf_13TeV", 0.,-1,1);
-    // RooRealVar* PDFp0         = new RooRealVar( "jj_"+signalname+TString::Format("_sig_PDFp0_%s"    ,cat_names.at(c).c_str()), "jj_"+signalname+TString::Format("_sig_PDFp0_%s"    ,cat_names.at(c).c_str()), 0.022);
-    // RooRealVar* PDFp1         = new RooRealVar( "jj_"+signalname+TString::Format("_sig_PDFp1_%s"    ,cat_names.at(c).c_str()), "jj_"+signalname+TString::Format("_sig_PDFp1_%s"    ,cat_names.at(c).c_str()), 1.42e-5);
-    // // RooGenericPdf* PDFshift  = new RooGenericPdf( signalname+"_jj"+TString::Format("_PDFshift_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_PDFshift_%s",cat_names.at(c).c_str()),"1+0*CMS_sig_pdf_13TeV*(jj_"+signalname+TString::Format("_sig_PDFp0_%s"    ,cat_names.at(c).c_str())+"+"+"jj_"+signalname+TString::Format("_sig_PDFp1_%s"    ,cat_names.at(c).c_str())+"*mgg13TeV)", RooArgList( *PDFp0, *PDFp1,*w->var("mgg13TeV"),*PDFnuisance));
-    // // RooGenericPdf* PDFshift  = new RooGenericPdf( signalname+"_jj"+TString::Format("_PDFshift_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_PDFshift_%s",cat_names.at(c).c_str()),"1.+@2*(@0+@3*@1)", RooArgList( *PDFp0, *PDFp1,*PDFnuisance,*mgg));
-    // RooGenericPdf* PDFshift  = new RooGenericPdf( signalname+"_jj"+TString::Format("_PDFshift_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_PDFshift_%s",cat_names.at(c).c_str()),"1.+@3*(@2+@0*@1)", RooArgList(*w->var("mgg13TeV"),*PDFp1,*PDFp0,*PDFnuisance));
-
-    // // RooFFTConvPdf* sigmodel = new RooFFTConvPdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()),*w->var("mgg13TeV"),*PDFshift,*bifur,3);
-    // // RooGenericPdf* sigmodel = new RooGenericPdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()), signalname+"_jj"+TString::Format("_sig_bifur_%s",cat_names.at(c).c_str())+"*"+signalname+"_jj"+TString::Format("_PDFshift_%s",cat_names.at(c).c_str()),RooArgList(*bifur,*PDFshift));
-    // // RooGenericPdf* sigmodel = new RooGenericPdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_sig_bifur_%s",cat_names.at(c).c_str()),RooArgList(*bifur));
-    // RooAddPdf* sigmodel = new RooAddPdf(signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()),signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()),RooArgList(*bifur,*bifur),RooArgList(*PDFshift),1);
-
-		//    PDFnuisance->setConstant(true);
-    
-    jjSig[c] = (RooAbsPdf*)  sigmodel;
+    jjSig[c] = (RooAbsPdf*)  p4mod;
     jjSig[c] -> fitTo(*sigToFit[c],Range(MMIN,MMAX),SumW2Error(kTRUE),PrintEvalErrors(-1),Save(kTRUE));
-      
+
     cout<<"FIT PASSED! Start importing and fixing parameters" <<endl;
-    w->import(*sigmodel  );
-    w->import(*m0        );
-    w->import(*gm0       );
-    w->import(*sigmaL     );
-    w->import(*sigmaR     );
-    w->import(*scalesigma);
-    w->import(*gsigmaL    );
-    w->import(*gsigmaR    );
-    // w->import(*bifur    );
-    // w->import(*PDFp0    );
-    // w->import(*PDFp1    );
-    // w->import(*PDFnuisance );
-    // w->import(*PDFshift );
+    w->import(*p1mod  );
+    w->import(*p2mod  );
+    w->import(*p3mod  );
+    w->import(*p4mod  );
 
-
-    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_sig_m0_%s"    ,cat_names.at(c).c_str())))->setConstant(true);
-    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_sig_gm0_%s"   ,cat_names.at(c).c_str())))->setConstant(true);
-    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_sig_sigmaL_%s" ,cat_names.at(c).c_str())))->setConstant(true);
-    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_sig_sigmaR_%s" ,cat_names.at(c).c_str())))->setConstant(true);
-    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_scalesigma_%s",cat_names.at(c).c_str())))->setConstant(true);
-    // ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_sig_PDFp0_%s",cat_names.at(c).c_str())))->setConstant(true);
-    // ((RooRealVar*) w->var("jj_"+signalname+TString::Format("_sig_PDFp1_%s",cat_names.at(c).c_str())))->setConstant(true);
-     
+    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("p1mod_%s"    ,cat_names.at(c).c_str())))->setConstant(true);
+    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("p2mod_%s"   ,cat_names.at(c).c_str())))->setConstant(true);
+    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("p3mod_%s" ,cat_names.at(c).c_str())))->setConstant(true);
+    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("p4mod_%s" ,cat_names.at(c).c_str())))->setConstant(true); 
   }
+
+  
 }
 
 vector<RooFitResult*> BkgModelFit(std::string altfunc,RooWorkspace* w, Bool_t dobands, std::vector<string> cat_names) {
