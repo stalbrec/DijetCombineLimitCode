@@ -415,22 +415,21 @@ void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vec
   RooRealVar* mgg = w->var("mgg13TeV");  
   mgg->setUnit("GeV");
 
-  //not working yet
   // Fit Signal -> EFT par4 / SM -> par3
   for(int c = ncat_min; c < ncat_min+ncat; ++c){
     
     sigToFit[c] = (RooDataSet*) w->data(TString::Format("SigWeight_%s",cat_names.at(c).c_str()));
     std::cout << sigToFit[c] <<std::endl;
-                                             //what is this ? how to adjust??_______________________***???
+
     w->factory(TString::Format("sig_fit_slope1_%s[5.,-100.,100.]",cat_names.at(c).c_str()));
     w->factory(TString::Format("sig_fit_slope2_%s[5.,-100.,100.]",cat_names.at(c).c_str()));
     w->factory(TString::Format("sig_fit_slope3_%s[5.,0.,50.]",cat_names.at(c).c_str()));
     w->factory(TString::Format("sig_fit_slope4_%s[100.,-1000.,1400.]",cat_names.at(c).c_str()));
 
-    RooFormulaVar *p1mod = new RooFormulaVar(TString::Format("p1mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope1_%s",cat_names.at(c).c_str())));
-    RooFormulaVar *p2mod = new RooFormulaVar(TString::Format("p2mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope2_%s",cat_names.at(c).c_str())));
-    RooFormulaVar *p3mod = new RooFormulaVar(TString::Format("p3mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope3_%s",cat_names.at(c).c_str())));
-    RooFormulaVar *p4mod = new RooFormulaVar(TString::Format("p4mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope4_%s",cat_names.at(c).c_str())));
+    RooFormulaVar *p1mod = new RooFormulaVar(TString::Format("sig_p1mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope1_%s",cat_names.at(c).c_str())));
+    RooFormulaVar *p2mod = new RooFormulaVar(TString::Format("sig_p2mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope2_%s",cat_names.at(c).c_str())));
+    RooFormulaVar *p3mod = new RooFormulaVar(TString::Format("sig_p3mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope3_%s",cat_names.at(c).c_str())));
+    RooFormulaVar *p4mod = new RooFormulaVar(TString::Format("sig_p4mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope4_%s",cat_names.at(c).c_str())));
     
     RooFormulaVar *sqrtS = new RooFormulaVar(TString::Format("sqrtS_%s",cat_names.at(c).c_str()),"","@0",*w->var("sqrtS"));
     RooFormulaVar *x = new RooFormulaVar(TString::Format("x_%s",cat_names.at(c).c_str()),"","@0/@1",RooArgList(*mgg, *sqrtS));
@@ -438,13 +437,12 @@ void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vec
     RooAbsPdf* sigmodel;
     
     x = new RooFormulaVar(TString::Format("x_%s",cat_names.at(c).c_str()),"","@0/@1",RooArgList(*mgg, *sqrtS));
-    //all args ? if if clause?
-    p1mod = new RooFormulaVar(TString::Format("p1mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope1_%s",cat_names.at(c).c_str())));
-    p2mod = new RooFormulaVar(TString::Format("p2mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope2_%s",cat_names.at(c).c_str())));
-    p3mod = new RooFormulaVar(TString::Format("p3mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope3_%s",cat_names.at(c).c_str())));
-    p4mod = new RooFormulaVar(TString::Format("p4mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope4_%s",cat_names.at(c).c_str())));
-    //                                                                                                                  fourpar='[0]*TMath::Power((1-(x/13000)),[1])/TMath::Power(x/13000,[2]+[3]*TMath::Log10(x/13000))' it was : ( @1*pow(1-@0 + @4*pow(@0,2),@2) ) / ( pow(@0/13000.,@3) )
-    //wrong function!!   x = @0 ->                                                     
+    //maybe not necessary
+    p1mod = new RooFormulaVar(TString::Format("sig_p1mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope1_%s",cat_names.at(c).c_str())));
+    p2mod = new RooFormulaVar(TString::Format("sig_p2mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope2_%s",cat_names.at(c).c_str())));
+    p3mod = new RooFormulaVar(TString::Format("sig_p3mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope3_%s",cat_names.at(c).c_str())));
+    p4mod = new RooFormulaVar(TString::Format("sig_p4mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope4_%s",cat_names.at(c).c_str())));
+    //fourpar='[0]*TMath::Power((1-(x/13000)),[1])/TMath::Power(x/13000,[2]+[3]*TMath::Log10(x/13000))' it was : ( @1*pow(1-@0 + @4*pow(@0,2),@2) ) / ( pow(@0/13000.,@3) )                                                    
     sigmodel = new RooGenericPdf( signalname+"_jj"+TString::Format("_sig_%s",cat_names.at(c).c_str()), signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()), "( pow((1-@0/13000), @1) / pow(@0/13000, @2 +@3*log10(@0/13000)) )", RooArgList(*mgg, *p1mod, *p2mod, *p3mod,*p4mod));
 
     jjSig[c] = (RooAbsPdf*)  sigmodel;
@@ -453,18 +451,15 @@ void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vec
     cout<<"FIT PASSED! Start importing and fixing parameters" <<endl; 
     
     w->import(*sigmodel);
-    
     w->import(*p1mod  );
     w->import(*p2mod  );
     w->import(*p3mod  );
     w->import(*p4mod  );
     
-    /*
-    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("p1mod_%s"    ,cat_names.at(c).c_str())))->setConstant(true);
-    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("p2mod_%s"   ,cat_names.at(c).c_str())))->setConstant(true);
-    ((RooRealVar*) w->var("jj_"+signalname+TString::Format("p3mod_%s" ,cat_names.at(c).c_str())))->setConstant(true);
-    */
-    //((RooRealVar*) w->var("jj_"+signalname+TString::Format("sig_%s" ,cat_names.at(c).c_str())))->setConstant(true); 
+    ((RooRealVar*) w->var(TString::Format("sig_fit_slope1_%s"    ,cat_names.at(c).c_str())))->setConstant(true);
+    ((RooRealVar*) w->var(TString::Format("sig_fit_slope2_%s"   ,cat_names.at(c).c_str())))->setConstant(true);
+    ((RooRealVar*) w->var(TString::Format("sig_fit_slope3_%s" ,cat_names.at(c).c_str())))->setConstant(true);
+    ((RooRealVar*) w->var(TString::Format("sig_fit_slope4_%s" ,cat_names.at(c).c_str())))->setConstant(true);
     
   }
 }
