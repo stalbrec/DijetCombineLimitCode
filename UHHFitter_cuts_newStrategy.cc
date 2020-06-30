@@ -24,7 +24,7 @@ void AddSigData(RooWorkspace* w, Float_t mass, int signalsample, std::vector<str
 void AddBkgData(RooWorkspace* w, std::vector<string> cat_names, std::string altfunc, string cut);
 void SigModelFit(RooWorkspace* w, Float_t mass, TString signalname, std::vector<string> cat_names);
 void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vector<string> cat_names);
-void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, int signalsample, std::vector<string> cat_names);
+void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, int signalsample, std::vector<string> cat_names, TString cuts);
 vector<RooFitResult*> BkgModelFit(std::string altfunc, RooWorkspace* w, Bool_t dobands, std::vector<string> cat_names,TString cuts);
 void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, std::vector<string> cat_names);
 void SetConstantParams(const RooArgSet* params);
@@ -32,7 +32,7 @@ void MakeDataCard_1Channel(std::string altfunc,RooWorkspace* w, const char* file
 void MakePlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitresults, TString signalname, std::vector<string> cat_names);
 void MakePrettyPlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitresults, TString signalname, std::vector<string> cat_names);
 
-RooArgSet* defineVariables(TString cuts)
+RooArgSet* defineVariables()
 {
   // define variables of the input ntuple
   RooRealVar* mgg  = new RooRealVar("mgg13TeV","M(jet-jet)",MMIN,MMAX,"GeV");
@@ -125,7 +125,7 @@ void runfits(const string cuts="none",const Float_t mass=2000, int signalsample 
   MakeSigWS(w, fileBaseName, signalname,signalsample,cat_names, cuts);
 
   cout << "CREATE BACKGROUND" << endl;
-  AddBkgData(w,cat_names,altfunc, cuts);
+  AddBkgData(w,cat_names,altfunc,cuts);//Error if I don't use 4 Arguments
     
   cout << "FIT BACKGROUND" << endl;
   fitresults = BkgModelFit(altfunc, w, dobands,cat_names, cuts);
@@ -174,7 +174,7 @@ void AddSigData(RooWorkspace* w, Float_t mass, int signalsample, std::vector<str
   //****************************//
 
   // Variables
-  RooArgSet* ntplVars = defineVariables(cuts);
+  RooArgSet* ntplVars = defineVariables();
   RooRealVar weightVar("weightVar","",1,0,1000);
 
   int iMass = abs(mass); 
@@ -297,7 +297,7 @@ void AddBkgData(RooWorkspace* w, std::vector<string> cat_names, std::string altf
   TTree* dataTree     = (TTree*) dataFile.Get("TCVARS");
 
   // Variables
-  RooArgSet* ntplVars = defineVariables(cuts);
+  RooArgSet* ntplVars = defineVariables();
 
   RooDataSet Data("Data","dataset",dataTree,*ntplVars,"","normWeight");
 
@@ -393,7 +393,7 @@ void SigModelFit(RooWorkspace* w, Float_t mass, TString signalname, std::vector<
   }
 }
 
-void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vector<string> cat_names, TString cuts) {
+void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vector<string> cat_names) {
   
   // Int_t ncat = NCAT;
   Int_t ncat_min = 0;
@@ -416,7 +416,7 @@ void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vec
   mgg->setUnit("GeV");
 
   // Fit Signal -> EFT par4 / SM -> par3
-  if(TString(cut).Contains("_mjj")){
+  if(TString(signalname).Contains("_mjj")){
     for(int c = ncat_min; c < ncat_min+ncat; ++c){
     
     sigToFit[c] = (RooDataSet*) w->data(TString::Format("SigWeight_%s",cat_names.at(c).c_str()));
@@ -462,7 +462,7 @@ void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vec
     ((RooRealVar*) w->var(TString::Format("sig_fit_slope3_%s" ,cat_names.at(c).c_str())))->setConstant(true);
    // ((RooRealVar*) w->var(TString::Format("sig_fit_slope4_%s" ,cat_names.at(c).c_str())))->setConstant(true)  
     }
-  }else if(TString(cut).Contains("_pT")){
+  }else if(TString(signalname).Contains("_pT")){
     for(int c = ncat_min; c < ncat_min+ncat; ++c){
     
     sigToFit[c] = (RooDataSet*) w->data(TString::Format("SigWeight_%s",cat_names.at(c).c_str()));
@@ -484,7 +484,7 @@ void SigModelFitaQGC(RooWorkspace* w, Float_t mass, TString signalname, std::vec
     p2mod = new RooFormulaVar(TString::Format("sig_p2mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope2_%s",cat_names.at(c).c_str())));
     //p3mod = new RooFormulaVar(TString::Format("sig_p3mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("sig_fit_slope3_%s",cat_names.at(c).c_str())));
     //Fitfunction from python                                                                                                                              three par = '[0]*TMath::Power((1-(x/13000)),[1])/TMath::Power(x/13000, [2])'
-    sigmodel = new RooGenericPdf( signalname+"_jj"+TString::Format("_sig_%s",cat_names.at(c).c_str()), signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()), "( pow((1-@0/13000), @1) / pow(@0/13000, @2)", RooArgList(*mgg, *p1mod, *p2mod));
+    sigmodel = new RooGenericPdf( signalname+"_jj"+TString::Format("_sig_%s",cat_names.at(c).c_str()), signalname+"_jj"+TString::Format("_%s",cat_names.at(c).c_str()), "pow((1-@0/13000), @1) / pow(@0/13000, @2)", RooArgList(*mgg, *p1mod, *p2mod));
 
     jjSig[c] = (RooAbsPdf*)  sigmodel;
     jjSig[c] -> fitTo(*sigToFit[c],Range(MMIN,MMAX),SumW2Error(kTRUE),PrintEvalErrors(-1),Save(kTRUE));
@@ -577,8 +577,9 @@ vector<RooFitResult*> BkgModelFit(std::string altfunc,RooWorkspace* w, Bool_t do
     p4mod = new RooFormulaVar(TString::Format("p4mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(mainCategory).c_str())));
     bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "( @1*pow(1-@0 + @4*pow(@0,2),@2) ) / ( pow(@0/13000.,@3) )", RooArgList(*x, *p1mod, *p2mod, *p3mod,*p4mod));
     }
-    if(TString(cut).Contains("_mjj")){
+    if(TString(cuts).Contains("_mjj")){
     RooAbsReal* bkg_fitTmp2  = new RooRealVar(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str()),"",data[c]->sumEntries(),1.0,1000000000);
+    RooAbsPdf*  bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "1./pow((@0/@1), @2)", RooArgList(*mgg, *sqrtS, *p1mod));
     w->import(*bkg_fitTmp);
     w->import(*bkg_fitTmp2);
  
@@ -590,10 +591,9 @@ vector<RooFitResult*> BkgModelFit(std::string altfunc,RooWorkspace* w, Bool_t do
     ((RooRealVar*) w->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(mainCategory).c_str())))->setConstant(true); //newStrategy
     ((RooRealVar*) w->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(mainCategory).c_str())))->setConstant(true); //newStrategy
     }
-    }else if(TString(cut).Contains("_pT"))
-     {
+    }else if(TString(cuts).Contains("_pT")){
       RooAbsReal* bkg_fitTmp2  = new RooRealVar(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str()),"",data[c]->sumEntries(),1.0,1000000000);
-      RooAbsReal* bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "pow(1-@0, @1)/pow(@0, @2)", RooArgList(*x, *p1mod, *p2mod)); // 3 parameter fitnew 
+      RooAbsPdf* bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "pow(1-@0, @1)/pow(@0, @2)", RooArgList(*x, *p1mod, *p2mod)); // 3 parameter fitnew 
     
       if (c==mainCategory)
       fitresult[c] = bkg_fitTmp->fitTo(*data[c], Strategy(1),Minos(kFALSE), Range(minMassFit,maxMassFit),SumW2Error(kTRUE), Save(kTRUE),PrintEvalErrors(-1));
@@ -1080,7 +1080,7 @@ void MakePrettyPlots(RooWorkspace* w, Float_t mass, vector<RooFitResult*> fitres
   // system(("cp "+directory+"/plots/backgrounds_pretty.pdf ~/aQGCVVjj/").c_str());
 }
 
-void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, int signalsample, std::vector<string> cat_names) {
+void MakeSigWS(RooWorkspace* w, const char* fileBaseName, TString signalname, int signalsample, std::vector<string> cat_names, TString cuts) {
   
   TString wsDir   = directory+"/workspaces/"+filePOSTfix;
   Int_t ncat_min = 0;
@@ -1279,7 +1279,7 @@ void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, s
      std::cout << "use default binning (~1GeV bins) " << std::endl;
     }
     
-    
+    //important for me
     bkg_fitPdf[c] = (RooExtendPdf*)  w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()));
     wAll->import(*w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str())));
     wAll->import(*w->function(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())));
