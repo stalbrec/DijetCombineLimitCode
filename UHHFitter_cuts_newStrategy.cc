@@ -556,7 +556,7 @@ vector<RooFitResult*> BkgModelFit(std::string altfunc,RooWorkspace* w, Bool_t do
 
     // 2 parameter fit
     RooAbsPdf* bkg_fitTmp = bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "1./pow((@0/@1), @2)", RooArgList(*mgg, *sqrtS, *p1mod)); 
-
+    /*
     //================== make fit with alternate function =====================================
     if (altfunc.find("3par")!=std::string::npos)
     {
@@ -577,6 +577,7 @@ vector<RooFitResult*> BkgModelFit(std::string altfunc,RooWorkspace* w, Bool_t do
     p4mod = new RooFormulaVar(TString::Format("p4mod_%s",cat_names.at(c).c_str()),"","@0",*w->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(mainCategory).c_str())));
     bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "( @1*pow(1-@0 + @4*pow(@0,2),@2) ) / ( pow(@0/13000.,@3) )", RooArgList(*x, *p1mod, *p2mod, *p3mod,*p4mod));
     }
+    */
     if(TString(cuts).Contains("_mjj")){
     RooAbsReal* bkg_fitTmp2  = new RooRealVar(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str()),"",data[c]->sumEntries(),1.0,1000000000);
     RooAbsPdf*  bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "1./pow((@0/13000/@1), @2)", RooArgList(*mgg, *sqrtS, *p1mod));
@@ -1692,7 +1693,7 @@ void UHHFitter_cuts_newStrategy(string cut, double mass, int signalsamples=0, in
   if(TString(cut).Contains("_mjj")){    
     MMIN = 1050.;
     MMAX = 10050.;
-    }else if(TString(cut).Contains("_pt")){
+    }else if(TString(cut).Contains("_pT")){
     MMIN = 600.;
     MMAX = 8000.;    
   }
