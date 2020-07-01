@@ -579,7 +579,7 @@ vector<RooFitResult*> BkgModelFit(std::string altfunc,RooWorkspace* w, Bool_t do
     }
     if(TString(cuts).Contains("_mjj")){
     RooAbsReal* bkg_fitTmp2  = new RooRealVar(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str()),"",data[c]->sumEntries(),1.0,1000000000);
-    RooAbsPdf*  bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "1./pow((@0/@1), @2)", RooArgList(*mgg, *sqrtS, *p1mod));
+    RooAbsPdf*  bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "1./pow((@0/13000/@1), @2)", RooArgList(*mgg, *sqrtS, *p1mod));
     w->import(*bkg_fitTmp);
     w->import(*bkg_fitTmp2);
  
@@ -593,8 +593,11 @@ vector<RooFitResult*> BkgModelFit(std::string altfunc,RooWorkspace* w, Bool_t do
     }
     }else if(TString(cuts).Contains("_pT")){
       RooAbsReal* bkg_fitTmp2  = new RooRealVar(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str()),"",data[c]->sumEntries(),1.0,1000000000);
-      RooAbsPdf* bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "pow(1-@0, @1)/pow(@0, @2)", RooArgList(*x, *p1mod, *p2mod)); // 3 parameter fitnew 
-    
+      RooAbsPdf* bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "pow(1-@0/13000, @1)/pow(@0/13000, @2)", RooArgList(*mgg, *p1mod, *p2mod)); // 3 parameter fitnew 
+          
+      w->import(*bkg_fitTmp);
+      w->import(*bkg_fitTmp2);
+
       if (c==mainCategory)
       fitresult[c] = bkg_fitTmp->fitTo(*data[c], Strategy(1),Minos(kFALSE), Range(minMassFit,maxMassFit),SumW2Error(kTRUE), Save(kTRUE),PrintEvalErrors(-1));
       if(constrainBackgroundParametersToSimulation) {
@@ -1280,7 +1283,7 @@ void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, s
     }
     
     //important for me
-    if(fileBkgName.Contains("_mjj")){
+    if(TString(fileBaseName).Contains("_mjj")){
       bkg_fitPdf[c] = (RooExtendPdf*)  w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()));
       wAll->import(*w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str())));
       wAll->import(*w->function(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())));
@@ -1296,23 +1299,9 @@ void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, s
 
       wAll->factory(TString::Format("CMS_bkg_fit_slope1_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
 
-       mean = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getVal();
-       min  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getMin(); 
-       max  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getMax(); 
-       wAll->factory(TString::Format("CMS_bkg_fit_slope2_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
-                  
-       mean = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(mainCategory).c_str())))->getVal();
-       min  = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(mainCategory).c_str())))->getMin(); 
-       max  = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(mainCategory).c_str())))->getMax(); 
-       wAll->factory(TString::Format("CMS_bkg_fit_slope3_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
-        
-       mean = (wAll->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(mainCategory).c_str())))->getVal();
-       min  = (wAll->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(mainCategory).c_str())))->getMin(); 
-       max  = (wAll->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(mainCategory).c_str())))->getMax(); 
-       wAll->factory(TString::Format("CMS_bkg_fit_slope4_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
-    
-    }else if (fileBkgName.Contains("_pT"))
+    }else if (TString(fileBaseName).Contains("_pT"))
     {
+     
       bkg_fitPdf[c] = (RooExtendPdf*)  w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()));
       wAll->import(*w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str())));
       wAll->import(*w->function(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())));
@@ -1331,7 +1320,7 @@ void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, s
       min  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getMin(); 
       max  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getMax(); 
       wAll->factory(TString::Format("CMS_bkg_fit_slope2_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
-        
+      
     }
     
     bkg_fitPdf[c] = (RooExtendPdf*)  w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()));
