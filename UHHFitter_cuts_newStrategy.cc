@@ -1280,6 +1280,60 @@ void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, s
     }
     
     //important for me
+    if(fileBkgName.Contains("_mjj")){
+      bkg_fitPdf[c] = (RooExtendPdf*)  w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()));
+      wAll->import(*w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str())));
+      wAll->import(*w->function(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())));
+
+      double mean = (wAll->var(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())))->getVal();
+      double min = (wAll->var(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())))->getMin();
+      double max = (wAll->var(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())))->getMax();
+      wAll->factory(TString::Format("CMS_bkg_fit_%s_13TeV_norm[%g,%g,%g]", cat_names.at(c).c_str(), mean, min, max));
+
+      mean = (wAll->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(mainCategory).c_str())))->getVal();
+      min = (wAll->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(mainCategory).c_str())))->getMin();
+      max = (wAll->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(mainCategory).c_str())))->getMax();
+
+      wAll->factory(TString::Format("CMS_bkg_fit_slope1_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
+
+       mean = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getVal();
+       min  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getMin(); 
+       max  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getMax(); 
+       wAll->factory(TString::Format("CMS_bkg_fit_slope2_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
+                  
+       mean = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(mainCategory).c_str())))->getVal();
+       min  = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(mainCategory).c_str())))->getMin(); 
+       max  = (wAll->var(TString::Format("bkg_fit_slope3_%s",cat_names.at(mainCategory).c_str())))->getMax(); 
+       wAll->factory(TString::Format("CMS_bkg_fit_slope3_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
+        
+       mean = (wAll->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(mainCategory).c_str())))->getVal();
+       min  = (wAll->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(mainCategory).c_str())))->getMin(); 
+       max  = (wAll->var(TString::Format("bkg_fit_slope4_%s",cat_names.at(mainCategory).c_str())))->getMax(); 
+       wAll->factory(TString::Format("CMS_bkg_fit_slope4_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
+    
+    }else if (fileBkgName.Contains("_pT"))
+    {
+      bkg_fitPdf[c] = (RooExtendPdf*)  w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()));
+      wAll->import(*w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str())));
+      wAll->import(*w->function(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())));
+
+      double mean = (wAll->var(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())))->getVal();
+      double min = (wAll->var(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())))->getMin();
+      double max = (wAll->var(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())))->getMax();
+      wAll->factory(TString::Format("CMS_bkg_fit_%s_13TeV_norm[%g,%g,%g]", cat_names.at(c).c_str(), mean, min, max));
+
+      mean = (wAll->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(mainCategory).c_str())))->getVal();
+      min = (wAll->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(mainCategory).c_str())))->getMin();
+      max = (wAll->var(TString::Format("bkg_fit_slope1_%s",cat_names.at(mainCategory).c_str())))->getMax();
+      wAll->factory(TString::Format("CMS_bkg_fit_slope1_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
+
+      mean = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getVal();
+      min  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getMin(); 
+      max  = (wAll->var(TString::Format("bkg_fit_slope2_%s",cat_names.at(mainCategory).c_str())))->getMax(); 
+      wAll->factory(TString::Format("CMS_bkg_fit_slope2_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
+        
+    }
+    
     bkg_fitPdf[c] = (RooExtendPdf*)  w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()));
     wAll->import(*w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str())));
     wAll->import(*w->function(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str())));
@@ -1648,9 +1702,9 @@ void UHHFitter_cuts_newStrategy(string cut, double mass, int signalsamples=0, in
   filePOSTfix=postfix;
   if(TString(cut).Contains("_mjj")){    
     MMIN = 1050.;
-    MMAX = 4500.;
+    MMAX = 10050.;
     }else if(TString(cut).Contains("_pt")){
-    MMIN = 500.;
+    MMIN = 600.;
     MMAX = 8000.;    
   }
   runfits(cut, mass, signalsamples, channel,altfunc);
