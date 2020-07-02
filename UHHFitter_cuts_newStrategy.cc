@@ -555,7 +555,8 @@ vector<RooFitResult*> BkgModelFit(std::string altfunc,RooWorkspace* w, Bool_t do
     RooFormulaVar *x = new RooFormulaVar(TString::Format("x_%s",cat_names.at(c).c_str()),"","@0/@1",RooArgList(*mgg, *sqrtS));
 
     // 2 parameter fit
-    //RooAbsPdf* bkg_fitTmp = bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "1./pow((@0/@1), @2)", RooArgList(*mgg, *sqrtS, *p1mod)); 
+    RooAbsPdf* bkg_fitTmp = bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "1./pow((@0/13000), @1)", RooArgList(*mgg, *p1mod)); 
+    //RooAbsPdf* bkg_fitTmp = bkg_fitTmp;
     /*
     //================== make fit with alternate function =====================================
     if (altfunc.find("3par")!=std::string::npos)
@@ -580,7 +581,7 @@ vector<RooFitResult*> BkgModelFit(std::string altfunc,RooWorkspace* w, Bool_t do
     */
     if(TString(cuts).Contains("_mjj")){
     RooAbsReal* bkg_fitTmp2  = new RooRealVar(TString::Format("bkg_fit_%s_norm",cat_names.at(c).c_str()),"",data[c]->sumEntries(),1.0,1000000000);
-    RooAbsPdf*  bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "1./pow((@0/13000/@1), @2)", RooArgList(*mgg, *sqrtS, *p1mod));
+    RooAbsPdf*  bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "1./pow((@0/13000), @1)", RooArgList(*mgg, *p1mod));
     w->import(*bkg_fitTmp);
     w->import(*bkg_fitTmp2);
  
