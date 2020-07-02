@@ -555,7 +555,7 @@ vector<RooFitResult*> BkgModelFit(std::string altfunc,RooWorkspace* w, Bool_t do
     RooFormulaVar *x = new RooFormulaVar(TString::Format("x_%s",cat_names.at(c).c_str()),"","@0/@1",RooArgList(*mgg, *sqrtS));
 
     // 2 parameter fit
-    RooAbsPdf* bkg_fitTmp = bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "1./pow((@0/@1), @2)", RooArgList(*mgg, *sqrtS, *p1mod)); 
+    //RooAbsPdf* bkg_fitTmp = bkg_fitTmp = new RooGenericPdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()), "1./pow((@0/@1), @2)", RooArgList(*mgg, *sqrtS, *p1mod)); 
     /*
     //================== make fit with alternate function =====================================
     if (altfunc.find("3par")!=std::string::npos)
@@ -1323,6 +1323,7 @@ void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, s
       wAll->factory(TString::Format("CMS_bkg_fit_slope2_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
       
     }
+    /*
     
     bkg_fitPdf[c] = (RooExtendPdf*)  w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str()));
     wAll->import(*w->pdf(TString::Format("bkg_fit_%s",cat_names.at(c).c_str())));
@@ -1380,7 +1381,7 @@ void MakeBkgWS(std::string altfunc, RooWorkspace* w, const char* fileBaseName, s
        wAll->factory(TString::Format("CMS_bkg_fit_slope2_%s_13TeV[%g,%g,%g]", cat_names.at(mainCategory).c_str(), mean, min, max));
         
     }
-
+    */
     cout << "Done For category " << c << endl; 
     wAll->Print();
     
@@ -1695,7 +1696,7 @@ void UHHFitter_cuts_newStrategy(string cut, double mass, int signalsamples=0, in
     MMAX = 10050.;
     }else if(TString(cut).Contains("_pT")){
     MMIN = 600.;
-    MMAX = 8000.;    
+    MMAX = 5600.;    
   }
   runfits(cut, mass, signalsamples, channel,altfunc);
   std::cout << signalsamples << std::endl;
