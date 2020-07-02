@@ -18,15 +18,15 @@ if (__name__=='__main__'):
     print('name:',name)
     # exit(0)
     if 1 in steps:
-        print('root -b -q "MiniTreeProducerDataUHH_cut.C(\\"\\",\\"\\",\\"'+str(name)+'\\")"')
-        print('root -b -q "MiniTreeSignalProducerUHH_cuts.C(10,11,0,\\"'+str(name)+'\\")"')
+        os.system('root -b -q "MiniTreeProducerDataUHH_cut.C(\\"\\",\\"\\",\\"'+str(name)+'\\")"')
+        os.system('root -b -q "MiniTreeSignalProducerUHH_cuts.C(10,11,0,\\"'+str(name)+'\\")"')
     #Fit and create datacards
     if 2 in steps:
-        print('root -b -q "UHHFitter_cuts_newStrategy.cc(\\"'+str(name)+'\\",0,10,0,\\\"\\\")"') # VV-notVBF
-        print('root -b -q "UHHFitter_cuts_newStrategy.cc(\\"'+str(name)+'\\",0,10,1,\\\"\\\")"') # VBF
-        print('python Limits/CombineDatacardsUHH_cuts.py 0 '+str(name))
+        os.system('root -b -q "UHHFitter_cuts_newStrategy.cc(\\"'+str(name)+'\\",0,10,0,\\\"\\\")"') # VV-notVBF
+        os.system('root -b -q "UHHFitter_cuts_newStrategy.cc(\\"'+str(name)+'\\",0,10,1,\\\"\\\")"') # VBF
+        os.system('python Limits/CombineDatacardsUHH_cuts.py 0 '+str(name))
     #run combine
     if 3 in steps:
-        print('python Limits/CalcAsympLimitsUHH_cuts.py 0 '+str(name))
+        os.system('python Limits/CalcAsympLimitsUHH_cuts.py 0 '+str(name))
     if 4 in steps:
         os.system('python Limits/brazilianFlag_aQTGC.py '+str(signal)+' '+variable)

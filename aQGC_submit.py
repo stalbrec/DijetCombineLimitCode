@@ -47,7 +47,7 @@ queue var1,var2 from (
                 if('-d' in args):
                     submit_command+=' -dry-run submit_dryrun.log'
                 print(submit_command)
-                # os.system(submit_command)
+                os.system(submit_command)
 
 def resubmit(channels, parameters,variables):
     postfix = "Limits/"
@@ -93,7 +93,7 @@ queue var1,var2 from (
                 if('-d' in args):
                     resubmit_command+=' -dry-run resubmit_dryrun.log'
                 print(resubmit_command)
-                # os.system(resubmit_command)
+                os.system(resubmit_command)
             
 def submitPlots(channels,parameters,variables):
     for channel in channels:
@@ -121,7 +121,7 @@ queue var1 from (
             if('-d' in args):
                 submit_command+=' -dry-run resubmit_dryrun.log'
             print(submit_command)
-            # os.system(submit_command)
+            os.system(submit_command)
 
 def local(channels,parameters,coupling=''):
     for channel in channels:
@@ -136,8 +136,7 @@ def local(channels,parameters,coupling=''):
     
 if (__name__=='__main__'):
     channels=['ZZ']
-    # parameters=["S0","S1","S2","M0","M1","M2","M3","M4","M5","M7","T0","T1","T2","T5","T6","T7","T8","T9"]
-    parameters=["M0"]
+    parameters=["S0","S1","S2","M0","M1","M2","M3","M4","M5","M7","T0","T1","T2","T5","T6","T7","T8","T9"]
     variables=['_mjj','_pT']
     args=sys.argv[1:]
     if('-s' in args):
